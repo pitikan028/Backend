@@ -36,38 +36,55 @@
 <body class="bg-cream text-dark font-sans">
 
 <!-- ===== HEADER ===== -->
-<header class="sticky top-0 z-40 bg-white border-b border-gray-200">
-  <div class="max-w-7xl mx-auto px-6 lg:px-10 h-20 flex items-center justify-between">
-    <a href="index.html" class="text-xl font-extrabold text-forest">Chokchai Elephant Camp</a>
-    <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-dark">
-      <a href="index.html" class="hover:text-forest">หน้าแรก</a>
-      <a href="index.html#about" class="hover:text-forest">เกี่ยวกับเรา</a>
-      <a href="activities.html" class="hover:text-forest">กิจกรรม</a>
-      <a href="index.html#reviews" class="hover:text-forest">รีวิว</a>
-      <a href="index.html#map" class="hover:text-forest">แผนที่</a>
-      <a href="index.html#contact" class="hover:text-forest">ติดต่อเรา</a>
+<!-- ===== HEADER ===== -->
+<header class="fixed inset-x-0 top-0 z-40 bg-white/30 backdrop-blur-md border-b border-white/30">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 h-20 lg:h-24 flex items-center justify-between">
+    <!-- Logo + name -->
+    <a href="index.html" class="flex items-center gap-3 lg:gap-5">
+      <img src="images/Logo.webp" alt="โลโก้ปางช้างโชคชัย" class="h-12 lg:h-16 w-auto">
+      <span class="font-script text-2xl lg:text-4xl text-forest">Chokchai Elephant Camp</span>
+    </a>
+
+    <!-- Desktop nav -->
+    <nav class="hidden md:flex items-center gap-8 lg:gap-12 text-base lg:text-lg font-semibold text-dark">
+      <a href="index.html" class="hover:text-forest transition">Home</a>
+      <a href="activities.html" class="hover:text-forest transition">Activity</a>
+      <a href="index.html#reviews" class="hover:text-forest transition">Review</a>
+      <a href="index.html#map" class="hover:text-forest transition">Maps</a>
+      <a href="index.html#contact" class="hover:text-forest transition">Contact us</a>
     </nav>
+
     <div class="flex items-center gap-3">
-      <a href="activities.html" class="hidden sm:inline-block bg-gold hover:bg-gold/90 text-white text-sm font-bold px-6 py-3 rounded-lg transition">จองเลย</a>
-      <button id="nav-toggle" class="md:hidden p-2" aria-label="เปิดเมนู">
+      <a href="activities.html" class="hidden sm:inline-block bg-forest hover:bg-forest/90 text-white text-base lg:text-lg font-bold px-6 lg:px-7 py-3 rounded-lg shadow-md transition">Book Now</a>
+      <button id="nav-toggle" class="md:hidden p-2 text-forest" aria-label="เปิดเมนู">
         <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
       </button>
     </div>
   </div>
-  <div id="mobile-menu" class="hidden md:hidden border-t border-gray-100 px-6 py-4 flex flex-col gap-4 text-sm font-semibold">
-    <a href="index.html">หน้าแรก</a>
-    <a href="index.html#about">เกี่ยวกับเรา</a>
-    <a href="activities.html">กิจกรรม</a>
-    <a href="index.html#reviews">รีวิว</a>
-    <a href="index.html#map">แผนที่</a>
-    <a href="index.html#contact">ติดต่อเรา</a>
-    <a href="activities.html" class="bg-gold text-white text-center px-6 py-3 rounded-lg">จองเลย</a>
+
+  <!-- Mobile menu -->
+  <div id="mobile-menu" class="hidden md:hidden bg-white/80 backdrop-blur-md border-t border-white/40 px-6 py-4 flex flex-col gap-4 text-base font-semibold text-dark">
+    <a href="index.html">Home</a>
+    <a href="activities.html">Activity</a>
+    <a href="index.html#reviews">Review</a>
+    <a href="index.html#map">Maps</a>
+    <a href="index.html#contact">Contact us</a>
+    <a href="activities.html" class="bg-forest text-white text-center px-6 py-3 rounded-lg">Book Now</a>
   </div>
 </header>
 
 <!-- ===== HERO ===== -->
-<section class="relative bg-forest text-white overflow-hidden">
-  <div class="max-w-7xl mx-auto px-6 lg:px-10 py-24 lg:py-32 flex flex-col items-center text-center gap-6">
+<section class="relative text-white overflow-hidden">
+  <!-- Background image -->
+  <img
+    src="images/Hero.jpg"
+    alt="แม่ช้างและลูกช้างเดินลุยน้ำในแม่น้ำ"
+    class="absolute inset-0 w-full h-full object-cover"
+  >
+  <!-- Dark overlay so the text stays readable -->
+  <div class="absolute inset-0 bg-black/40"></div>
+
+  <div class="relative max-w-7xl mx-auto px-6 lg:px-10 py-24 lg:py-32 flex flex-col items-center text-center gap-6">
     <span class="text-gold font-semibold text-sm tracking-wide">ปางช้างเชิงอนุรักษ์ | เชียงใหม่</span>
     <h1 class="font-script text-5xl lg:text-6xl leading-tight max-w-3xl">
       Wild Days. Epic Memories.
@@ -200,7 +217,7 @@
 </section>
 
 <!-- ===== BOOKING (simple contact-style form) ===== -->
-<!-- <section class="bg-white">
+<section class="bg-white">
   <div class="max-w-3xl mx-auto px-6 lg:px-10 py-20 flex flex-col items-center gap-10">
     <div class="text-center">
       <span class="text-gold font-bold text-sm">จองกิจกรรม</span>
@@ -241,7 +258,7 @@
       </button>
     </form>
   </div>
-</section> -->
+</section>
 
 <!-- ===== REVIEWS ===== -->
 <section id="reviews" class="bg-cream">
