@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>เลือกเซ็ทกิจกรรม | Chokchai Elephant Camp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          forest: '#21452A',
+          'forest-dark': '#183420',
+          gold: '#BA9330',
+          cream: '#F9F8F2',
+          dark: '#252520',
+        },
+        fontFamily: {
+          sans: ['Inter', 'sans-serif'],
+          script: ['Caveat', 'cursive'],
+        }
+      }
+    }
+  }
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  .img-placeholder {
+    background: repeating-linear-gradient(45deg, #e7ede7, #e7ede7 12px, #dbe4db 12px, #dbe4db 24px);
+  }
+</style>
+</head>
+<body class="bg-cream text-dark font-sans">
+
+<!-- ===== HEADER (same as index.html) ===== -->
+<header class="sticky top-0 z-40 bg-white border-b border-gray-200">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 h-20 flex items-center justify-between">
+    <a href="index.html" class="text-xl font-extrabold text-forest">Chokchai Elephant Camp</a>
+    <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-dark">
+      <a href="index.html" class="hover:text-forest">หน้าแรก</a>
+      <a href="index.html#about" class="hover:text-forest">เกี่ยวกับเรา</a>
+      <a href="activities.html" class="text-forest">กิจกรรม</a>
+      <a href="index.html#reviews" class="hover:text-forest">รีวิว</a>
+      <a href="index.html#map" class="hover:text-forest">แผนที่</a>
+      <a href="index.html#contact" class="hover:text-forest">ติดต่อเรา</a>
+    </nav>
+    <div class="flex items-center gap-3">
+      <a href="#grid" class="hidden sm:inline-block bg-gold hover:bg-gold/90 text-white text-sm font-bold px-6 py-3 rounded-lg transition">จองเลย</a>
+      <button id="nav-toggle" class="md:hidden p-2" aria-label="เปิดเมนู">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+  <div id="mobile-menu" class="hidden md:hidden border-t border-gray-100 px-6 py-4 flex flex-col gap-4 text-sm font-semibold">
+    <a href="index.html">หน้าแรก</a>
+    <a href="index.html#about">เกี่ยวกับเรา</a>
+    <a href="activities.html">กิจกรรม</a>
+    <a href="index.html#reviews">รีวิว</a>
+    <a href="index.html#map">แผนที่</a>
+    <a href="index.html#contact">ติดต่อเรา</a>
+  </div>
+</header>
+
+<!-- ===== PAGE HERO ===== -->
+<section class="bg-cream text-center px-6 py-16">
+  <span class="text-gold font-bold text-sm">6 กิจกรรมสุดพิเศษ</span>
+  <h1 class="text-3xl lg:text-4xl font-extrabold text-forest mt-2">เลือกเซ็ทกิจกรรมของคุณ</h1>
+  <p class="text-gray-600 mt-3 max-w-xl mx-auto">ค้นพบโปรแกรมสังเกตการณ์ช้างและกิจกรรมวัฒนธรรมสุดพิเศษของเรา เลือกเซ็ทที่ใช่ แล้วจองออนไลน์ได้ทันที</p>
+</section>
+
+<!-- ===== ACTIVITY GRID (6 sets, like reference site) ===== -->
+<section id="grid" class="bg-white">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 py-16 grid md:grid-cols-3 gap-7">
+
+    <!-- Card 1 -->
+    <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col">
+      <div class="relative img-placeholder h-64">
+        <span class="absolute top-4 right-4 w-9 h-9 bg-white rounded-full flex items-center justify-center font-extrabold text-forest text-sm">1</span>
+        <span class="absolute top-4 left-4 bg-forest text-white text-xs font-bold px-3.5 py-1.5 rounded-full">1 ชั่วโมง</span>
+        <div class="absolute bottom-0 left-0 right-0 bg-black/45 px-5 py-3">
+          <p class="text-white font-extrabold text-lg">990 ฿ / คน</p>
+        </div>
+      </div>
+      <div class="p-6 flex flex-col gap-3 flex-1">
+        <h3 class="font-extrabold">ELEPHANT JUNGLE TREKKING</h3>
+        <p class="text-sm text-gray-500">เดินป่ากับช้าง</p>
+        <button
+          class="mt-auto bg-gold hover:bg-gold/90 text-white font-bold py-3 rounded-lg transition"
+          onclick="bookingModal.open({name:'ELEPHANT JUNGLE TREKKING', nameTh:'เดินป่ากับช้าง', adultPrice:990, childPrice:690})">
+          BOOK NOW
+        </button>
+        <a href="#" class="text-center text-sm text-forest font-semibold underline">ดูรายละเอียดเพิ่มเติม</a>
+      </div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col">
+      <div class="relative img-placeholder h-64">
+        <span class="absolute top-4 right-4 w-9 h-9 bg-white rounded-full flex items-center justify-center font-extrabold text-forest text-sm">2</span>
+        <span class="absolute top-4 left-4 bg-forest text-white text-xs font-bold px-3.5 py-1.5 rounded-full">1.5 ชั่วโมง</span>
+        <div class="absolute bottom-0 left-0 right-0 bg-black/45 px-5 py-3">
+          <p class="text-white font-extrabold text-lg">1,290 ฿ / คน</p>
+        </div>
+      </div>
+      <div class="p-6 flex flex-col gap-3 flex-1">
+        <h3 class="font-extrabold">ELEPHANT BATHING</h3>
+        <p class="text-sm text-gray-500">อาบน้ำช้าง</p>
+        <button
+          class="mt-auto bg-gold hover:bg-gold/90 text-white font-bold py-3 rounded-lg transition"
+          onclick="bookingModal.open({name:'ELEPHANT BATHING', nameTh:'อาบน้ำช้าง', adultPrice:1290, childPrice:990})">
+          BOOK NOW
+        </button>
+        <a href="#" class="text-center text-sm text-forest font-semibold underline">ดูรายละเอียดเพิ่มเติม</a>
+      </div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col">
+      <div class="relative img-placeholder h-64">
+        <span class="absolute top-4 right-4 w-9 h-9 bg-white rounded-full flex items-center justify-center font-extrabold text-forest text-sm">3</span>
+        <span class="absolute top-4 left-4 bg-forest text-white text-xs font-bold px-3.5 py-1.5 rounded-full">ครึ่งวัน</span>
+        <div class="absolute bottom-0 left-0 right-0 bg-black/45 px-5 py-3">
+          <p class="text-white font-extrabold text-lg">1,890 ฿ / คน</p>
+        </div>
+      </div>
+      <div class="p-6 flex flex-col gap-3 flex-1">
+        <h3 class="font-extrabold">ELEPHANT FEEDING</h3>
+        <p class="text-sm text-gray-500">ให้อาหารช้าง</p>
+        <button
+          class="mt-auto bg-gold hover:bg-gold/90 text-white font-bold py-3 rounded-lg transition"
+          onclick="bookingModal.open({name:'ELEPHANT FEEDING', nameTh:'ให้อาหารช้าง', adultPrice:1890, childPrice:1500})">
+          BOOK NOW
+        </button>
+        <a href="#" class="text-center text-sm text-forest font-semibold underline">ดูรายละเอียดเพิ่มเติม</a>
+      </div>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col">
+      <div class="relative img-placeholder h-64">
+        <span class="absolute top-4 right-4 w-9 h-9 bg-white rounded-full flex items-center justify-center font-extrabold text-forest text-sm">4</span>
+        <span class="absolute top-4 left-4 bg-forest text-white text-xs font-bold px-3.5 py-1.5 rounded-full">1 ชั่วโมง</span>
+        <div class="absolute bottom-0 left-0 right-0 bg-black/45 px-5 py-3">
+          <p class="text-white font-extrabold text-lg">990 ฿ / คน</p>
+        </div>
+      </div>
+      <div class="p-6 flex flex-col gap-3 flex-1">
+        <h3 class="font-extrabold">VITAMIN MAKING</h3>
+        <p class="text-sm text-gray-500">ทำวิตามินให้ช้าง</p>
+        <button
+          class="mt-auto bg-gold hover:bg-gold/90 text-white font-bold py-3 rounded-lg transition"
+          onclick="bookingModal.open({name:'VITAMIN MAKING', nameTh:'ทำวิตามินให้ช้าง', adultPrice:990, childPrice:690})">
+          BOOK NOW
+        </button>
+        <a href="#" class="text-center text-sm text-forest font-semibold underline">ดูรายละเอียดเพิ่มเติม</a>
+      </div>
+    </div>
+
+    <!-- Card 5 -->
+    <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col">
+      <div class="relative img-placeholder h-64">
+        <span class="absolute top-4 right-4 w-9 h-9 bg-white rounded-full flex items-center justify-center font-extrabold text-forest text-sm">5</span>
+        <span class="absolute top-4 left-4 bg-forest text-white text-xs font-bold px-3.5 py-1.5 rounded-full">1.5 ชั่วโมง</span>
+        <div class="absolute bottom-0 left-0 right-0 bg-black/45 px-5 py-3">
+          <p class="text-white font-extrabold text-lg">1,290 ฿ / คน</p>
+        </div>
+      </div>
+      <div class="p-6 flex flex-col gap-3 flex-1">
+        <h3 class="font-extrabold">BAMBOO RAFTING</h3>
+        <p class="text-sm text-gray-500">ล่องแพไม้ไผ่</p>
+        <button
+          class="mt-auto bg-gold hover:bg-gold/90 text-white font-bold py-3 rounded-lg transition"
+          onclick="bookingModal.open({name:'BAMBOO RAFTING', nameTh:'ล่องแพไม้ไผ่', adultPrice:1290, childPrice:990})">
+          BOOK NOW
+        </button>
+        <a href="#" class="text-center text-sm text-forest font-semibold underline">ดูรายละเอียดเพิ่มเติม</a>
+      </div>
+    </div>
+
+    <!-- Card 6 -->
+    <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col">
+      <div class="relative img-placeholder h-64">
+        <span class="absolute top-4 right-4 w-9 h-9 bg-white rounded-full flex items-center justify-center font-extrabold text-forest text-sm">6</span>
+        <span class="absolute top-4 left-4 bg-forest text-white text-xs font-bold px-3.5 py-1.5 rounded-full">ครึ่งวัน</span>
+        <div class="absolute bottom-0 left-0 right-0 bg-black/45 px-5 py-3">
+          <p class="text-white font-extrabold text-lg">1,890 ฿ / คน</p>
+        </div>
+      </div>
+      <div class="p-6 flex flex-col gap-3 flex-1">
+        <h3 class="font-extrabold">ZIPLINING</h3>
+        <p class="text-sm text-gray-500">โหนสลิง</p>
+        <button
+          class="mt-auto bg-gold hover:bg-gold/90 text-white font-bold py-3 rounded-lg transition"
+          onclick="bookingModal.open({name:'ZIPLINING', nameTh:'โหนสลิง', adultPrice:1890, childPrice:1500})">
+          BOOK NOW
+        </button>
+        <a href="#" class="text-center text-sm text-forest font-semibold underline">ดูรายละเอียดเพิ่มเติม</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===== FOOTER (same as index.html) ===== -->
+<footer class="bg-forest-dark text-white">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 py-14 grid md:grid-cols-4 gap-10">
+    <div>
+      <p class="text-xl font-extrabold">Chokchai Elephant Camp</p>
+      <p class="text-white/60 text-sm mt-2">ปางช้างเชิงอนุรักษ์ จ.เชียงใหม่</p>
+    </div>
+    <div>
+      <p class="text-gold font-bold text-sm mb-3">เมนู</p>
+      <ul class="text-white/70 text-sm flex flex-col gap-2">
+        <li><a href="index.html">หน้าแรก</a></li>
+        <li><a href="activities.html">กิจกรรม</a></li>
+        <li><a href="index.html#reviews">รีวิว</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="text-gold font-bold text-sm mb-3">ติดต่อ</p>
+      <ul class="text-white/70 text-sm flex flex-col gap-2">
+        <li>โทร: 053-123-456</li>
+        <li>Line: @chokchaicamp</li>
+      </ul>
+    </div>
+    <div>
+      <p class="text-gold font-bold text-sm mb-3">ติดตามเรา</p>
+      <ul class="text-white/70 text-sm flex flex-col gap-2">
+        <li><a href="#">Facebook</a></li>
+        <li><a href="#">Instagram</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="border-t border-white/10 py-6 text-center text-white/50 text-xs">
+    © 2026 Chokchai Elephant Camp | สงวนลิขสิทธิ์
+  </div>
+</footer>
+
+<!-- ============================================================ -->
+<!-- ===== BOOKING MODAL (4 steps: Package / Contact / Pick-Up / Payment) ===== -->
+<!-- ============================================================ -->
+<div id="booking-modal-overlay" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 overflow-y-auto">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl my-8 p-8 lg:p-12 relative">
+
+    <button onclick="bookingModal.close()" class="absolute top-6 right-6 text-gray-400 hover:text-dark text-2xl leading-none">&times;</button>
+
+    <!-- Step indicator -->
+    <div class="flex items-center mb-8">
+      <div class="flex flex-col items-center">
+        <div id="step-circle-1" class="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm border bg-gold text-white border-transparent">1</div>
+        <span id="step-label-1" class="text-xs mt-2 font-bold text-gold">แพ็กเกจ</span>
+      </div>
+      <div id="step-line-1" class="flex-1 h-0.5 mx-2 bg-gray-300"></div>
+      <div class="flex flex-col items-center">
+        <div id="step-circle-2" class="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm border bg-white text-gray-400 border-gray-300">2</div>
+        <span id="step-label-2" class="text-xs mt-2 text-gray-400">ติดต่อ</span>
+      </div>
+      <div id="step-line-2" class="flex-1 h-0.5 mx-2 bg-gray-300"></div>
+      <div class="flex flex-col items-center">
+        <div id="step-circle-3" class="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm border bg-white text-gray-400 border-gray-300">3</div>
+        <span id="step-label-3" class="text-xs mt-2 text-gray-400">รับ-ส่ง</span>
+      </div>
+      <div id="step-line-3" class="flex-1 h-0.5 mx-2 bg-gray-300"></div>
+      <div class="flex flex-col items-center">
+        <div id="step-circle-4" class="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm border bg-white text-gray-400 border-gray-300">4</div>
+        <span id="step-label-4" class="text-xs mt-2 text-gray-400">ชำระเงิน</span>
+      </div>
+    </div>
+
+    <h3 id="modal-activity-name" class="text-2xl font-extrabold text-forest"></h3>
+    <p id="modal-activity-subtitle" class="text-gray-500 text-sm mb-4"></p>
+    <hr class="border-gray-200 mb-6">
+
+    <!-- STEP 1: PACKAGE -->
+    <div id="step-panel-1" class="flex flex-col gap-5">
+      <p class="font-extrabold text-lg flex items-center gap-2">📋 รายละเอียดแพ็กเกจ</p>
+      <div>
+        <label class="text-sm font-semibold block mb-2">วันที่เข้าร่วมกิจกรรม</label>
+        <input type="date" id="input-date" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream" />
+      </div>
+      <p class="font-bold text-sm">จำนวนผู้เข้าร่วม</p>
+      <div class="grid sm:grid-cols-3 gap-4">
+        <div>
+          <label class="text-sm font-semibold block mb-2">ผู้ใหญ่ (<span id="input-adult-price"></span>)</label>
+          <div class="flex items-center border border-gray-300 rounded-lg bg-cream overflow-hidden">
+            <button type="button" data-qty-btn="dec" data-target="qty-adult" class="px-4 py-3 font-bold text-forest">-</button>
+            <input id="qty-adult" type="number" value="2" min="0" class="w-full text-center bg-transparent py-3" oninput="bookingModal.updateTotal()" />
+            <button type="button" data-qty-btn="inc" data-target="qty-adult" class="px-4 py-3 font-bold text-forest">+</button>
+          </div>
+        </div>
+        <div>
+          <label class="text-sm font-semibold block mb-2">เด็ก (<span id="input-child-price"></span>)</label>
+          <div class="flex items-center border border-gray-300 rounded-lg bg-cream overflow-hidden">
+            <button type="button" data-qty-btn="dec" data-target="qty-child" class="px-4 py-3 font-bold text-forest">-</button>
+            <input id="qty-child" type="number" value="0" min="0" class="w-full text-center bg-transparent py-3" oninput="bookingModal.updateTotal()" />
+            <button type="button" data-qty-btn="inc" data-target="qty-child" class="px-4 py-3 font-bold text-forest">+</button>
+          </div>
+        </div>
+        <div>
+          <label class="text-sm font-semibold block mb-2">ทารก (0 ฿)</label>
+          <div class="flex items-center border border-gray-300 rounded-lg bg-cream overflow-hidden">
+            <button type="button" data-qty-btn="dec" data-target="qty-infant" class="px-4 py-3 font-bold text-forest">-</button>
+            <input id="qty-infant" type="number" value="0" min="0" class="w-full text-center bg-transparent py-3" />
+            <button type="button" data-qty-btn="inc" data-target="qty-infant" class="px-4 py-3 font-bold text-forest">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end items-baseline gap-2">
+        <span class="font-extrabold text-lg">ยอดรวม :</span>
+        <span id="total-amount" class="font-extrabold text-2xl text-gold"></span>
+      </div>
+      <div class="flex justify-end">
+        <button onclick="bookingModal.next()" class="bg-forest hover:bg-forest-dark text-white font-bold px-8 py-3.5 rounded-lg transition">ถัดไป</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: CONTACT -->
+    <div id="step-panel-2" class="hidden flex-col gap-5">
+      <p class="font-extrabold text-lg flex items-center gap-2">👤 ข้อมูลติดต่อ</p>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label class="text-sm font-semibold block mb-2">ชื่อจริง *</label>
+          <input id="input-firstname" type="text" placeholder="ชื่อจริงของคุณ" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream" />
+        </div>
+        <div>
+          <label class="text-sm font-semibold block mb-2">นามสกุล *</label>
+          <input id="input-lastname" type="text" placeholder="นามสกุลของคุณ" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream" />
+        </div>
+        <div>
+          <label class="text-sm font-semibold block mb-2">เบอร์โทร/มือถือ *</label>
+          <input id="input-phone" type="tel" placeholder="08X-XXX-XXXX" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream" />
+        </div>
+        <div>
+          <label class="text-sm font-semibold block mb-2">แอปติดต่อ *</label>
+          <select class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream">
+            <option>WhatsApp</option>
+            <option>Line</option>
+            <option>WeChat</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="text-sm font-semibold block mb-2">อีเมล *</label>
+        <input id="input-email" type="email" placeholder="อีเมลของคุณ" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream" />
+      </div>
+      <div>
+        <label class="text-sm font-semibold block mb-2">ความคิดเห็นเพิ่มเติม</label>
+        <textarea rows="3" placeholder="ระบุความต้องการพิเศษ, อาหารที่แพ้ หรือข้อจำกัดด้านอาหาร" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream"></textarea>
+      </div>
+      <div class="flex justify-between">
+        <button onclick="bookingModal.back()" class="border border-forest text-forest font-bold px-8 py-3.5 rounded-lg">ย้อนกลับ</button>
+        <button onclick="bookingModal.next()" class="bg-forest hover:bg-forest-dark text-white font-bold px-8 py-3.5 rounded-lg transition">ถัดไป</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: PICK-UP -->
+    <div id="step-panel-3" class="hidden flex-col gap-5">
+      <p class="font-extrabold text-lg flex items-center gap-2">🚐 จุดรับ-ส่ง</p>
+      <p class="font-semibold text-sm">ต้องการให้ไปรับที่ไหน?</p>
+      <div class="flex flex-col gap-3">
+        <label class="flex items-center gap-3">
+          <input type="radio" name="pickup" value="โรงแรม (Hotel)" checked class="accent-gold w-5 h-5" />
+          <span>โรงแรม (Hotel)</span>
+        </label>
+        <label class="flex items-center gap-3">
+          <input type="radio" name="pickup" value="จุดนัดพบ (Meeting Point)" class="accent-gold w-5 h-5" />
+          <span>จุดนัดพบ (Meeting Point)</span>
+        </label>
+        <label class="flex items-center gap-3">
+          <input type="radio" name="pickup" value="Airbnb / ที่พักส่วนตัว" class="accent-gold w-5 h-5" />
+          <span>Airbnb / ที่พักส่วนตัว</span>
+        </label>
+        <label class="flex items-center gap-3">
+          <input type="radio" name="pickup" value="ยังไม่ตัดสินใจ" class="accent-gold w-5 h-5" />
+          <span>ยังไม่ตัดสินใจตอนนี้</span>
+        </label>
+      </div>
+      <p class="font-extrabold text-forest">เวลารับ: 06.00 - 06.30 น.</p>
+      <p class="text-xs text-gray-500 leading-relaxed">
+        * เวลารับอาจคลาดเคลื่อนเล็กน้อยตามจุดรับ หากมีการเปลี่ยนแปลงจะแจ้งให้ทราบทางอีเมลล่วงหน้า<br>
+        * บริการรับส่งฟรีในรัศมี 5 กม. จากตัวเมืองเชียงใหม่ นอกเขตนี้มีค่าใช้จ่ายเพิ่มเติม
+      </p>
+      <div class="flex justify-between">
+        <button onclick="bookingModal.back()" class="border border-forest text-forest font-bold px-8 py-3.5 rounded-lg">ย้อนกลับ</button>
+        <button onclick="bookingModal.next()" class="bg-forest hover:bg-forest-dark text-white font-bold px-8 py-3.5 rounded-lg transition">ถัดไป</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: PAYMENT -->
+    <div id="step-panel-4" class="hidden flex-col gap-5">
+      <div class="rounded-lg overflow-hidden border border-gray-200">
+        <div class="flex items-center gap-4 px-5 py-4 bg-cream">
+          <span>👤</span><span id="summary-visitors" class="text-sm font-semibold"></span>
+        </div>
+        <div class="flex items-center gap-4 px-5 py-4 bg-white">
+          <span>📅</span><span id="summary-date" class="text-sm font-semibold"></span>
+        </div>
+        <div class="flex items-center gap-4 px-5 py-4 bg-cream">
+          <span>🚐</span><span id="summary-pickup" class="text-sm font-semibold"></span>
+        </div>
+        <div class="flex items-center gap-4 px-5 py-4 bg-white">
+          <span>✉️</span><span id="summary-contact" class="text-sm font-semibold"></span>
+        </div>
+      </div>
+      <div class="flex justify-end items-baseline gap-2">
+        <span class="font-extrabold text-lg">ยอดรวม :</span>
+        <span id="checkout-amount" class="font-extrabold text-2xl text-gold"></span>
+      </div>
+      <p class="font-extrabold text-lg flex items-center gap-2">💳 รายละเอียดการชำระเงิน</p>
+      <p class="text-sm text-forest font-semibold">🔒 ข้อมูลการชำระเงินของคุณปลอดภัย</p>
+      <p class="text-xs text-gray-500">* การจองจะยังไม่ยืนยันจนกว่าคุณจะทำการชำระเงิน</p>
+      <div>
+        <label class="text-sm font-semibold block mb-2">ชำระด้วยบัตร (Stripe)</label>
+        <input type="text" placeholder="💳  หมายเลขบัตร" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream" />
+      </div>
+      <label class="flex items-center gap-3 text-sm text-gray-600">
+        <input type="checkbox" class="accent-gold w-5 h-5" />
+        ยอมรับว่าสามารถยกเลิกฟรีก่อนเริ่มกิจกรรม 72 ชั่วโมง
+      </label>
+      <div class="flex justify-between">
+        <button onclick="bookingModal.back()" class="border border-forest text-forest font-bold px-8 py-3.5 rounded-lg">ย้อนกลับ</button>
+        <button onclick="bookingModal.checkout()" class="bg-gold hover:bg-gold/90 text-white font-bold px-8 py-3.5 rounded-lg transition">
+          ชำระเงิน <span id="checkout-amount-btn"></span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

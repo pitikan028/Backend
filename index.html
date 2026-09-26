@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Chokchai Elephant Camp | ปางช้างเชิงอนุรักษ์ เชียงใหม่</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          forest: '#21452A',
+          'forest-dark': '#183420',
+          gold: '#BA9330',
+          cream: '#F9F8F2',
+          dark: '#252520',
+        },
+        fontFamily: {
+          sans: ['Inter', 'sans-serif'],
+          script: ['Caveat', 'cursive'],
+        }
+      }
+    }
+  }
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  .img-placeholder {
+    background: repeating-linear-gradient(45deg, #e7ede7, #e7ede7 12px, #dbe4db 12px, #dbe4db 24px);
+  }
+</style>
+</head>
+<body class="bg-cream text-dark font-sans">
+
+<!-- ===== HEADER ===== -->
+<header class="sticky top-0 z-40 bg-white border-b border-gray-200">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 h-20 flex items-center justify-between">
+    <a href="index.html" class="text-xl font-extrabold text-forest">Chokchai Elephant Camp</a>
+    <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-dark">
+      <a href="index.html" class="hover:text-forest">หน้าแรก</a>
+      <a href="index.html#about" class="hover:text-forest">เกี่ยวกับเรา</a>
+      <a href="activities.html" class="hover:text-forest">กิจกรรม</a>
+      <a href="index.html#reviews" class="hover:text-forest">รีวิว</a>
+      <a href="index.html#map" class="hover:text-forest">แผนที่</a>
+      <a href="index.html#contact" class="hover:text-forest">ติดต่อเรา</a>
+    </nav>
+    <div class="flex items-center gap-3">
+      <a href="activities.html" class="hidden sm:inline-block bg-gold hover:bg-gold/90 text-white text-sm font-bold px-6 py-3 rounded-lg transition">จองเลย</a>
+      <button id="nav-toggle" class="md:hidden p-2" aria-label="เปิดเมนู">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+  <div id="mobile-menu" class="hidden md:hidden border-t border-gray-100 px-6 py-4 flex flex-col gap-4 text-sm font-semibold">
+    <a href="index.html">หน้าแรก</a>
+    <a href="index.html#about">เกี่ยวกับเรา</a>
+    <a href="activities.html">กิจกรรม</a>
+    <a href="index.html#reviews">รีวิว</a>
+    <a href="index.html#map">แผนที่</a>
+    <a href="index.html#contact">ติดต่อเรา</a>
+    <a href="activities.html" class="bg-gold text-white text-center px-6 py-3 rounded-lg">จองเลย</a>
+  </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="relative bg-forest text-white overflow-hidden">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 py-24 lg:py-32 flex flex-col items-center text-center gap-6">
+    <span class="text-gold font-semibold text-sm tracking-wide">ปางช้างเชิงอนุรักษ์ | เชียงใหม่</span>
+    <h1 class="font-script text-5xl lg:text-6xl leading-tight max-w-3xl">
+      Wild Days. Epic Memories.
+    </h1>
+    <p class="text-white/80 max-w-xl text-lg">
+      ให้อาหารช้างด้วยมือ อาบน้ำในลำธารป่า โหนสลิงเหนือยอดไม้ ล่องแพไม้ไผ่ ครบทุกความสนุกในวันเดียว
+    </p>
+    <div class="flex flex-wrap justify-center gap-4 mt-2">
+      <a href="activities.html" class="bg-gold hover:bg-gold/90 px-8 py-4 rounded-lg font-bold transition">จองกิจกรรม</a>
+      <a href="#activities" class="border border-white/70 hover:bg-white/10 px-8 py-4 rounded-lg font-bold transition">ดูกิจกรรมทั้งหมด</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ABOUT ===== -->
+<section id="about" class="bg-white">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 py-20 grid md:grid-cols-2 gap-14 items-center">
+    <div class="img-placeholder rounded-2xl h-96 w-full"></div>
+    <div class="flex flex-col gap-5">
+      <span class="text-gold font-bold text-sm">เกี่ยวกับปางช้างของเรา</span>
+      <h2 class="text-3xl lg:text-4xl font-extrabold text-dark leading-snug">
+        More Than a Camp.<br>It's an Adventure.
+      </h2>
+      <p class="text-gray-600 leading-relaxed">
+        ตั้งอยู่ท่ามกลางป่าเชียงใหม่ Chokchai Elephant Camp คือที่ที่คนรักการผจญภัยและคนรักสัตว์มาเจอกัน
+        เราสร้างความทรงจำดี ๆ มากว่า 15 ปี ผสมผสานความมหัศจรรย์ของช้างเข้ากับความตื่นเต้นของกิจกรรมกลางแจ้ง
+        ไม่ว่าคุณจะมาเป็นกลุ่มเพื่อน ครอบครัว หรือมองหาอะไรที่ท้าทาย เรามีกิจกรรมที่ใช่รอคุณอยู่
+      </p>
+      <div class="flex gap-10 mt-2">
+        <div>
+          <p class="text-3xl font-extrabold text-forest">15+</p>
+          <p class="text-sm text-gray-500">ปีประสบการณ์</p>
+        </div>
+        <div>
+          <p class="text-3xl font-extrabold text-forest">4.9★</p>
+          <p class="text-sm text-gray-500">คะแนนรีวิว</p>
+        </div>
+        <div>
+          <p class="text-3xl font-extrabold text-forest">Ethical</p>
+          <p class="text-sm text-gray-500">การดูแลช้าง</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ACTIVITIES (unchanged from original design) ===== -->
+<section id="activities" class="bg-cream">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 py-20">
+    <div class="text-center mb-14">
+      <span class="text-gold font-bold text-sm">6 กิจกรรมสุดพิเศษ</span>
+      <h2 class="text-3xl lg:text-4xl font-extrabold text-dark mt-2">Choose Your Elephant Experience</h2>
+    </div>
+    <div class="grid md:grid-cols-3 gap-7">
+      <!-- Card template repeated -->
+      <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+        <div class="img-placeholder h-56 w-full"></div>
+        <div class="p-6 flex flex-col gap-2">
+          <h3 class="font-bold text-lg">Elephant Jungle Trekking</h3>
+          <p class="text-sm text-gray-500">เดินป่าติดตามฝูงช้างในเส้นทางธรรมชาติ</p>
+          <p class="text-xs font-semibold text-forest">1 ชั่วโมง</p>
+          <div class="flex items-center justify-between mt-2">
+            <span class="font-extrabold text-lg">990 ฿ / คน</span>
+            <a href="activities.html" class="bg-gold text-white text-sm font-bold px-5 py-2.5 rounded-lg">จอง</a>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+        <div class="img-placeholder h-56 w-full"></div>
+        <div class="p-6 flex flex-col gap-2">
+          <h3 class="font-bold text-lg">Elephant Bathing</h3>
+          <p class="text-sm text-gray-500">ร่วมอาบน้ำและขัดผิวให้ช้างที่ลำธารธรรมชาติ</p>
+          <p class="text-xs font-semibold text-forest">1.5 ชั่วโมง</p>
+          <div class="flex items-center justify-between mt-2">
+            <span class="font-extrabold text-lg">1,290 ฿ / คน</span>
+            <a href="activities.html" class="bg-gold text-white text-sm font-bold px-5 py-2.5 rounded-lg">จอง</a>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+        <div class="img-placeholder h-56 w-full"></div>
+        <div class="p-6 flex flex-col gap-2">
+          <h3 class="font-bold text-lg">Elephant Feeding</h3>
+          <p class="text-sm text-gray-500">เตรียมและให้อาหารช้างแบบใกล้ชิด</p>
+          <p class="text-xs font-semibold text-forest">ครึ่งวัน</p>
+          <div class="flex items-center justify-between mt-2">
+            <span class="font-extrabold text-lg">1,890 ฿ / คน</span>
+            <a href="activities.html" class="bg-gold text-white text-sm font-bold px-5 py-2.5 rounded-lg">จอง</a>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+        <div class="img-placeholder h-56 w-full"></div>
+        <div class="p-6 flex flex-col gap-2">
+          <h3 class="font-bold text-lg">Vitamin Making</h3>
+          <p class="text-sm text-gray-500">เตรียมวิตามินให้ช้างด้วยตัวเอง</p>
+          <p class="text-xs font-semibold text-forest">1 ชั่วโมง</p>
+          <div class="flex items-center justify-between mt-2">
+            <span class="font-extrabold text-lg">990 ฿ / คน</span>
+            <a href="activities.html" class="bg-gold text-white text-sm font-bold px-5 py-2.5 rounded-lg">จอง</a>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+        <div class="img-placeholder h-56 w-full"></div>
+        <div class="p-6 flex flex-col gap-2">
+          <h3 class="font-bold text-lg">Bamboo Rafting</h3>
+          <p class="text-sm text-gray-500">ล่องแพไม้ไผ่ตามลำน้ำธรรมชาติ</p>
+          <p class="text-xs font-semibold text-forest">1.5 ชั่วโมง</p>
+          <div class="flex items-center justify-between mt-2">
+            <span class="font-extrabold text-lg">1,290 ฿ / คน</span>
+            <a href="activities.html" class="bg-gold text-white text-sm font-bold px-5 py-2.5 rounded-lg">จอง</a>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+        <div class="img-placeholder h-56 w-full"></div>
+        <div class="p-6 flex flex-col gap-2">
+          <h3 class="font-bold text-lg">Ziplining</h3>
+          <p class="text-sm text-gray-500">โหนสลิงชมป่าธรรมชาติจากมุมสูง</p>
+          <p class="text-xs font-semibold text-forest">ครึ่งวัน</p>
+          <div class="flex items-center justify-between mt-2">
+            <span class="font-extrabold text-lg">1,890 ฿ / คน</span>
+            <a href="activities.html" class="bg-gold text-white text-sm font-bold px-5 py-2.5 rounded-lg">จอง</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== BOOKING (simple contact-style form) ===== -->
+<!-- <section class="bg-white">
+  <div class="max-w-3xl mx-auto px-6 lg:px-10 py-20 flex flex-col items-center gap-10">
+    <div class="text-center">
+      <span class="text-gold font-bold text-sm">จองกิจกรรม</span>
+      <h2 class="text-3xl font-extrabold mt-2">จองคิวล่วงหน้าออนไลน์</h2>
+    </div>
+    <form class="w-full bg-cream border border-gray-200 rounded-2xl p-10 flex flex-col gap-5">
+      <div class="grid sm:grid-cols-2 gap-5">
+        <div>
+          <label class="text-sm font-semibold block mb-2">ชื่อ-นามสกุล</label>
+          <input type="text" placeholder="กรอกชื่อของคุณ" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white" />
+        </div>
+        <div>
+          <label class="text-sm font-semibold block mb-2">เบอร์โทรศัพท์</label>
+          <input type="tel" placeholder="08X-XXX-XXXX" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white" />
+        </div>
+        <div>
+          <label class="text-sm font-semibold block mb-2">วันที่ต้องการเข้าชม</label>
+          <input type="date" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white" />
+        </div>
+        <div>
+          <label class="text-sm font-semibold block mb-2">จำนวนผู้เข้าร่วม</label>
+          <input type="number" min="1" placeholder="จำนวนคน" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white" />
+        </div>
+      </div>
+      <div>
+        <label class="text-sm font-semibold block mb-2">เลือกกิจกรรม</label>
+        <select class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white">
+          <option>Elephant Jungle Trekking</option>
+          <option>Elephant Bathing</option>
+          <option>Elephant Feeding</option>
+          <option>Vitamin Making</option>
+          <option>Bamboo Rafting</option>
+          <option>Ziplining</option>
+        </select>
+      </div>
+      <button type="button" onclick="alert('ดูรายละเอียดกิจกรรมและจองแบบครบขั้นตอนได้ที่หน้า กิจกรรม'); window.location.href='activities.html';" class="bg-forest hover:bg-forest-dark text-white font-bold py-4 rounded-lg mt-2 transition">
+        ยืนยันการจอง
+      </button>
+    </form>
+  </div>
+</section> -->
+
+<!-- ===== REVIEWS ===== -->
+<section id="reviews" class="bg-cream">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 py-20">
+    <div class="text-center mb-14">
+      <span class="text-gold font-bold text-sm">เสียงจากนักท่องเที่ยว</span>
+      <h2 class="text-3xl lg:text-4xl font-extrabold mt-2">รีวิวจาก Google และ TripAdvisor</h2>
+    </div>
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="bg-white rounded-2xl border border-gray-200 p-6 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="font-bold">Emily R.</p>
+            <p class="text-gold text-sm">★★★★★</p>
+          </div>
+          <span class="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">Google</span>
+        </div>
+        <p class="text-sm text-gray-600">"ประสบการณ์ดีมาก ควาญช้างดูแลช้างอย่างอ่อนโยน ไม่มีการขี่หลังช้างเลย"</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-gray-200 p-6 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="font-bold">Somchai P.</p>
+            <p class="text-gold text-sm">★★★★★</p>
+          </div>
+          <span class="bg-emerald-600 text-white text-xs font-bold px-3 py-1 rounded-full">TripAdvisor</span>
+        </div>
+        <p class="text-sm text-gray-600">"เหมาะสำหรับครอบครัว ลูก ๆ สนุกมากได้ให้อาหารช้างใกล้ ๆ"</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-gray-200 p-6 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="font-bold">Klaus M.</p>
+            <p class="text-gold text-sm">★★★★☆</p>
+          </div>
+          <span class="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">Google</span>
+        </div>
+        <p class="text-sm text-gray-600">"สถานที่สวยงาม ทีมงานเป็นมิตร แนะนำให้จองล่วงหน้า"</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MAP ===== -->
+<section id="map" class="bg-white">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 py-20 grid md:grid-cols-2 gap-14 items-center">
+    <div class="flex flex-col gap-5">
+      <span class="text-gold font-bold text-sm">แผนที่และเส้นทาง</span>
+      <h2 class="text-3xl font-extrabold">มาเยี่ยมชมเราได้ที่</h2>
+      <p class="text-gray-600">99 หมู่ 4 ต.แม่แรม อ.แม่ริม<br>จ.เชียงใหม่ 50180</p>
+      <div>
+        <p class="font-bold text-sm">เวลาทำการ</p>
+        <p class="text-gray-600 text-sm">ทุกวัน 08:00 - 17:00 น.</p>
+      </div>
+      <a href="https://maps.google.com" target="_blank" class="bg-forest hover:bg-forest-dark text-white font-bold px-6 py-3.5 rounded-lg w-fit transition">นำทางด้วย Google Maps</a>
+    </div>
+    <div class="rounded-2xl overflow-hidden border border-gray-200 h-96">
+      <iframe
+        class="w-full h-full"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        src="https://www.google.com/maps?q=Chiang+Mai+Elephant+Camp&output=embed">
+      </iframe>
+    </div>
+  </div>
+</section>
+
+<!-- ===== INBOX / ASK A QUESTION ===== -->
+<section id="contact" class="bg-cream">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 py-20 grid md:grid-cols-2 gap-14 items-center">
+    <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+      <div class="bg-forest px-6 py-4 text-white font-bold">💬 กล่องข้อความ - สอบถามข้อมูล</div>
+      <div class="p-6 flex flex-col gap-3">
+        <div class="bg-white border border-gray-200 rounded-lg p-3 max-w-sm">
+          <p class="text-xs font-bold text-forest">นักท่องเที่ยว</p>
+          <p class="text-sm">มีบริการรับส่งจากตัวเมืองเชียงใหม่ไหมคะ?</p>
+        </div>
+        <div class="bg-cream border border-gray-200 rounded-lg p-3 max-w-sm">
+          <p class="text-xs font-bold text-forest">ปางช้าง</p>
+          <p class="text-sm">มีค่ะ รับส่งฟรีในรัศมี 15 กม. จากตัวเมือง</p>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg p-3 max-w-sm">
+          <p class="text-xs font-bold text-forest">นักท่องเที่ยว</p>
+          <p class="text-sm">เด็กอายุ 5 ขวบเข้าร่วมกิจกรรมได้ไหม?</p>
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-col gap-4">
+      <span class="text-gold font-bold text-sm">มีคำถาม?</span>
+      <h2 class="text-2xl font-extrabold">ส่งคำถามถึงเราได้เลย</h2>
+      <p class="text-gray-600 text-sm">ทีมงานของเราจะตอบกลับภายใน 24 ชั่วโมง</p>
+      <input type="text" placeholder="อีเมลหรือเบอร์โทรของคุณ" class="border border-gray-300 rounded-lg px-4 py-3" />
+      <textarea placeholder="พิมพ์คำถามของคุณที่นี่..." rows="4" class="border border-gray-300 rounded-lg px-4 py-3"></textarea>
+      <button class="bg-gold hover:bg-gold/90 text-white font-bold py-3.5 rounded-lg w-fit px-8 transition">ส่งคำถาม</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="bg-forest-dark text-white">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 py-14 grid md:grid-cols-4 gap-10">
+    <div>
+      <p class="text-xl font-extrabold">Chokchai Elephant Camp</p>
+      <p class="text-white/60 text-sm mt-2">ปางช้างเชิงอนุรักษ์ จ.เชียงใหม่</p>
+    </div>
+    <div>
+      <p class="text-gold font-bold text-sm mb-3">เมนู</p>
+      <ul class="text-white/70 text-sm flex flex-col gap-2">
+        <li><a href="index.html">หน้าแรก</a></li>
+        <li><a href="activities.html">กิจกรรม</a></li>
+        <li><a href="index.html#reviews">รีวิว</a></li>
+        <li><a href="activities.html">จองกิจกรรม</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="text-gold font-bold text-sm mb-3">ติดต่อ</p>
+      <ul class="text-white/70 text-sm flex flex-col gap-2">
+        <li>โทร: 053-123-456</li>
+        <li>Line: @chokchaicamp</li>
+        <li>อีเมล: info@chokchaicamp.co</li>
+      </ul>
+    </div>
+    <div>
+      <p class="text-gold font-bold text-sm mb-3">ติดตามเรา</p>
+      <ul class="text-white/70 text-sm flex flex-col gap-2">
+        <li><a href="#">Facebook</a></li>
+        <li><a href="#">Instagram</a></li>
+        <li><a href="#">TripAdvisor</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="border-t border-white/10 py-6 text-center text-white/50 text-xs">
+    © 2026 Chokchai Elephant Camp | สงวนลิขสิทธิ์
+  </div>
+</footer>
+
+<!-- ===== WHATSAPP FLOATING BUTTON ===== -->
+<a href="https://wa.me/66651234567" target="_blank"
+   class="fixed bottom-6 right-6 z-50 bg-[#25D366] w-16 h-16 rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition">
+  <svg width="30" height="30" viewBox="0 0 24 24" fill="white"><path d="M12.04 2c-5.46 0-9.9 4.44-9.9 9.9 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.46 0 9.9-4.44 9.9-9.9s-4.44-9.9-9.9-9.93zm0 18.02c-1.5 0-2.97-.4-4.24-1.16l-.3-.18-3.12.82.83-3.04-.2-.31a8.15 8.15 0 01-1.25-4.35c0-4.51 3.67-8.18 8.18-8.18 2.18 0 4.23.85 5.78 2.4a8.12 8.12 0 012.4 5.79c0 4.51-3.67 8.21-8.18 8.21zm4.48-6.13c-.25-.12-1.45-.71-1.67-.8-.22-.08-.39-.12-.55.13-.16.24-.63.79-.78.96-.14.16-.29.18-.53.06-.25-.12-1.04-.38-1.98-1.22-.73-.65-1.23-1.46-1.37-1.71-.14-.24-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.14.16-.24.24-.4.08-.16.04-.31-.02-.43-.06-.12-.55-1.33-.76-1.82-.2-.48-.4-.42-.55-.42h-.47c-.16 0-.43.06-.65.31-.22.24-.86.84-.86 2.04 0 1.2.88 2.36 1 2.53.12.16 1.74 2.66 4.22 3.72.59.25 1.05.4 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.45-.59 1.65-1.16.2-.57.2-1.06.14-1.16-.06-.1-.22-.16-.47-.28z"/></svg>
+</a>
+
+<script src="script.js"></script>
+</body>
+</html>
