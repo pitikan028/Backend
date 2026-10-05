@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>ระบบหลังบ้าน | Chokchai Elephant Camp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          forest: '#21452A',
+          'forest-dark': '#183420',
+          gold: '#BA9330',
+          cream: '#F9F8F2',
+          dark: '#252520',
+        },
+        fontFamily: { sans: ['Inter', 'sans-serif'] }
+      }
+    }
+  }
+</script>
+</head>
+<body class="bg-cream text-dark font-sans min-h-screen">
+
+<!-- ===== หน้าเข้าสู่ระบบ ===== -->
+<div id="login-view" class="hidden min-h-screen flex items-center justify-center px-6">
+  <form id="login-form" class="bg-white rounded-2xl shadow-lg border border-gray-200 p-10 w-full max-w-md flex flex-col gap-5">
+    <div class="text-center">
+      <p class="text-4xl">🐘</p>
+      <h1 class="text-2xl font-extrabold text-forest mt-2">ระบบหลังบ้าน</h1>
+      <p class="text-sm text-gray-500">Chokchai Elephant Camp</p>
+    </div>
+
+    <p id="login-error" class="hidden bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3" role="alert"></p>
+
+    <div>
+      <label for="login-email" class="text-sm font-semibold block mb-2">อีเมล</label>
+      <input id="login-email" type="email" autocomplete="username" required
+             class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream focus:outline-none focus:border-gold" />
+    </div>
+    <div>
+      <label for="login-password" class="text-sm font-semibold block mb-2">รหัสผ่าน</label>
+      <input id="login-password" type="password" autocomplete="current-password" required
+             class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream focus:outline-none focus:border-gold" />
+    </div>
+
+    <button type="submit" class="bg-forest hover:bg-forest-dark text-white font-bold py-3.5 rounded-lg transition disabled:opacity-60">
+      เข้าสู่ระบบ
+    </button>
+    <a href="index.html" class="text-center text-sm text-gray-500 hover:text-forest">← กลับไปหน้าเว็บไซต์</a>
+  </form>
+</div>
+
+<!-- ===== แดชบอร์ด ===== -->
+<div id="dashboard-view" class="hidden">
+
+  <header class="bg-forest-dark text-white">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <span class="font-extrabold">🐘 Chokchai · ระบบหลังบ้าน</span>
+      <div class="flex items-center gap-4 text-sm">
+        <span id="current-user" class="hidden sm:inline text-white/70"></span>
+        <a href="index.html" class="text-white/70 hover:text-white">ดูเว็บไซต์</a>
+        <button id="logout-button" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg font-semibold transition">
+          ออกจากระบบ
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-8 flex flex-col gap-6">
+
+    <!-- สถิติ -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-white rounded-xl border border-gray-200 p-5">
+        <p class="text-xs text-gray-500 font-semibold">การจองทั้งหมด</p>
+        <p id="stat-total" class="text-3xl font-extrabold text-forest mt-1">–</p>
+      </div>
+      <div class="bg-white rounded-xl border border-gray-200 p-5">
+        <p class="text-xs text-gray-500 font-semibold">รอยืนยัน</p>
+        <p id="stat-pending" class="text-3xl font-extrabold text-amber-600 mt-1">–</p>
+      </div>
+      <div class="bg-white rounded-xl border border-gray-200 p-5">
+        <p class="text-xs text-gray-500 font-semibold">ทริปที่จะถึง</p>
+        <p id="stat-upcoming" class="text-3xl font-extrabold text-sky-700 mt-1">–</p>
+      </div>
+      <div class="bg-white rounded-xl border border-gray-200 p-5">
+        <p class="text-xs text-gray-500 font-semibold">รายได้ (ยืนยันแล้ว)</p>
+        <p id="stat-revenue" class="text-2xl font-extrabold text-gold mt-1">–</p>
+      </div>
+    </div>
+
+    <!-- แท็บ -->
+    <div class="flex flex-wrap gap-2">
+      <button data-tab="bookings" class="bg-forest text-white font-semibold text-sm px-5 py-2.5 rounded-lg transition">
+        การจอง
+      </button>
+      <button data-tab="inquiries" class="text-gray-600 bg-white border border-gray-200 font-semibold text-sm px-5 py-2.5 rounded-lg transition">
+        คำถามจากลูกค้า <span id="badge-inquiries" class="text-xs font-bold text-red-600"></span>
+      </button>
+      <button data-tab="reviews" class="text-gray-600 bg-white border border-gray-200 font-semibold text-sm px-5 py-2.5 rounded-lg transition">
+        รีวิว <span id="badge-reviews" class="text-xs font-bold text-red-600"></span>
+      </button>
+    </div>
+
+    <!-- ตัวกรอง (เฉพาะแท็บการจอง) -->
+    <div id="filter-bar" class="flex flex-wrap gap-3">
+      <select id="filter-status" class="border border-gray-300 rounded-lg px-4 py-2.5 bg-white text-sm">
+        <option value="">ทุกสถานะ</option>
+        <option value="pending">รอยืนยัน</option>
+        <option value="confirmed">ยืนยันแล้ว</option>
+        <option value="completed">เสร็จสิ้น</option>
+        <option value="cancelled">ยกเลิก</option>
+      </select>
+      <input id="filter-search" type="search" placeholder="ค้นหารหัสจอง / ชื่อ / อีเมล / เบอร์โทร"
+             class="border border-gray-300 rounded-lg px-4 py-2.5 bg-white text-sm flex-1 min-w-[240px]" />
+    </div>
+
+    <!-- ตาราง -->
+    <div class="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+      <table class="w-full text-sm min-w-[880px]">
+        <thead id="table-head"></thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+
+    <div class="flex items-center justify-between">
+      <p id="pagination-info" class="text-sm text-gray-500"></p>
+      <div class="flex gap-2">
+        <button id="page-prev" class="border border-gray-300 bg-white px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-40">ก่อนหน้า</button>
+        <button id="page-next" class="border border-gray-300 bg-white px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-40">ถัดไป</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div id="toast" class="hidden fixed bottom-6 right-6 bg-forest text-white text-sm font-semibold px-5 py-3 rounded-lg shadow-lg z-50" role="status"></div>
+
+<script type="module" src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+import jwt from 'jsonwebtoken';
+import config from '../config/index.js';
+import ApiError from '../utils/ApiError.js';
+import { db } from '../db/knex.js';
+import asyncHandler from './asyncHandler.js';
+
+/** ตรวจ JWT จาก header `Authorization: Bearer <token>` แล้วแนบผู้ใช้ไว้ที่ req.user */
+export const requireAuth = asyncHandler(async (req, _res, next) => {
+  const header = req.headers.authorization ?? '';
+  const [scheme, token] = header.split(' ');
+
+  if (scheme !== 'Bearer' || !token) {
+    throw ApiError.unauthorized('ต้องส่ง token มาด้วย (Authorization: Bearer <token>)');
+  }
+
+  let payload;
+  try {
+    payload = jwt.verify(token, config.jwt.secret);
+  } catch {
+    throw ApiError.unauthorized('token ไม่ถูกต้องหรือหมดอายุแล้ว');
+  }
+
+  // ตรวจกับฐานข้อมูลทุกครั้ง เพื่อให้ปิดบัญชีแล้วมีผลทันทีโดยไม่ต้องรอ token หมดอายุ
+  const user = await db('admin_users')
+    .select('id', 'email', 'name', 'role', 'is_active')
+    .where({ id: payload.sub })
+    .first();
+
+  if (!user || !(user.is_active === true || user.is_active === 1)) {
+    throw ApiError.unauthorized('บัญชีนี้ถูกปิดการใช้งานแล้ว');
+  }
+
+  req.user = { id: user.id, email: user.email, name: user.name, role: user.role };
+  next();
+});
+
+/** จำกัดให้เฉพาะ role ที่ระบุเท่านั้นที่เรียกได้ ต้องใช้ต่อจาก requireAuth */
+export const requireRole =
+  (...roles) =>
+  (req, _res, next) => {
+    if (!req.user) return next(ApiError.unauthorized());
+    if (!roles.includes(req.user.role)) {
+      return next(ApiError.forbidden('บัญชีนี้ไม่มีสิทธิ์ใช้งานส่วนนี้'));
+    }
+    return next();
+  };
+
+export default { requireAuth, requireRole };

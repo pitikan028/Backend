@@ -1,0 +1,193 @@
+### ทดลองยิง API จาก VS Code
+#
+# ต้องติดตั้ง extension "REST Client" (humao.rest-client) ก่อน
+# จากนั้นจะมีคำว่า "Send Request" ขึ้นเหนือแต่ละบล็อก กดได้เลย
+#
+# ลำดับที่แนะนำ: ยิงข้อ 1-4 ดูข้อมูล → ข้อ 5 จองจริง → ข้อ 8 login → ข้อ 9-11 จัดการหลังบ้าน
+
+@host = http://localhost:8080
+@bookingDate = 2026-12-25
+@adminEmail = admin@chokchai.local
+@adminPassword = Admin@1234
+
+
+### 1. ตรวจสถานะระบบ — ต้องได้ status ok
+GET {{host}}/api/health
+
+
+### 2. รายการกิจกรรมทั้งหมด (6 รายการ)
+GET {{host}}/api/activities
+
+
+### 3. รายละเอียดกิจกรรมเดียว
+GET {{host}}/api/activities/elephant-bathing
+
+
+### 4. เช็คที่ว่างของวันที่กำหนด
+GET {{host}}/api/activities/elephant-bathing/availability?date={{bookingDate}}
+
+
+### 5. จองกิจกรรม
+# ลองแก้ adults/children ดูว่ายอดเปลี่ยนตาม
+# ลองใส่ "total_amount": 1 เพิ่มเข้าไปดู — ระบบจะไม่สนใจ เพราะคำนวณเองจากฐานข้อมูล
+# @name createBooking
+POST {{host}}/api/bookings
+Content-Type: application/json
+
+{
+  "activity_slug": "elephant-bathing",
+  "booking_date": "{{bookingDate}}",
+  "adults": 2,
+  "children": 1,
+  "infants": 0,
+  "first_name": "สมชาย",
+  "last_name": "ใจดี",
+  "phone": "081-234-5678",
+  "email": "somchai@example.com",
+  "contact_app": "Line",
+  "pickup_type": "hotel",
+  "pickup_detail": "โรงแรมนิมมาน",
+  "note": "แพ้ถั่ว",
+  "accept_terms": true
+}
+
+
+### 6. ค้นหาการจองที่เพิ่งสร้าง (ใช้รหัสจากข้อ 5 อัตโนมัติ)
+GET {{host}}/api/bookings/{{createBooking.response.body.data.booking_ref}}?email=somchai@example.com
+
+
+### 7. ลองใช้อีเมลผิด — ต้องได้ 404 ไม่ใช่ข้อมูลการจอง
+GET {{host}}/api/bookings/{{createBooking.response.body.data.booking_ref}}?email=hacker@example.com
+
+
+### 7.1 ตัวอย่างข้อมูลไม่ถูกต้อง — ต้องได้ 422 พร้อมบอกว่าฟิลด์ไหนผิด
+POST {{host}}/api/bookings
+Content-Type: application/json
+
+{
+  "activity_slug": "elephant-bathing",
+  "booking_date": "{{bookingDate}}",
+  "adults": 0,
+  "children": 0,
+  "infants": 1,
+  "first_name": "ทดสอบ",
+  "last_name": "ผิดพลาด",
+  "phone": "123",
+  "email": "ไม่ใช่อีเมล",
+  "accept_terms": false
+}
+
+
+### 8. แอดมินเข้าสู่ระบบ — รับ token
+# @name login
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{adminEmail}}",
+  "password": "{{adminPassword}}"
+}
+
+
+### 9. สถิติ dashboard
+GET {{host}}/api/admin/stats
+Authorization: Bearer {{login.response.body.data.token}}
+
+
+### 10. รายการจองทั้งหมด
+GET {{host}}/api/admin/bookings?page=1&limit=20
+Authorization: Bearer {{login.response.body.data.token}}
+
+
+### 10.1 กรองเฉพาะที่รอยืนยัน
+GET {{host}}/api/admin/bookings?status=pending
+Authorization: Bearer {{login.response.body.data.token}}
+
+
+### 10.2 ค้นหาด้วยอีเมล / ชื่อ / เบอร์โทร / รหัสจอง
+GET {{host}}/api/admin/bookings?q=somchai
+Authorization: Bearer {{login.response.body.data.token}}
+
+
+### 11. ยืนยันการจอง (แก้เลข 1 เป็น id จริงจากข้อ 10)
+PATCH {{host}}/api/admin/bookings/1
+Authorization: Bearer {{login.response.body.data.token}}
+Content-Type: application/json
+
+{
+  "status": "confirmed",
+  "payment_status": "paid"
+}
+
+
+### 11.1 ลองข้ามขั้น pending → completed — ต้องได้ 409
+PATCH {{host}}/api/admin/bookings/1
+Authorization: Bearer {{login.response.body.data.token}}
+Content-Type: application/json
+
+{
+  "status": "completed"
+}
+
+
+### 12. เรียก API แอดมินโดยไม่มี token — ต้องได้ 401
+GET {{host}}/api/admin/stats
+
+
+### 13. รีวิวที่เผยแพร่แล้ว
+GET {{host}}/api/reviews
+
+
+### 14. ส่งรีวิวใหม่ — จะยังไม่แสดงจนแอดมินอนุมัติ
+POST {{host}}/api/reviews
+Content-Type: application/json
+
+{
+  "author_name": "ทดสอบ รีวิว",
+  "rating": 5,
+  "comment": "ประทับใจมากครับ ทีมงานดูแลช้างดีจริง ๆ"
+}
+
+
+### 15. รีวิวทั้งหมดรวมที่ยังไม่อนุมัติ
+GET {{host}}/api/admin/reviews?is_published=false
+Authorization: Bearer {{login.response.body.data.token}}
+
+
+### 16. อนุมัติรีวิว (แก้เลข 4 เป็น id จริงจากข้อ 15)
+PATCH {{host}}/api/admin/reviews/4
+Authorization: Bearer {{login.response.body.data.token}}
+Content-Type: application/json
+
+{
+  "is_published": true
+}
+
+
+### 17. คำถามที่พบบ่อย
+GET {{host}}/api/faqs
+
+
+### 18. ส่งคำถามผ่านฟอร์มติดต่อ
+POST {{host}}/api/inquiries
+Content-Type: application/json
+
+{
+  "contact": "somchai@example.com",
+  "message": "มีรถรับส่งจากสนามบินเชียงใหม่ไหมครับ"
+}
+
+
+### 19. คำถามที่ยังไม่ได้ตอบ
+GET {{host}}/api/admin/inquiries?status=new
+Authorization: Bearer {{login.response.body.data.token}}
+
+
+### 20. บันทึกคำตอบ (แก้เลข 1 เป็น id จริงจากข้อ 19)
+PATCH {{host}}/api/admin/inquiries/1
+Authorization: Bearer {{login.response.body.data.token}}
+Content-Type: application/json
+
+{
+  "answer": "มีครับ บริการรับส่งฟรีในรัศมี 15 กม. จากตัวเมือง"
+}

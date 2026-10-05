@@ -1,0 +1,252 @@
+# วิธีตรวจสอบว่าระบบใช้งานได้จริง
+
+เอกสารนี้ตอบ 3 คำถาม: **รันยังไง**, **ข้อมูลเก็บที่ไหน**, **ต้องตรวจอะไรบ้าง**
+
+---
+
+## 1. รันระบบ
+
+เปิด Docker Desktop ให้ทำงานก่อน แล้วใน VS Code กด `Terminal → Run Task...` เลือก
+**"1. เริ่มระบบทั้งหมด"** หรือพิมพ์ใน terminal
+
+```bash
+docker compose up -d
+```
+
+ตรวจว่าขึ้นครบ 3 ตัวและเป็น `healthy`
+
+```bash
+docker compose ps
+```
+
+```
+NAME                STATUS
+chokchai-api        Up (healthy)
+chokchai-postgres   Up (healthy)
+chokchai-web        Up
+```
+
+ถ้า `api` ขึ้น `unhealthy` หรือ `Restarting` ให้ดูสาเหตุด้วย `docker compose logs api`
+
+---
+
+## 2. ตรวจแบบอัตโนมัติ (เร็วที่สุด)
+
+```powershell
+.\scripts\smoke-test.ps1
+```
+
+สคริปต์นี้ยิงคำขอจริงไล่ตั้งแต่หน้าเว็บ → API → ฐานข้อมูล → ระบบหลังบ้าน 22 รายการ
+แล้วสรุปเป็นตารางผ่าน/ไม่ผ่าน ข้อมูลทดสอบที่สร้างระหว่างทางถูกลบทิ้งตอนจบ จึงรันซ้ำได้
+
+ที่ตรวจให้ครอบคลุมถึง:
+- หน้าเว็บทั้ง 3 หน้าโหลดได้
+- API ตอบและต่อฐานข้อมูลได้
+- **ยอดเงินคำนวณถูก** และ**ไม่เชื่อราคาที่ส่งมาจากเบราว์เซอร์**
+- ที่ว่างลดลงจริงหลังจอง
+- คนอื่นเปิดดูการจองเราไม่ได้ถ้าไม่รู้อีเมล
+- เรียก API แอดมินโดยไม่ login ไม่ได้
+- เปลี่ยนสถานะข้ามขั้นไม่ได้
+
+ถ้าขึ้น **"ผ่านทั้งหมด 22 รายการ"** แปลว่าระบบทำงานครบทุกส่วน
+
+---
+
+## 3. ตรวจด้วยตาผ่านหน้าเว็บ
+
+### หน้าแรก — http://localhost:8080
+
+| ตรวจอะไร | ผลที่ควรเห็น |
+| --- | --- |
+| การ์ดกิจกรรม | มี 6 ใบ ราคา 990 / 1,290 / 1,890 บาท |
+| คะแนนรีวิวในส่วน About | ตัวเลขมาจากค่าเฉลี่ยจริงในฐานข้อมูล ไม่ใช่ 4.9 ตายตัว |
+| รีวิว | 3 รีวิว มีป้าย Google / TripAdvisor |
+| FAQ ด้านล่าง | 4 ข้อ |
+| ฟอร์ม Send us Your Question | กรอกแล้วกดส่ง ต้องขึ้นข้อความสีเขียว "ส่งคำถามเรียบร้อย..." |
+
+**พิสูจน์ว่าข้อมูลมาจากฐานข้อมูลจริง ไม่ใช่ hardcode:** กด `F12` → แท็บ **Network** → รีเฟรชหน้า
+จะเห็นคำขอไปที่ `activities`, `reviews`, `faqs` ถ้าคลิกดูจะเห็น JSON ที่ตรงกับสิ่งที่แสดงบนหน้า
+
+ลองอีกทางหนึ่ง: แก้ราคาในฐานข้อมูลแล้วรีเฟรชหน้าเว็บ ราคาต้องเปลี่ยนตามทันทีโดยไม่ต้องแก้โค้ด
+
+```bash
+docker exec chokchai-postgres psql -U chokchai -d chokchai -c "UPDATE activities SET adult_price = 1111 WHERE slug = 'ziplining';"
+```
+
+(แก้กลับด้วย `UPDATE activities SET adult_price = 1890 WHERE slug = 'ziplining';`)
+
+### หน้าจอง — http://localhost:8080/activities.html
+
+1. กด **BOOK NOW** ที่การ์ดใดก็ได้
+2. **ขั้นที่ 1** เลือกวันที่ → ใต้ช่องวันที่จะขึ้น "เหลือที่ว่าง X ที่ จากทั้งหมด Y ที่"
+   ตัวเลขนี้ถามจาก API ทุกครั้งที่เปลี่ยนวันที่ ไม่ได้ hardcode
+   - ลองเลือกวันที่เป็นวันนี้ → ระบบไม่ให้เลือก (ต้องจองล่วงหน้าอย่างน้อย 1 วัน)
+   - ลองกดถัดไปโดยใส่ผู้ใหญ่ 0 เด็ก 0 → ขึ้นกล่องแดงเตือน
+3. **ขั้นที่ 2** ลองใส่อีเมลผิดรูปแบบแล้วกดถัดไป → ขึ้นเตือน
+4. **ขั้นที่ 3** เลือกจุดรับ
+5. **ขั้นที่ 4** ต้องติ๊กยอมรับเงื่อนไขก่อน ไม่งั้นกดยืนยันไม่ผ่าน
+6. กดยืนยัน → ได้หน้าจอสีเขียวพร้อม **รหัสการจอง** เช่น `CEC-7QK4M2`
+7. เปิด modal ใหม่ในวันเดิม → ตัวเลขที่ว่างต้อง**ลดลง**ตามจำนวนที่เพิ่งจอง
+
+### หน้าหลังบ้าน — http://localhost:8080/admin.html
+
+เข้าด้วย `admin@chokchai.local` / `Admin@1234`
+
+| ตรวจอะไร | ผลที่ควรเห็น |
+| --- | --- |
+| การ์ดสถิติด้านบน | ตัวเลขตรงกับจำนวนการจองจริง |
+| แท็บ "การจอง" | เห็นรายการที่เพิ่งจองจากหน้าเว็บ สถานะ "รอยืนยัน" |
+| ปุ่ม "ยืนยันแล้ว" | กดแล้วสถานะเปลี่ยนและตัวเลขสถิติอัปเดตตาม |
+| แท็บ "คำถามจากลูกค้า" | เห็นคำถามที่ส่งจากฟอร์มหน้าแรก |
+| แท็บ "รีวิว" | กด "อนุมัติ" แล้วรีวิวจะไปโผล่ที่หน้าแรก |
+| ช่องค้นหา | พิมพ์ชื่อหรืออีเมลแล้วกรองได้ |
+
+**ทดสอบความปลอดภัย:** กด F12 → Application → Local Storage → ลบ `chokchai_admin_token`
+แล้วรีเฟรช ต้องเด้งกลับไปหน้า login
+
+---
+
+## 4. ตรวจด้วย DBeaver
+
+ดูวิธีเชื่อมต่อและ query ตัวอย่างที่ [DBEAVER.md](DBEAVER.md) — ตั้งค่า `localhost:5432`,
+database `chokchai`, user/password `chokchai`/`chokchai`
+
+**สิ่งที่ควรลองดู**
+
+```sql
+-- การจองล่าสุดพร้อมชื่อกิจกรรม
+SELECT b.booking_ref, a.name_th, b.booking_date,
+       b.first_name, b.last_name, b.total_amount, b.status
+FROM bookings b JOIN activities a ON a.id = b.activity_id
+ORDER BY b.created_at DESC;
+```
+
+จองจากหน้าเว็บแล้วรัน query นี้อีกครั้ง — แถวใหม่ต้องโผล่ขึ้นมาทันที
+นี่คือหลักฐานว่าหน้าเว็บกับฐานข้อมูลเชื่อมกันจริง
+
+```sql
+-- ตรวจว่าราคาที่บันทึกตรงกับราคาปัจจุบันของกิจกรรม
+SELECT b.booking_ref,
+       b.unit_adult_price AS ราคาตอนจอง,
+       a.adult_price      AS ราคาปัจจุบัน,
+       b.adults, b.children, b.total_amount
+FROM bookings b JOIN activities a ON a.id = b.activity_id;
+```
+
+ถ้าแก้ราคาในตาราง `activities` แล้วรัน query นี้ จะเห็นว่า `ราคาตอนจอง` ของการจองเก่า**ไม่เปลี่ยน**
+ซึ่งเป็นพฤติกรรมที่ถูกต้อง
+
+```sql
+-- รหัสผ่านแอดมินต้องเป็น hash ไม่ใช่ข้อความธรรมดา
+SELECT email, name, role, LEFT(password_hash, 20) || '...' AS hash FROM admin_users;
+```
+
+ต้องเห็นขึ้นต้นด้วย `$2a$10$` ไม่ใช่ `Admin@1234`
+
+---
+
+## 5. ข้อมูลเก็บอยู่ที่ไหน
+
+ระบบมีข้อมูล 3 ชั้น แยกที่เก็บกันคนละที่
+
+### ชั้นที่ 1 — โค้ดและไฟล์เว็บ
+
+อยู่ที่ **`D:\Chokchai\`** บนดิสก์ตรง ๆ แก้ไขได้ด้วย VS Code
+ไฟล์ใน `frontend/` ถูกเชื่อมเข้า container โดยตรง แก้แล้วกด refresh เบราว์เซอร์เห็นผลทันที
+
+### ชั้นที่ 2 — ฐานข้อมูล (ข้อมูลการจองจริง)
+
+เก็บใน Docker volume ชื่อ **`chokchai_postgres_data`**
+
+```bash
+docker volume inspect chokchai_postgres_data
+```
+
+ตัว volume ไม่ได้เป็นโฟลเดอร์ที่เปิดดูจาก Windows Explorer ได้ แต่อยู่ในไฟล์ดิสก์เสมือนของ Docker
+
+```
+D:\DockerData\wsl\disk\docker_data.vhdx
+```
+
+> ไฟล์นี้เดิมอยู่บนไดรฟ์ C: แล้วย้ายมา D: เพื่อประหยัดพื้นที่
+> ที่ตำแหน่งเดิมบน C: เหลือไว้แค่ทางลัด (junction) ชี้มาที่นี่
+
+**ข้อมูลจะยังอยู่เมื่อ:** ปิดเครื่อง, `docker compose down`, `docker compose restart`, รีสตาร์ท Docker Desktop
+
+**ข้อมูลจะหายเมื่อ:** สั่ง `docker compose down -v` (มี `-v`) หรือลบ volume ทิ้งเอง
+
+ตรวจว่าข้อมูลยังอยู่:
+
+```bash
+docker exec chokchai-postgres psql -U chokchai -d chokchai -c "SELECT count(*) FROM bookings;"
+```
+
+### ชั้นที่ 3 — ไฟล์สำรอง
+
+อยู่ที่ **`D:\Chokchai\backup\`** เป็นไฟล์ `.sql` ธรรมดา เปิดอ่านได้
+
+สำรองใหม่: `Run Task → "7. สำรองฐานข้อมูล"` หรือ
+
+```powershell
+docker exec chokchai-postgres pg_dump -U chokchai -d chokchai --clean --if-exists |
+  Out-File "backup\chokchai-$(Get-Date -Format yyyyMMdd-HHmmss).sql" -Encoding utf8
+```
+
+กู้คืนจากไฟล์สำรอง:
+
+```powershell
+Get-Content backup\chokchai-XXXXXXXX-XXXXXX.sql -Raw |
+  docker exec -i chokchai-postgres psql -U chokchai -d chokchai
+```
+
+### สรุปเป็นตาราง
+
+| ข้อมูล | เก็บที่ | หายไหมถ้า `docker compose down` |
+| --- | --- | --- |
+| โค้ด HTML/JS/backend | `D:\Chokchai\` | ไม่หาย |
+| การจอง, รีวิว, คำถาม, บัญชีแอดมิน | volume `chokchai_postgres_data` → `D:\DockerData\wsl\disk\docker_data.vhdx` | ไม่หาย (หายเฉพาะเมื่อใส่ `-v`) |
+| ไฟล์สำรอง | `D:\Chokchai\backup\*.sql` | ไม่หาย |
+| Docker image | `D:\DockerData\` | ไม่หาย |
+
+---
+
+## 6. ตรวจว่าโค้ดฝั่ง backend ยังถูกต้อง
+
+```bash
+cd backend
+npm test
+```
+
+รัน 22 เคสกับฐานข้อมูลจริง ครอบคลุมการคำนวณราคา, การกันจองเกินโควตา,
+การตรวจสอบข้อมูลนำเข้า, สิทธิ์การเข้าถึง และลำดับการเปลี่ยนสถานะ
+
+ควรรันทุกครั้งหลังแก้โค้ดใน `backend/src/`
+
+---
+
+## 7. ยิง API ทีละอันจาก VS Code
+
+ติดตั้ง extension **REST Client** (VS Code จะเสนอให้เองตอนเปิดโปรเจกต์)
+แล้วเปิด [api-playground.http](api-playground.http) จะมีปุ่ม **Send Request** เหนือแต่ละคำขอ
+กดดูผลลัพธ์ได้ทีละอันโดยไม่ต้องเปิดโปรแกรมอื่น
+
+---
+
+## 8. แก้ปัญหาที่พบบ่อย
+
+| อาการ | สาเหตุและวิธีแก้ |
+| --- | --- |
+| เปิด localhost:8080 ไม่ได้ | Docker Desktop ยังไม่ทำงาน หรือ container ยังไม่ขึ้น → `docker compose up -d` |
+| หน้าเว็บขึ้นแต่การ์ดกิจกรรมว่าง | API ต่อฐานข้อมูลไม่ได้ → `docker compose logs api` ดูข้อความท้ายสุด |
+| กดจองแล้วขึ้น "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้" | container `api` ล้ม → `docker compose ps` แล้ว `docker compose restart api` |
+| ตารางในฐานข้อมูลว่างเปล่า | ยังไม่ได้ seed → `docker compose restart api` (API จะ migrate + seed ให้ตอนบูต) |
+| แก้ไฟล์ใน `frontend/` แล้วไม่เห็นผล | เบราว์เซอร์แคชไว้ → กด `Ctrl + Shift + R` |
+| แก้ไฟล์ใน `backend/src/` แล้วไม่เห็นผล | โค้ด backend ถูก copy เข้า image → `docker compose up -d --build api` |
+| `port is already allocated` | มีโปรแกรมอื่นใช้พอร์ตอยู่ → แก้ `WEB_PORT` / `API_PORT` / `DB_PORT` ใน `.env` |
+
+ดู log แบบละเอียด
+
+```bash
+docker compose logs -f api        # ติดตาม API แบบ real-time
+docker compose logs --tail 50 web # 50 บรรทัดล่าสุดของ nginx
+```
