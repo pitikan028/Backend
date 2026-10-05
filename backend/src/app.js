@@ -23,6 +23,10 @@ export function createApp() {
       credentials: true,
     }),
   );
+  // webhook ของ Stripe ต้องได้ body ดิบ ๆ ไว้ตรวจลายเซ็น จึงต้องดักก่อน express.json()
+  app.use('/api/payments/stripe/webhook', express.raw({ type: 'application/json', limit: '1mb' }));
+  // การแจ้งโอนเงินพ่วงรูปสลิปมาด้วย จึงต้องรับ body ใหญ่กว่า endpoint อื่น
+  app.use('/api/payments/promptpay/notify', express.json({ limit: '6mb' }));
   app.use(express.json({ limit: '100kb' }));
   app.use(express.urlencoded({ extended: true, limit: '100kb' }));
 

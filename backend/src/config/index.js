@@ -59,11 +59,39 @@ export const config = {
     maxAdvanceDays: toInt(process.env.BOOKING_MAX_ADVANCE_DAYS, 365),
     maxGuestsPerBooking: toInt(process.env.BOOKING_MAX_GUESTS, 30),
   },
+  // URL ของหน้าเว็บที่ลูกค้าเปิด ใช้สร้างลิงก์ในอีเมลและ redirect หลังชำระเงิน
+  appUrl: (process.env.APP_URL ?? 'http://localhost:8080').replace(/\/$/, ''),
+  userJwtExpiresIn: process.env.USER_JWT_EXPIRES_IN ?? '7d',
+  mail: {
+    // ไม่ตั้ง SMTP_HOST = ไม่ส่งอีเมลจริง แต่ยังบันทึกลงตาราง notifications ให้ตรวจดูได้
+    host: process.env.SMTP_HOST ?? '',
+    port: toInt(process.env.SMTP_PORT, 587),
+    secure: process.env.SMTP_SECURE === 'true',
+    user: process.env.SMTP_USER ?? '',
+    password: process.env.SMTP_PASSWORD ?? '',
+    from: process.env.MAIL_FROM ?? 'Chokchai Elephant Camp <no-reply@chokchai.local>',
+  },
+  payment: {
+    // ค่าเริ่มต้นของวิธีชำระเงิน (แอดมินเปลี่ยนได้ในหน้าตั้งค่าระบบ)
+    // mock = หน้าชำระเงินจำลอง, promptpay = สแกน QR พร้อมเพย์, stripe = Stripe Checkout, none = ปิดการชำระออนไลน์
+    provider: (process.env.PAYMENT_PROVIDER ?? 'mock').toLowerCase(),
+    stripeSecretKey: process.env.STRIPE_SECRET_KEY ?? '',
+    stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET ?? '',
+  },
   seedAdmin: {
     email: process.env.SEED_ADMIN_EMAIL ?? 'admin@chokchai.local',
     password: process.env.SEED_ADMIN_PASSWORD ?? 'Admin@1234',
     name: process.env.SEED_ADMIN_NAME ?? 'ผู้ดูแลระบบ',
   },
 };
+
+if (!['mock', 'promptpay', 'stripe', 'none'].includes(config.payment.provider)) {
+  throw new Error(
+    `Unsupported PAYMENT_PROVIDER "${config.payment.provider}" (use "mock", "promptpay", "stripe" or "none")`,
+  );
+}
+if (config.payment.provider === 'stripe' && !config.payment.stripeSecretKey) {
+  throw new Error('PAYMENT_PROVIDER=stripe ต้องกำหนด STRIPE_SECRET_KEY ด้วย');
+}
 
 export default config;

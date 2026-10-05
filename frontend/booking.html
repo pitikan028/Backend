@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ตรวจสอบการจอง | Chokchai Elephant Camp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body data-page="booking" class="bg-cream text-dark font-sans min-h-screen flex flex-col">
+
+<div id="site-header"></div>
+
+<main class="flex-1 w-full max-w-3xl mx-auto px-6 py-12 flex flex-col gap-6">
+  <div class="text-center">
+    <h1 class="text-2xl lg:text-3xl font-extrabold text-forest">ตรวจสอบการจอง</h1>
+    <p class="text-sm text-gray-500 mt-2">กรอกรหัสการจองและอีเมลที่ใช้ตอนจอง เพื่อดูสถานะ ชำระเงิน หรือยกเลิกการจอง</p>
+  </div>
+
+  <!-- GET /api/bookings/:ref?email=... -->
+  <form id="lookup-form" class="bg-white rounded-2xl border border-gray-200 p-6 grid sm:grid-cols-[1fr_1.4fr_auto] gap-4 items-end" novalidate>
+    <div>
+      <label for="lookup-ref" class="text-sm font-semibold block mb-2">รหัสการจอง</label>
+      <input id="lookup-ref" name="ref" type="text" maxlength="16" placeholder="CEC-XXXXXX" autocapitalize="characters" required
+             class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream font-mono uppercase focus:outline-none focus:border-gold" />
+    </div>
+    <div>
+      <label for="lookup-email" class="text-sm font-semibold block mb-2">อีเมลที่ใช้จอง</label>
+      <input id="lookup-email" name="email" type="email" maxlength="160" autocomplete="email" required
+             class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream focus:outline-none focus:border-gold" />
+    </div>
+    <button type="submit" class="bg-forest hover:bg-forest-dark text-white font-bold px-7 py-3 rounded-lg transition">ค้นหา</button>
+  </form>
+
+  <p id="page-message" class="hidden" role="status"></p>
+  <section id="booking-result" aria-live="polite"></section>
+
+  <p class="text-center text-sm text-gray-500">
+    เป็นสมาชิกอยู่แล้ว? <a href="account.html" class="font-semibold text-forest hover:underline">ดูประวัติการจองทั้งหมดในบัญชีของฉัน</a>
+  </p>
+</main>
+
+<div id="site-footer"></div>
+
+<script type="module" src="js/pages.js"></script>
+</body>
+</html>

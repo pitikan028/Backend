@@ -5,14 +5,25 @@ import { requireAuth, requireRole } from '../middleware/auth.js';
 import * as activityService from '../services/activity.service.js';
 import * as bookingService from '../services/booking.service.js';
 import * as contentService from '../services/content.service.js';
+import * as notificationService from '../services/notification.service.js';
+import * as settingsService from '../services/settings.service.js';
+import * as userService from '../services/user.service.js';
+import dayjs from 'dayjs';
 import {
   activityBodySchema,
   activityUpdateSchema,
   adminReviewListQuery,
   bookingListQuery,
   bookingStatusSchema,
+  createStaffSchema,
   idParam,
   inquiryListQuery,
+  notificationListQuery,
+  reportQuery,
+  settingsSchema,
+  updateStaffSchema,
+  userListQuery,
+  userStatusSchema,
   updateInquirySchema,
   updateReviewSchema,
 } from '../validators/schemas.js';
@@ -28,6 +39,21 @@ router.get(
   '/stats',
   asyncHandler(async (_req, res) => {
     res.json({ data: await bookingService.getStats() });
+  }),
+);
+
+// รายงานยอดจองรายวันและรายกิจกรรม ค่าเริ่มต้นคือ 30 วันล่าสุด
+router.get(
+  '/reports',
+  validate({ query: reportQuery }),
+  asyncHandler(async (req, res) => {
+    const to = req.validated.query.to ?? dayjs().format('YYYY-MM-DD');
+    const from = req.validated.query.from ?? dayjs(to).subtract(29, 'day').format('YYYY-MM-DD');
+    if (dayjs(to).diff(dayjs(from), 'day') > 366) {
+      res.status(422).json({ error: { message: 'เลือกช่วงรายงานได้ไม่เกิน 1 ปี' } });
+      return;
+    }
+    res.json({ data: await bookingService.getReport({ from, to }) });
   }),
 );
 
@@ -49,11 +75,36 @@ router.get(
   }),
 );
 
+// รูปสลิปโอนเงินที่ลูกค้าแนบ — ส่งกลับเป็นไฟล์รูป ไม่ใช่ JSON
+router.get(
+  '/bookings/:id/slip',
+  validate({ params: idParam }),
+  asyncHandler(async (req, res) => {
+    const slip = await bookingService.getPaymentSlip(req.params.id);
+    res.set({
+      'Content-Type': slip.mimeType,
+      'Content-Length': slip.data.length,
+      // สลิปเป็นข้อมูลการเงินส่วนตัว ห้ามให้เบราว์เซอร์หรือ proxy เก็บแคชไว้
+      'Cache-Control': 'private, no-store',
+      'Content-Disposition': 'inline',
+    });
+    res.send(slip.data);
+  }),
+);
+
 router.patch(
   '/bookings/:id',
   validate({ params: idParam, body: bookingStatusSchema }),
   asyncHandler(async (req, res) => {
-    res.json({ data: await bookingService.updateBookingStatus(req.params.id, req.body) });
+    const before = await bookingService.getBookingById(req.params.id);
+    const booking = await bookingService.updateBookingStatus(req.params.id, req.body);
+
+    // แจ้งลูกค้าเฉพาะเมื่อมีอะไรเปลี่ยนจริง ไม่ส่งซ้ำถ้ากดบันทึกค่าเดิม
+    if (booking.status !== before.status) await notificationService.notifyBookingStatus(booking);
+    if (booking.payment_status === 'paid' && before.payment_status !== 'paid') {
+      await notificationService.notifyPaymentReceived(booking);
+    }
+    res.json({ data: booking });
   }),
 );
 
@@ -136,6 +187,81 @@ router.patch(
   validate({ params: idParam, body: updateInquirySchema }),
   asyncHandler(async (req, res) => {
     res.json({ data: await contentService.updateInquiry(req.params.id, req.body) });
+  }),
+);
+
+/* ---------- customers ---------- */
+
+router.get(
+  '/users',
+  validate({ query: userListQuery }),
+  asyncHandler(async (req, res) => {
+    res.json(await userService.listUsers(req.validated.query));
+  }),
+);
+
+// ระงับ / เปิดใช้บัญชีลูกค้า (บัญชีที่ถูกระงับจะล็อกอินไม่ได้และ token เดิมใช้ไม่ได้ทันที)
+router.patch(
+  '/users/:id',
+  validate({ params: idParam, body: userStatusSchema }),
+  asyncHandler(async (req, res) => {
+    res.json({ data: await userService.setUserActive(req.params.id, req.body.is_active) });
+  }),
+);
+
+/* ---------- staff accounts (เฉพาะ admin) ---------- */
+
+router.get(
+  '/staff',
+  requireRole('admin'),
+  asyncHandler(async (_req, res) => {
+    res.json({ data: await userService.listStaff() });
+  }),
+);
+
+router.post(
+  '/staff',
+  requireRole('admin'),
+  validate({ body: createStaffSchema }),
+  asyncHandler(async (req, res) => {
+    res.status(201).json({ data: await userService.createStaff(req.body) });
+  }),
+);
+
+router.patch(
+  '/staff/:id',
+  requireRole('admin'),
+  validate({ params: idParam, body: updateStaffSchema }),
+  asyncHandler(async (req, res) => {
+    res.json({ data: await userService.updateStaff(req.params.id, req.body, req.user) });
+  }),
+);
+
+/* ---------- system settings ---------- */
+
+router.get(
+  '/settings',
+  asyncHandler(async (_req, res) => {
+    res.json({ data: await settingsService.getSettings() });
+  }),
+);
+
+router.put(
+  '/settings',
+  requireRole('admin'),
+  validate({ body: settingsSchema }),
+  asyncHandler(async (req, res) => {
+    res.json({ data: await settingsService.updateSettings(req.body) });
+  }),
+);
+
+/* ---------- notification log ---------- */
+
+router.get(
+  '/notifications',
+  validate({ query: notificationListQuery }),
+  asyncHandler(async (req, res) => {
+    res.json(await notificationService.listAll(req.validated.query));
   }),
 );
 

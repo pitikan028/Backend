@@ -16,3 +16,10 @@ dist/
 Thumbs.db
 .vscode/
 .idea/
+
+# certificate สำหรับ HTTPS — ห้าม commit private key
+infra/certs/*
+!infra/certs/.gitkeep
+
+# ไฟล์สำรองฐานข้อมูล มีข้อมูลส่วนตัวของลูกค้า
+backup/

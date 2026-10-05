@@ -6,32 +6,7 @@
 <title>เลือกเซ็ทกิจกรรม | Chokchai Elephant Camp</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          forest: '#21452A',
-          'forest-dark': '#183420',
-          gold: '#BA9330',
-          cream: '#F9F8F2',
-          dark: '#252520',
-        },
-        fontFamily: {
-          sans: ['Inter', 'sans-serif'],
-          script: ['Caveat', 'cursive'],
-        }
-      }
-    }
-  }
-</script>
-<style>
-  html { scroll-behavior: smooth; }
-  .img-placeholder {
-    background: repeating-linear-gradient(45deg, #e7ede7, #e7ede7 12px, #dbe4db 12px, #dbe4db 24px);
-  }
-</style>
+<link rel="stylesheet" href="css/app.css">
 </head>
 <body class="bg-cream text-dark font-sans">
 
@@ -47,7 +22,9 @@
       <a href="index.html#map" class="hover:text-forest">แผนที่</a>
       <a href="index.html#contact" class="hover:text-forest">ติดต่อเรา</a>
     </nav>
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-4">
+      <!-- ลิงก์เข้าสู่ระบบ / บัญชีของฉัน เติมโดย js/common.js -->
+      <div data-auth-nav class="hidden lg:flex items-center gap-4 text-sm font-semibold"></div>
       <a href="#grid" class="hidden sm:inline-block bg-gold hover:bg-gold/90 text-white text-sm font-bold px-6 py-3 rounded-lg transition">จองเลย</a>
       <button id="nav-toggle" class="md:hidden p-2" aria-label="เปิดเมนู">
         <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -61,6 +38,7 @@
     <a href="index.html#reviews">รีวิว</a>
     <a href="index.html#map">แผนที่</a>
     <a href="index.html#contact">ติดต่อเรา</a>
+    <div data-auth-nav class="flex flex-col gap-4"></div>
   </div>
 </header>
 
@@ -72,8 +50,35 @@
 </section>
 
 <!-- ===== ACTIVITY GRID — สร้างจาก GET /api/activities ===== -->
-<section id="grid" class="bg-white">
-  <div id="activity-cards" class="max-w-7xl mx-auto px-6 lg:px-10 py-16 grid md:grid-cols-3 gap-7"></div>
+<section id="grid" class="bg-white scroll-mt-20">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 pt-10">
+    <!-- ค้นหาและกรอง — ส่งเป็น query ไปที่ GET /api/activities?q=&category=&sort= -->
+    <form id="activity-filters" class="bg-cream border border-gray-200 rounded-2xl p-4 grid gap-3 md:grid-cols-[1fr_auto_auto_auto] items-end" role="search">
+      <div>
+        <label for="filter-q" class="text-xs font-semibold text-gray-600 block mb-1.5">ค้นหากิจกรรม</label>
+        <input id="filter-q" name="q" type="search" maxlength="80" placeholder="เช่น อาบน้ำช้าง, rafting"
+               class="w-full border border-gray-300 rounded-lg px-4 py-2.5 bg-white text-sm focus:outline-none focus:border-gold" />
+      </div>
+      <div>
+        <label for="filter-category" class="text-xs font-semibold text-gray-600 block mb-1.5">หมวดหมู่</label>
+        <select id="filter-category" name="category" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 bg-white text-sm">
+          <option value="">ทุกหมวดหมู่</option>
+        </select>
+      </div>
+      <div>
+        <label for="filter-sort" class="text-xs font-semibold text-gray-600 block mb-1.5">เรียงตาม</label>
+        <select id="filter-sort" name="sort" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 bg-white text-sm">
+          <option value="">แนะนำ</option>
+          <option value="price_asc">ราคาต่ำไปสูง</option>
+          <option value="price_desc">ราคาสูงไปต่ำ</option>
+          <option value="duration">ระยะเวลาสั้นไปยาว</option>
+        </select>
+      </div>
+      <button type="reset" class="border border-gray-300 bg-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-50 transition">ล้างตัวกรอง</button>
+    </form>
+    <p id="filter-count" class="text-sm text-gray-500 mt-3" role="status" aria-live="polite"></p>
+  </div>
+  <div id="activity-cards" class="max-w-7xl mx-auto px-6 lg:px-10 pt-6 pb-16 grid md:grid-cols-3 gap-7"></div>
 </section>
 
 <!-- ===== FOOTER (same as index.html) ===== -->
@@ -89,6 +94,8 @@
         <li><a href="index.html">หน้าแรก</a></li>
         <li><a href="activities.html">กิจกรรม</a></li>
         <li><a href="index.html#reviews">รีวิว</a></li>
+        <li><a href="booking.html">ตรวจสอบการจอง</a></li>
+        <li><a href="account.html">บัญชีของฉัน</a></li>
       </ul>
     </div>
     <div>
@@ -219,8 +226,15 @@
               <option value="Line">Line</option>
               <option value="WhatsApp">WhatsApp</option>
               <option value="WeChat">WeChat</option>
+              <option value="Instagram">Instagram (IG)</option>
             </select>
           </div>
+        </div>
+        <div>
+          <!-- ชื่อช่องเปลี่ยนตามแอปที่เลือก (LINE ID / เบอร์ WhatsApp / WeChat ID / Instagram) -->
+          <label for="input-contact-id" id="label-contact-id" class="text-sm font-semibold block mb-2">LINE ID *</label>
+          <input id="input-contact-id" name="contact_id" type="text" maxlength="80" autocomplete="off" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream" />
+          <p class="text-xs text-gray-500 mt-1">ทีมงานจะใช้ช่องทางนี้ยืนยันเวลารับและส่งรายละเอียดการเดินทาง</p>
         </div>
         <div>
           <label for="input-email" class="text-sm font-semibold block mb-2">อีเมล *</label>
@@ -263,7 +277,26 @@
           <label for="input-pickup-detail" class="text-sm font-semibold block mb-2">ชื่อที่พัก / จุดรับ (ถ้ามี)</label>
           <input id="input-pickup-detail" name="pickup_detail" type="text" maxlength="255" placeholder="เช่น Nimman Hotel ซอย 5" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream" />
         </div>
-        <p class="font-extrabold text-forest">เวลารับ: 06.00 - 06.30 น.</p>
+        <div>
+          <p class="font-semibold text-sm mb-3">เลือกรอบเวลารับ *</p>
+          <!-- เวลาของแต่ละรอบมาจากหน้าตั้งค่าระบบ (GET /api/settings) -->
+          <div class="grid sm:grid-cols-2 gap-3">
+            <label class="flex items-center gap-3 border border-gray-300 rounded-lg px-4 py-3 bg-cream cursor-pointer has-[:checked]:border-gold has-[:checked]:bg-white">
+              <input type="radio" name="pickup_round" value="morning" data-label="รอบเช้า" checked class="accent-gold w-5 h-5" />
+              <span>
+                <span class="font-extrabold text-forest block">รอบเช้า</span>
+                <span class="text-sm text-gray-600">เวลารับ <span data-setting="pickup_time_morning">06:00 - 06:30 น.</span></span>
+              </span>
+            </label>
+            <label class="flex items-center gap-3 border border-gray-300 rounded-lg px-4 py-3 bg-cream cursor-pointer has-[:checked]:border-gold has-[:checked]:bg-white">
+              <input type="radio" name="pickup_round" value="afternoon" data-label="รอบกลางวัน" class="accent-gold w-5 h-5" />
+              <span>
+                <span class="font-extrabold text-forest block">รอบกลางวัน</span>
+                <span class="text-sm text-gray-600">เวลารับ <span data-setting="pickup_time_afternoon">11:30 - 12:00 น.</span></span>
+              </span>
+            </label>
+          </div>
+        </div>
         <p class="text-xs text-gray-500 leading-relaxed">
           * เวลารับอาจคลาดเคลื่อนเล็กน้อยตามจุดรับ หากมีการเปลี่ยนแปลงจะแจ้งให้ทราบทางอีเมลล่วงหน้า<br>
           * บริการรับส่งฟรีในรัศมี 5 กม. จากตัวเมืองเชียงใหม่ นอกเขตนี้มีค่าใช้จ่ายเพิ่มเติม
@@ -287,7 +320,10 @@
             <span>🚐</span><span id="summary-pickup" class="text-sm font-semibold"></span>
           </div>
           <div class="flex items-center gap-4 px-5 py-4 bg-white">
-            <span>✉️</span><span id="summary-contact" class="text-sm font-semibold"></span>
+            <span>🕒</span><span id="summary-round" class="text-sm font-semibold"></span>
+          </div>
+          <div class="flex items-center gap-4 px-5 py-4 bg-cream">
+            <span>✉️</span><span id="summary-contact" class="text-sm font-semibold break-words"></span>
           </div>
         </div>
         <div class="flex justify-end items-baseline gap-2">
@@ -295,13 +331,18 @@
           <span id="checkout-amount" class="font-extrabold text-2xl text-gold"></span>
         </div>
         <p class="font-extrabold text-lg flex items-center gap-2">💳 การชำระเงิน</p>
-        <p class="text-sm text-gray-600 leading-relaxed bg-cream border border-gray-200 rounded-lg px-4 py-3">
+        <!-- แสดงข้อความตามค่า PAYMENT_PROVIDER ของหลังบ้าน (js/app.js สลับให้) -->
+        <p id="payment-note-online" class="hidden text-sm text-gray-600 leading-relaxed bg-cream border border-gray-200 rounded-lg px-4 py-3">
+          หลังยืนยันการจอง คุณสามารถ <span class="font-bold text-forest">ชำระเงินออนไลน์ได้ทันที</span>
+          หรือกลับมาชำระภายหลังจากหน้า "ตรวจสอบการจอง" ก็ได้
+        </p>
+        <p id="payment-note-offline" class="text-sm text-gray-600 leading-relaxed bg-cream border border-gray-200 rounded-lg px-4 py-3">
           ระบบจะบันทึกการจองไว้ในสถานะ <span class="font-bold text-forest">รอชำระเงิน</span>
           แล้วทีมงานจะติดต่อกลับพร้อมช่องทางชำระเงินภายใน 24 ชั่วโมง
         </p>
         <label class="flex items-start gap-3 text-sm text-gray-600">
           <input type="checkbox" name="accept_terms" class="accent-gold w-5 h-5 mt-0.5" />
-          <span>ยอมรับว่าสามารถยกเลิกฟรีก่อนเริ่มกิจกรรม 72 ชั่วโมง</span>
+          <span>ยอมรับว่าสามารถยกเลิกฟรีก่อนวันกิจกรรมอย่างน้อย <span id="cancel-hours">72</span> ชั่วโมง</span>
         </label>
         <div class="flex justify-between">
           <button type="button" data-modal-action="back" class="border border-forest text-forest font-bold px-8 py-3.5 rounded-lg">ย้อนกลับ</button>
@@ -321,8 +362,18 @@
       <p id="success-ref" class="text-3xl font-extrabold tracking-widest text-gold bg-cream rounded-lg py-4"></p>
       <p id="success-detail" class="text-sm text-gray-600"></p>
       <p class="text-sm">ยอดรวม <span id="success-total" class="font-extrabold text-forest"></span></p>
-      <p class="text-xs text-gray-500">ทีมงานจะติดต่อกลับที่ <span id="success-email" class="font-semibold"></span> ภายใน 24 ชั่วโมง</p>
-      <button type="button" data-modal-action="close" class="bg-forest hover:bg-forest-dark text-white font-bold px-8 py-3.5 rounded-lg transition mx-auto">ปิดหน้าต่าง</button>
+      <p class="text-xs text-gray-500">
+        เราส่งรายละเอียดการจองไปที่ <span id="success-email" class="font-semibold"></span> แล้ว
+        <span id="success-note-online" class="hidden">— ชำระเงินตอนนี้เพื่อยืนยันการจองทันที</span>
+        <span id="success-note-offline">— ทีมงานจะติดต่อกลับพร้อมช่องทางชำระเงินภายใน 24 ชั่วโมง</span>
+      </p>
+      <div class="flex flex-wrap justify-center gap-3">
+        <button type="button" id="success-pay" data-modal-action="pay" class="hidden bg-gold hover:bg-gold/90 text-white font-bold px-8 py-3.5 rounded-lg transition">
+          ชำระเงินตอนนี้ <span id="success-pay-amount"></span>
+        </button>
+        <a id="success-manage" href="booking.html" class="border border-forest text-forest font-bold px-8 py-3.5 rounded-lg">ดูการจองของฉัน</a>
+        <button type="button" data-modal-action="close" class="bg-forest hover:bg-forest-dark text-white font-bold px-8 py-3.5 rounded-lg transition">ปิดหน้าต่าง</button>
+      </div>
     </div>
 
   </div>

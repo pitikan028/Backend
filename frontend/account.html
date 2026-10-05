@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>บัญชีของฉัน | Chokchai Elephant Camp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body data-page="account" class="bg-cream text-dark font-sans min-h-screen flex flex-col">
+
+<div id="site-header"></div>
+
+<main class="flex-1 w-full max-w-5xl mx-auto px-6 py-10 flex flex-col gap-6">
+
+  <div class="flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl lg:text-3xl font-extrabold text-forest">บัญชีของฉัน</h1>
+      <p id="account-greeting" class="text-sm text-gray-500 mt-1"></p>
+    </div>
+    <button id="logout-button" type="button" class="border border-gray-300 bg-white hover:bg-gray-50 text-sm font-semibold px-5 py-2.5 rounded-lg transition">
+      ออกจากระบบ
+    </button>
+  </div>
+
+  <div class="flex flex-wrap gap-2" role="tablist">
+    <button type="button" data-tab="bookings" class="bg-forest text-white font-semibold text-sm px-5 py-2.5 rounded-lg transition">การจองของฉัน</button>
+    <button type="button" data-tab="notifications" class="bg-white text-gray-600 border border-gray-200 font-semibold text-sm px-5 py-2.5 rounded-lg transition">
+      การแจ้งเตือน <span id="unread-badge" class="text-xs font-bold text-red-600"></span>
+    </button>
+    <button type="button" data-tab="profile" class="bg-white text-gray-600 border border-gray-200 font-semibold text-sm px-5 py-2.5 rounded-lg transition">ข้อมูลส่วนตัว</button>
+  </div>
+
+  <p id="page-message" class="hidden" role="status"></p>
+
+  <!-- ประวัติการจอง — GET /api/account/bookings -->
+  <section id="panel-bookings" class="flex flex-col gap-4"></section>
+
+  <!-- การแจ้งเตือน — GET /api/account/notifications -->
+  <section id="panel-notifications" class="hidden flex flex-col gap-3"></section>
+
+  <!-- ข้อมูลส่วนตัว — PATCH /api/account/me และ POST /api/account/password -->
+  <section id="panel-profile" class="hidden grid md:grid-cols-2 gap-6 items-start">
+    <form id="profile-form" class="bg-white rounded-2xl border border-gray-200 p-6 flex flex-col gap-4" novalidate>
+      <h2 class="font-extrabold text-lg">ข้อมูลส่วนตัว</h2>
+      <p id="profile-message" class="hidden" role="status"></p>
+      <div>
+        <label for="profile-email" class="text-sm font-semibold block mb-2">อีเมล</label>
+        <input id="profile-email" type="email" disabled class="w-full border border-gray-200 rounded-lg px-4 py-3 bg-gray-100 text-gray-500" />
+      </div>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label for="profile-first-name" class="text-sm font-semibold block mb-2">ชื่อจริง</label>
+          <input id="profile-first-name" name="first_name" type="text" maxlength="100" required class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream" />
+        </div>
+        <div>
+          <label for="profile-last-name" class="text-sm font-semibold block mb-2">นามสกุล</label>
+          <input id="profile-last-name" name="last_name" type="text" maxlength="100" required class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream" />
+        </div>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label for="profile-phone" class="text-sm font-semibold block mb-2">เบอร์โทร</label>
+          <input id="profile-phone" name="phone" type="tel" maxlength="40" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream" />
+        </div>
+        <div>
+          <label for="profile-contact-app" class="text-sm font-semibold block mb-2">แอปติดต่อ</label>
+          <select id="profile-contact-app" name="contact_app" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream">
+            <option value="Line">Line</option>
+            <option value="WhatsApp">WhatsApp</option>
+            <option value="WeChat">WeChat</option>
+            <option value="Instagram">Instagram (IG)</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label for="profile-contact-id" id="profile-contact-id-label" class="text-sm font-semibold block mb-2">LINE ID *</label>
+        <input id="profile-contact-id" name="contact_id" type="text" maxlength="80" autocomplete="off" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream" />
+      </div>
+      <button type="submit" class="bg-forest hover:bg-forest-dark text-white font-bold py-3 rounded-lg transition">บันทึกข้อมูล</button>
+    </form>
+
+    <form id="password-form" class="bg-white rounded-2xl border border-gray-200 p-6 flex flex-col gap-4" novalidate>
+      <h2 class="font-extrabold text-lg">เปลี่ยนรหัสผ่าน</h2>
+      <p id="password-message" class="hidden" role="status"></p>
+      <div>
+        <label for="password-current" class="text-sm font-semibold block mb-2">รหัสผ่านปัจจุบัน</label>
+        <input id="password-current" name="current_password" type="password" autocomplete="current-password" required class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream" />
+      </div>
+      <div>
+        <label for="password-new" class="text-sm font-semibold block mb-2">รหัสผ่านใหม่</label>
+        <input id="password-new" name="new_password" type="password" minlength="8" autocomplete="new-password" required class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream" />
+        <p class="text-xs text-gray-500 mt-1">อย่างน้อย 8 ตัวอักษร และต้องมีทั้งตัวอักษรและตัวเลข</p>
+      </div>
+      <div>
+        <label for="password-confirm" class="text-sm font-semibold block mb-2">ยืนยันรหัสผ่านใหม่</label>
+        <input id="password-confirm" name="password_confirm" type="password" autocomplete="new-password" required class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream" />
+      </div>
+      <button type="submit" class="bg-forest hover:bg-forest-dark text-white font-bold py-3 rounded-lg transition">เปลี่ยนรหัสผ่าน</button>
+    </form>
+  </section>
+
+</main>
+
+<div id="site-footer"></div>
+
+<script type="module" src="js/pages.js"></script>
+</body>
+</html>

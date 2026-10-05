@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="VITAMIN MAKING">
+<defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3ecd7"/><stop offset="1" stop-color="#d8c9a0"/></linearGradient></defs>
+<rect width="800" height="600" fill="url(#sky)"/>
+<circle cx="640" cy="120" r="56" fill="#fff6cf" opacity="0.9"/>
+<path d="M0 390 q140 -130 300 -40 q130 -110 260 -30 q120 -70 240 10 V600 H0 Z" fill="#8b9a5b" opacity="0.75"/>
+<path d="M0 470 q200 -70 400 -10 q200 60 400 -20 V600 H0 Z" fill="#5d6f3b"/>
+<g transform="translate(300,300)"><path d="M0 60 h200 q-6 110 -100 110 q-94 0 -100 -110 z" fill="#8a5a33"/><ellipse cx="100" cy="60" rx="100" ry="22" fill="#6e4424"/><rect x="120" y="-60" width="22" height="150" rx="10" fill="#b98a55" transform="rotate(24 131 15)"/></g><circle cx="580" cy="440" r="24" fill="#5f7d3a"/><circle cx="573" cy="433" r="7" fill="#7c9c4f"/><circle cx="630" cy="470" r="24" fill="#5f7d3a"/><circle cx="623" cy="463" r="7" fill="#7c9c4f"/><circle cx="560" cy="490" r="24" fill="#5f7d3a"/><circle cx="553" cy="483" r="7" fill="#7c9c4f"/><path d="M150 430 q30 -40 70 -10 q-34 34 -70 10 z" fill="#4f8a45"/><path d="M190 480 q30 -40 70 -10 q-34 34 -70 10 z" fill="#4f8a45"/><path d="M110 490 q30 -40 70 -10 q-34 34 -70 10 z" fill="#4f8a45"/>
+</svg>

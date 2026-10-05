@@ -51,9 +51,45 @@
 
 ตอบ `503` พร้อม `"status": "degraded"` เมื่อเชื่อมฐานข้อมูลไม่ได้
 
+## `GET /api/settings`
+
+ค่าตั้งระบบที่หน้าเว็บใช้ แอดมินแก้ได้จากหน้าหลังบ้าน (ค่าที่ใช้เฉพาะหลังบ้านจะไม่ถูกส่งออกมา)
+
+```json
+{
+  "data": {
+    "opening_hours": "Daily 08:00 AM - 5:00 PM",
+    "contact_phone": "095-447-2547",
+    "contact_line": "@chokchaielephant",
+    "contact_email": "Chokchaielephantcampcnx@gmail.com",
+    "site_notice": "",
+    "booking_min_lead_days": 1,
+    "booking_max_advance_days": 365,
+    "booking_max_guests": 30,
+    "cancel_free_hours": 72,
+    "pickup_time_morning": "06:00 - 06:30 น.",
+    "pickup_time_afternoon": "11:30 - 12:00 น.",
+    "payment_provider": "mock"
+  }
+}
+```
+
+`payment_provider` คือวิธีชำระเงินที่ใช้ได้จริงตอนนี้ (`mock` / `promptpay` / `stripe` / `none`) หน้าเว็บใช้ตัดสินว่าจะแสดงปุ่มชำระเงินหรือไม่
+ถ้าแอดมินเลือก PromptPay แต่ยังไม่กรอกบัญชี ค่านี้จะเป็น `none` หมายเลขพร้อมเพย์ของร้านไม่ถูกส่งออกทาง endpoint นี้
+
 ## `GET /api/activities`
 
-รายการกิจกรรมที่เปิดรับจอง เรียงตาม `sort_order`
+รายการกิจกรรมที่เปิดรับจอง เรียงตาม `sort_order` รองรับการค้นหาและกรองผ่าน query string
+
+| พารามิเตอร์ | คำอธิบาย |
+| --- | --- |
+| `q` | ค้นจากชื่ออังกฤษ ชื่อไทย และคำอธิบาย (ไม่สนตัวพิมพ์เล็ก/ใหญ่) |
+| `category` | กรองตามหมวดหมู่ เช่น `elephant`, `adventure`, `workshop` |
+| `max_price` | ราคาผู้ใหญ่ไม่เกินค่านี้ |
+| `sort` | `recommended` (ค่าเริ่มต้น) / `price_asc` / `price_desc` / `duration` |
+
+คำตอบมี `meta.categories` เป็นรายการหมวดหมู่ทั้งหมดที่มีกิจกรรมเปิดอยู่ (ไม่ขึ้นกับตัวกรอง) ใช้สร้างตัวเลือกในหน้าเว็บ
+และแต่ละกิจกรรมมีฟิลด์ `category` กับ `highlights` (จุดเด่น บรรทัดละ 1 ข้อ) เพิ่มจากตัวอย่างด้านล่าง
 
 ```json
 {
@@ -69,12 +105,13 @@
       "adult_price": 990,
       "child_price": 690,
       "infant_price": 0,
-      "image_url": "images/activities/jungle-trekking.jpg",
+      "image_url": "images/activities/jungle-trekking.svg",
       "daily_capacity": 40,
       "sort_order": 1,
       "is_active": true
     }
-  ]
+  ],
+  "meta": { "total": 6, "categories": ["adventure", "elephant", "workshop"] }
 }
 ```
 
@@ -176,6 +213,21 @@ curl -X POST http://localhost:8080/api/bookings \
 
 จำกัด 20 ครั้งต่อ 15 นาทีต่อ IP
 
+**ฟิลด์ที่เพิ่มในเวอร์ชันนี้**
+
+| ฟิลด์ | หมายเหตุ |
+| --- | --- |
+| `contact_app` | `Line` (ค่าเริ่มต้น) / `WhatsApp` / `WeChat` / `Instagram` |
+| `contact_id` | ไอดีของแอปที่เลือก เช่น LINE ID หรือชื่อบัญชี Instagram (ไม่เกิน 80 ตัว) — หน้าเว็บบังคับกรอก |
+| `pickup_round` | รอบเวลารับ `morning` (ค่าเริ่มต้น) หรือ `afternoon` |
+
+**เพิ่มเติม**
+
+- ถ้าแนบ header `Authorization: Bearer <token ของลูกค้า>` มาด้วย การจองจะถูกผูกกับบัญชีนั้น (`user_id`) และไปแสดงในประวัติการจอง ไม่แนบก็จองได้ตามปกติ
+- คำตอบมี `payment: { "provider": "...", "token": "..." }` — `token` ใช้กับ `/api/payments/*` ของการจองนี้
+- ลูกค้าได้รับอีเมล "เราได้รับการจองของคุณแล้ว" ทันที
+- กติกา (จองล่วงหน้ากี่วัน จำนวนคนสูงสุด) อ่านจากค่าตั้งระบบ ดู `GET /api/settings`
+
 ## `GET /api/bookings/:ref?email=...`
 
 ลูกค้าดูการจองของตัวเอง ต้องระบุทั้งรหัสการจองและอีเมลที่ใช้ตอนจอง
@@ -184,6 +236,102 @@ curl -X POST http://localhost:8080/api/bookings \
 ```bash
 curl "http://localhost:8080/api/bookings/CEC-7QK4M2?email=somchai@example.com"
 ```
+
+คำตอบมี `cancellation` บอกว่าลูกค้ายกเลิกเองได้หรือไม่ และ `payment.provider`
+
+```json
+"cancellation": { "can_cancel": true, "deadline": "2026-12-21T17:00:00.000Z", "reason": null }
+```
+
+## `POST /api/bookings/:ref/cancel`
+
+ลูกค้าที่ไม่ได้ล็อกอินยกเลิกการจองของตัวเอง ยืนยันตัวด้วยอีเมลที่ใช้จอง
+
+```json
+{ "email": "somchai@example.com", "reason": "เปลี่ยนแผนเดินทาง" }
+```
+
+- ยกเลิกได้เฉพาะสถานะ `pending` / `confirmed` และต้องก่อนวันกิจกรรมอย่างน้อย `cancel_free_hours` ชั่วโมง — ไม่เข้าเงื่อนไขได้ `409`
+- อีเมลไม่ตรงได้ `404` (ไม่บอกว่ารหัสการจองมีอยู่จริงหรือไม่)
+- ที่นั่งถูกคืนเข้าโควตาทันที และลูกค้าได้รับอีเมลยืนยันการยกเลิก
+- ถ้าการจองชำระเงินแล้ว `payment_status` จะยังเป็น `paid` จนกว่าทีมงานจะคืนเงินและบันทึกเป็น `refunded`
+
+## `POST /api/bookings/:ref/pay`
+
+ขอลิงก์ไปหน้าชำระเงิน body: `{ "email": "somchai@example.com" }`
+
+```json
+{ "data": { "provider": "mock", "checkout_url": "http://localhost:8080/payment.html?ref=CEC-7QK4M2&token=...&mode=mock" } }
+```
+
+ได้ `409` ถ้าการจองชำระแล้ว ถูกยกเลิก หรือเซิร์ฟเวอร์ตั้ง `PAYMENT_PROVIDER=none`
+เมื่อ provider เป็น `stripe` ค่า `checkout_url` จะเป็นหน้า Stripe Checkout
+
+## `GET /api/payments/status?ref=...&token=...`
+
+สถานะการชำระเงินของการจอง ใช้ `token` จากลิงก์ชำระเงินแทนการล็อกอิน (token ผิดได้ `403`)
+
+```json
+{
+  "data": {
+    "provider": "mock",
+    "booking_ref": "CEC-7QK4M2",
+    "activity": { "id": 2, "slug": "elephant-bathing", "name": "ELEPHANT BATHING", "name_th": "อาบน้ำช้าง" },
+    "booking_date": "2026-12-25",
+    "total_amount": 3570,
+    "currency": "THB",
+    "status": "confirmed",
+    "payment_status": "paid",
+    "payment_method": "mock",
+    "paid_at": "2026-10-05T08:30:11.000Z",
+    "email": "somchai@example.com"
+  }
+}
+```
+
+เมื่อ provider เป็น `promptpay` และการจองยังไม่ชำระ คำตอบจะมี `promptpay` เพิ่ม
+
+```json
+"promptpay": {
+  "qr_image": "data:image/png;base64,...",
+  "account_name": "ปางช้างโชคชัย",
+  "account_id": "095-xxx-2547"
+}
+```
+
+`qr_image` คือ QR พร้อมเพย์มาตรฐาน EMVCo ที่ฝังหมายเลขของร้านและยอดเงินของการจองนี้ไว้แล้ว
+
+## `POST /api/payments/promptpay/notify`
+
+ลูกค้าแจ้งว่าโอนเงินแล้ว พร้อมแนบสลิป
+
+```json
+{ "ref": "CEC-7QK4M2", "token": "...", "note": "โอน 14:32 น.", "slip": "data:image/jpeg;base64,/9j/4AAQ..." }
+```
+
+| ฟิลด์ | หมายเหตุ |
+| --- | --- |
+| `note` | ไม่บังคับ ไม่เกิน 90 ตัว |
+| `slip` | รูปสลิปแบบ data URL ชนิด JPEG / PNG / WebP ไม่เกิน 4 MB — หน้าเว็บบังคับแนบ ส่วน API ไม่บังคับ |
+
+เซิร์ฟเวอร์ตรวจชนิดไฟล์จากเนื้อไฟล์จริง ไฟล์ที่ไม่ใช่รูปได้ `422` และ body เกิน 6 MB ได้ `413`
+คำตอบมี `has_slip: true` เมื่อบันทึกสลิปแล้ว
+
+- `payment_status` เปลี่ยนเป็น `reviewing` — **ยังไม่ถือว่าได้รับเงิน** จนกว่าแอดมินจะตั้งเป็น `paid`
+- ลูกค้าได้อีเมลยืนยันการแจ้งโอน และทีมงานได้อีเมลแจ้งให้ตรวจยอด (ถ้าตั้ง `admin_notify_email`)
+- แจ้งซ้ำ หรือการจองถูกยกเลิก / ชำระแล้ว ได้ `409` · ไม่ได้เปิด PromptPay ได้ `404`
+
+## `POST /api/payments/mock/confirm`
+
+จำลองว่าชำระเงินสำเร็จ body: `{ "ref": "CEC-7QK4M2", "token": "..." }` — ใช้ได้เฉพาะเมื่อ `PAYMENT_PROVIDER=mock` (ค่าอื่นได้ `404`)
+
+ผลคือ `payment_status = paid`, การจองที่ยัง `pending` ถูกเปลี่ยนเป็น `confirmed` และลูกค้าได้รับอีเมลแจ้งรับชำระ
+
+## `POST /api/payments/stripe/webhook`
+
+Stripe เรียกเข้ามาเองเมื่อเกิด event `checkout.session.completed` ไม่ได้ออกแบบให้หน้าเว็บเรียก
+เซิร์ฟเวอร์ตรวจลายเซ็นใน header `Stripe-Signature` ด้วย `STRIPE_WEBHOOK_SECRET` — ไม่ผ่านได้ `400`
+event เดิมที่ถูกส่งซ้ำจะไม่ทำให้บันทึกรับเงินหรือส่งอีเมลซ้ำ
 
 ## `GET /api/reviews`
 
@@ -215,7 +363,86 @@ curl "http://localhost:8080/api/bookings/CEC-7QK4M2?email=somchai@example.com"
 
 ---
 
-# Authentication
+# Endpoint สมาชิก (ลูกค้า)
+
+token ของลูกค้าได้จากการสมัครหรือเข้าสู่ระบบ อายุ 7 วัน ส่งมาใน header เหมือนของแอดมิน
+
+```
+Authorization: Bearer <token ของลูกค้า>
+```
+
+token ของลูกค้าใช้เรียก `/api/admin/*` ไม่ได้ (`403`) และ token ของทีมงานใช้เรียก `/api/account/*` ไม่ได้ (`401`)
+
+## `POST /api/account/register`
+
+| ฟิลด์ | บังคับ | หมายเหตุ |
+| --- | --- | --- |
+| `email` | ✔︎ | ซ้ำกับบัญชีที่มีอยู่ได้ `409` |
+| `password` | ✔︎ | อย่างน้อย 8 ตัว มีทั้งตัวอักษรและตัวเลข |
+| `first_name`, `last_name` | ✔︎ | |
+| `phone` | | |
+| `contact_app` | | `Line` (ค่าเริ่มต้น) / `WhatsApp` / `WeChat` / `Instagram` |
+| `contact_id` | | ไอดีของแอปที่เลือก — หน้าเว็บบังคับกรอก |
+
+```json
+{
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIs...",
+    "expires_in": "7d",
+    "user": { "id": 1, "email": "manee@example.com", "first_name": "มานี", "last_name": "ใจดี", "phone": "089-000-1111", "contact_app": "Line", "is_active": true }
+  }
+}
+```
+
+การจองที่เคยทำไว้แบบไม่ล็อกอินด้วยอีเมลเดียวกันจะถูกผูกเข้าบัญชีใหม่ให้อัตโนมัติ และระบบส่งอีเมลต้อนรับ
+
+## `POST /api/account/login`
+
+body: `{ "email": "...", "password": "..." }` — คำตอบรูปแบบเดียวกับ register
+รหัสผิดได้ `401` บัญชีที่ถูกระงับได้ `403` จำกัด 20 ครั้งต่อ 15 นาที
+
+## `GET /api/account/me` · `PATCH /api/account/me`
+
+ดู / แก้ไขโปรไฟล์ ฟิลด์ที่แก้ได้: `first_name`, `last_name`, `phone`, `contact_app`, `contact_id` (อีเมลแก้ไม่ได้)
+
+## `POST /api/account/password`
+
+body: `{ "current_password": "...", "new_password": "..." }` — รหัสปัจจุบันผิดได้ `400`
+
+## `GET /api/account/bookings`
+
+ประวัติการจองทั้งหมดของบัญชี เรียงจากวันที่เข้าร่วมล่าสุด แต่ละรายการมี `cancellation` เหมือน `GET /api/bookings/:ref`
+
+## `GET /api/account/bookings/:ref`
+
+รายละเอียดการจองเดียว — การจองของคนอื่นได้ `404`
+
+## `POST /api/account/bookings/:ref/cancel` · `POST /api/account/bookings/:ref/pay`
+
+ทำงานเหมือน `POST /api/bookings/:ref/cancel` และ `/pay` แต่ไม่ต้องส่งอีเมล เพราะยืนยันตัวด้วย token แล้ว
+
+## `GET /api/account/notifications`
+
+การแจ้งเตือนล่าสุด 30 รายการของบัญชี (เนื้อหาเดียวกับอีเมลที่ส่ง)
+
+```json
+{
+  "data": [
+    { "id": 12, "type": "payment_received", "subject": "ได้รับการชำระเงินแล้ว (CEC-7QK4M2)", "body": "...", "booking_id": 8, "is_read": false, "created_at": "2026-10-05T08:30:11.000Z" }
+  ],
+  "meta": { "unread": 1 }
+}
+```
+
+`type` ที่เป็นไปได้: `welcome`, `booking_created`, `payment_reviewing`, `payment_received`, `booking_confirmed`, `booking_completed`, `booking_cancelled`
+
+## `POST /api/account/notifications/read`
+
+ทำเครื่องหมายว่าอ่านแล้วทั้งหมด ตอบ `204`
+
+---
+
+# Authentication (ทีมงาน)
 
 ## `POST /api/auth/login`
 
@@ -277,7 +504,7 @@ Authorization: Bearer <token>
 | --- | --- |
 | `page`, `limit` | แบ่งหน้า (limit สูงสุด 100) |
 | `status` | `pending` / `confirmed` / `cancelled` / `completed` |
-| `payment_status` | `unpaid` / `paid` / `refunded` |
+| `payment_status` | `unpaid` / `reviewing` (ลูกค้าแจ้งโอนแล้ว รอตรวจ) / `paid` / `refunded` |
 | `activity_id` | กรองตามกิจกรรม |
 | `date_from`, `date_to` | ช่วงวันที่เข้าร่วมกิจกรรม |
 | `q` | ค้นหาจากรหัสจอง / อีเมล / ชื่อ / นามสกุล / เบอร์โทร |
@@ -289,9 +516,18 @@ curl "http://localhost:8080/api/admin/bookings?status=pending&limit=10" \
 
 ## `GET /api/admin/bookings/:id`
 
+## `GET /api/admin/bookings/:id/slip`
+
+รูปสลิปโอนเงินที่ลูกค้าแนบ ตอบกลับเป็น**ไฟล์รูป** (`Content-Type: image/jpeg` ฯลฯ) ไม่ใช่ JSON และห้ามแคช
+การจองที่ไม่มีสลิปได้ `404` — ดูว่ามีสลิปหรือไม่ได้จากฟิลด์ `slip_uploaded_at` ของการจอง
+
 ## `PATCH /api/admin/bookings/:id`
 
 ส่งอย่างน้อยหนึ่งฟิลด์: `status`, `payment_status`, `payment_ref`
+
+- เปลี่ยน `status` แล้วลูกค้าจะได้รับอีเมลแจ้ง (ยืนยัน / เสร็จสิ้น / ยกเลิก)
+- ตั้ง `payment_status` เป็น `paid` = บันทึกรับเงินนอกระบบ (`payment_method = manual`) ลูกค้าได้รับอีเมลแจ้งรับชำระ
+- ตั้งเป็น `refunded` หลังคืนเงินให้ลูกค้าแล้ว
 
 สถานะเปลี่ยนได้ตามลำดับนี้เท่านั้น ข้ามขั้นจะได้ `409`
 
@@ -349,3 +585,86 @@ curl -X PATCH http://localhost:8080/api/admin/bookings/12 \
 
 ส่ง `answer` และ/หรือ `status` — ถ้าส่ง `answer` มาโดยไม่ระบุ `status`
 ระบบจะตั้งเป็น `answered` และบันทึก `answered_at` ให้เอง
+
+## `GET /api/admin/reports?from=YYYY-MM-DD&to=YYYY-MM-DD`
+
+รายงานยอดจองตามวันที่ทำรายการ ไม่ส่งช่วงวันที่ = 30 วันล่าสุด (เลือกได้ไม่เกิน 1 ปี)
+
+```json
+{
+  "data": {
+    "from": "2026-09-06",
+    "to": "2026-10-05",
+    "totals": { "bookings": 42, "cancelled": 3, "guests": 118, "revenue": 152300, "paid": 140100 },
+    "daily": [{ "date": "2026-09-06", "bookings": 2, "cancelled": 0, "guests": 5, "revenue": 6450, "paid": 6450 }],
+    "by_activity": [{ "activity_id": 2, "name_th": "อาบน้ำช้าง", "bookings": 15, "cancelled": 1, "guests": 44, "revenue": 51200, "paid": 47630 }]
+  }
+}
+```
+
+- `guests` ไม่นับการจองที่ถูกยกเลิก
+- `revenue` = ยอดของการจองสถานะ `confirmed` / `completed` (นิยามเดียวกับ `revenue_thb` ใน stats)
+- `paid` = ยอดของการจองที่ `payment_status = paid`
+- `daily` มีครบทุกวันในช่วง วันที่ไม่มีการจองจะเป็น 0
+
+## `GET /api/admin/users` · `PATCH /api/admin/users/:id`
+
+รายชื่อลูกค้าที่สมัครสมาชิก พารามิเตอร์: `page`, `limit`, `q` (ชื่อ / อีเมล / เบอร์โทร), `is_active` (`true` / `false`)
+แต่ละรายการมี `booking_count`
+
+`PATCH` รับ `{ "is_active": false }` เพื่อระงับบัญชี — ลูกค้าจะเข้าสู่ระบบไม่ได้และ token เดิมใช้ไม่ได้ทันที
+
+## `GET /api/admin/staff` · `POST /api/admin/staff` · `PATCH /api/admin/staff/:id`
+
+จัดการบัญชีทีมงาน **เฉพาะ role `admin`** (staff เรียกได้ `403`)
+
+| ฟิลด์ | หมายเหตุ |
+| --- | --- |
+| `email` | เฉพาะตอนสร้าง |
+| `name` | |
+| `role` | `admin` หรือ `staff` |
+| `password` | ตอนสร้างบังคับ ตอนแก้ไขส่งมาเมื่อต้องการตั้งรหัสใหม่ |
+| `is_active` | เฉพาะตอนแก้ไข |
+
+ระบบไม่ยอมให้ปิดบัญชีหรือลดสิทธิ์ของตัวเอง และต้องเหลือ admin ที่ใช้งานได้อย่างน้อย 1 บัญชีเสมอ (`409`)
+
+| สิ่งที่ทำได้ | admin | staff |
+| --- | --- | --- |
+| ดูและจัดการการจอง คำถาม รีวิว ลูกค้า รายงาน | ✔︎ | ✔︎ |
+| เพิ่ม / แก้ไขกิจกรรม | ✔︎ | ✔︎ |
+| ลบกิจกรรม / ลบรีวิว | ✔︎ | |
+| แก้ค่าตั้งระบบ | ✔︎ | ดูได้อย่างเดียว |
+| จัดการบัญชีทีมงาน | ✔︎ | |
+
+## `GET /api/admin/settings` · `PUT /api/admin/settings`
+
+ค่าตั้งระบบทั้งหมด (รวม `admin_notify_email` ที่ไม่อยู่ใน `GET /api/settings`) `PUT` ส่งเฉพาะค่าที่ต้องการแก้ และทำได้เฉพาะ role `admin`
+
+| key | ช่วงค่า | ผล |
+| --- | --- | --- |
+| `opening_hours`, `contact_phone`, `contact_line`, `contact_email` | ข้อความ | แสดงบนหน้าเว็บ |
+| `site_notice` | ข้อความ ≤ 300 ตัว | แถบประกาศด้านบนทุกหน้า เว้นว่าง = ไม่แสดง |
+| `booking_min_lead_days` | 0–60 | ต้องจองล่วงหน้าอย่างน้อยกี่วัน |
+| `booking_max_advance_days` | 1–730 | จองล่วงหน้าได้ไกลสุดกี่วัน |
+| `booking_max_guests` | 1–100 | จำนวนคนสูงสุดต่อ 1 การจอง |
+| `cancel_free_hours` | 0–720 | ลูกค้ายกเลิกเองได้ก่อนวันกิจกรรมกี่ชั่วโมง |
+| `pickup_time_morning`, `pickup_time_afternoon` | ข้อความ | เวลารับของรอบเช้า / รอบกลางวัน ที่แสดงในฟอร์มจอง |
+| `payment_provider` | `mock` / `promptpay` / `stripe` / `none` | วิธีชำระเงินออนไลน์ |
+| `promptpay_id` | เบอร์มือถือ 10 หลัก หรือเลข 13 หลัก | บัญชีพร้อมเพย์ที่ใช้รับเงิน (ใส่ขีดหรือเว้นวรรคได้) |
+| `promptpay_name` | ข้อความ | ชื่อบัญชีที่แสดงให้ลูกค้าเทียบกับในแอปธนาคาร |
+| `admin_notify_email` | อีเมลหรือว่าง | รับสำเนาเมื่อมีการจองใหม่ / ลูกค้ายกเลิก |
+
+เลือก `promptpay` โดยยังไม่มีหมายเลขและชื่อบัญชี หรือเลือก `stripe` โดยเซิร์ฟเวอร์ไม่มี `STRIPE_SECRET_KEY` จะได้ `422`
+
+ค่าที่ไม่เคยตั้งจะใช้ค่าเริ่มต้น (กติกาการจองใช้ค่าจาก `.env`) การแก้ไขมีผลทันทีโดยไม่ต้องรีสตาร์ท
+
+## `GET /api/admin/notifications`
+
+บันทึกการแจ้งเตือนทุกฉบับที่ระบบส่ง พารามิเตอร์: `page`, `limit`, `status`
+
+| `status` | ความหมาย |
+| --- | --- |
+| `sent` | ส่งอีเมลสำเร็จ |
+| `queued` | กำลังส่ง |
+| `failed` | ส่งไม่สำเร็จ ดูสาเหตุในฟิลด์ `error` |
+| `logged` | เซิร์ฟเวอร์ไม่ได้ตั้งค่า SMTP จึงบันทึกไว้เฉย ๆ |

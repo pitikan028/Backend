@@ -191,3 +191,139 @@ Content-Type: application/json
 {
   "answer": "มีครับ บริการรับส่งฟรีในรัศมี 15 กม. จากตัวเมือง"
 }
+
+
+########################################################################
+### ส่วนที่เพิ่มในเวอร์ชัน 2 — ค้นหา / สมาชิก / ชำระเงิน / รายงาน / ตั้งค่า
+########################################################################
+
+@memberEmail = playground.member@example.com
+@memberPassword = Playground1
+
+
+### 20. ค่าตั้งระบบที่หน้าเว็บใช้
+GET {{host}}/api/settings
+
+
+### 21. ค้นหาและกรองกิจกรรม
+GET {{host}}/api/activities?q=ช้าง&category=elephant&sort=price_asc
+
+
+### 22. สมัครสมาชิก (ยิงซ้ำจะได้ 409 เพราะอีเมลซ้ำ — ใช้ข้อ 23 แทน)
+POST {{host}}/api/account/register
+Content-Type: application/json
+
+{
+  "email": "{{memberEmail}}",
+  "password": "{{memberPassword}}",
+  "first_name": "ทดลอง",
+  "last_name": "สมาชิก",
+  "phone": "081-333-4444"
+}
+
+
+### 23. ลูกค้าเข้าสู่ระบบ — รับ token
+# @name memberLogin
+POST {{host}}/api/account/login
+Content-Type: application/json
+
+{
+  "email": "{{memberEmail}}",
+  "password": "{{memberPassword}}"
+}
+
+
+### 24. โปรไฟล์ของฉัน
+GET {{host}}/api/account/me
+Authorization: Bearer {{memberLogin.response.body.data.token}}
+
+
+### 25. จองแบบสมาชิก (การจองจะเข้าไปอยู่ในประวัติของบัญชี)
+# @name memberBooking
+POST {{host}}/api/bookings
+Content-Type: application/json
+Authorization: Bearer {{memberLogin.response.body.data.token}}
+
+{
+  "activity_slug": "bamboo-rafting",
+  "booking_date": "{{bookingDate}}",
+  "adults": 2,
+  "children": 0,
+  "infants": 0,
+  "first_name": "ทดลอง",
+  "last_name": "สมาชิก",
+  "phone": "081-333-4444",
+  "email": "{{memberEmail}}",
+  "accept_terms": true
+}
+
+
+### 26. ประวัติการจองของฉัน
+GET {{host}}/api/account/bookings
+Authorization: Bearer {{memberLogin.response.body.data.token}}
+
+
+### 27. ขอลิงก์ชำระเงิน — เปิด checkout_url ในเบราว์เซอร์เพื่อจ่าย
+POST {{host}}/api/account/bookings/{{memberBooking.response.body.data.booking_ref}}/pay
+Authorization: Bearer {{memberLogin.response.body.data.token}}
+
+
+### 28. ยืนยันการชำระจำลอง (เฉพาะ PAYMENT_PROVIDER=mock)
+POST {{host}}/api/payments/mock/confirm
+Content-Type: application/json
+
+{
+  "ref": "{{memberBooking.response.body.data.booking_ref}}",
+  "token": "{{memberBooking.response.body.data.payment.token}}"
+}
+
+
+### 29. การแจ้งเตือนของฉัน
+GET {{host}}/api/account/notifications
+Authorization: Bearer {{memberLogin.response.body.data.token}}
+
+
+### 30. ยกเลิกการจองของฉัน
+POST {{host}}/api/account/bookings/{{memberBooking.response.body.data.booking_ref}}/cancel
+Content-Type: application/json
+Authorization: Bearer {{memberLogin.response.body.data.token}}
+
+{ "reason": "ทดลองยกเลิกจาก playground" }
+
+
+### 31. token ของลูกค้าเข้าหลังบ้านไม่ได้ — ต้องได้ 403
+GET {{host}}/api/admin/stats
+Authorization: Bearer {{memberLogin.response.body.data.token}}
+
+
+### 32. [แอดมิน] รายงาน 30 วันล่าสุด  (ต้องยิงข้อ 8 เพื่อ login ก่อน)
+GET {{host}}/api/admin/reports
+Authorization: Bearer {{login.response.body.data.token}}
+
+
+### 33. [แอดมิน] รายชื่อลูกค้า
+GET {{host}}/api/admin/users?q=playground
+Authorization: Bearer {{login.response.body.data.token}}
+
+
+### 34. [แอดมิน] รายชื่อทีมงาน
+GET {{host}}/api/admin/staff
+Authorization: Bearer {{login.response.body.data.token}}
+
+
+### 35. [แอดมิน] ค่าตั้งระบบทั้งหมด
+GET {{host}}/api/admin/settings
+Authorization: Bearer {{login.response.body.data.token}}
+
+
+### 36. [แอดมิน] ตั้งแถบประกาศบนหน้าเว็บ (ส่ง "" เพื่อเอาออก)
+PUT {{host}}/api/admin/settings
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.data.token}}
+
+{ "site_notice": "ปางช้างปิดทำการวันที่ 31 ธันวาคม" }
+
+
+### 37. [แอดมิน] บันทึกอีเมลที่ระบบส่ง
+GET {{host}}/api/admin/notifications?limit=10
+Authorization: Bearer {{login.response.body.data.token}}

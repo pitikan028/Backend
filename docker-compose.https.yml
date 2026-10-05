@@ -1,0 +1,16 @@
+# ส่วนเสริมสำหรับขึ้นใช้งานจริงด้วย HTTPS — ใช้ซ้อนกับ docker-compose.yml
+#
+#   1. วาง certificate ไว้ที่ infra/certs/fullchain.pem และ infra/certs/privkey.pem
+#   2. ตั้ง APP_URL=https://โดเมนของคุณ และ CORS_ORIGINS=https://โดเมนของคุณ ในไฟล์ .env
+#   3. docker compose -f docker-compose.yml -f docker-compose.https.yml up -d --build
+#
+# ทดลองในเครื่องด้วย certificate แบบ self-signed ได้ ดูหัวข้อ HTTPS ใน README
+
+services:
+  web:
+    ports:
+      - '${HTTP_PORT:-80}:80'
+      - '${HTTPS_PORT:-443}:443'
+    volumes:
+      - ./infra/nginx/https.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./infra/certs:/etc/nginx/certs:ro

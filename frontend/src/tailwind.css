@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* ลายทแยงที่ใช้แทนรูปเมื่อยังไม่มีไฟล์รูปจริง */
+.img-placeholder {
+  background: repeating-linear-gradient(45deg, #e7ede7, #e7ede7 12px, #dbe4db 12px, #dbe4db 24px);
+}
+
+dialog::backdrop {
+  background: rgb(0 0 0 / 0.5);
+}

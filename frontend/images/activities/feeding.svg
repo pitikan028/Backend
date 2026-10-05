@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="ELEPHANT FEEDING">
+<defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fde6b8"/><stop offset="1" stop-color="#f3c77a"/></linearGradient></defs>
+<rect width="800" height="600" fill="url(#sky)"/>
+<circle cx="640" cy="120" r="56" fill="#fff6cf" opacity="0.9"/>
+<path d="M0 390 q140 -130 300 -40 q130 -110 260 -30 q120 -70 240 10 V600 H0 Z" fill="#7aa35a" opacity="0.75"/>
+<path d="M0 470 q200 -70 400 -10 q200 60 400 -20 V600 H0 Z" fill="#4b7a3c"/>
+<g transform="translate(330,300) scale(0.9)" fill="#6f7275"><ellipse cx="120" cy="90" rx="95" ry="62"/><circle cx="225" cy="70" r="48"/><path d="M190 40 q-42 -8 -50 40 q8 42 50 30 z"/><path d="M262 82 q26 40 6 84 q-8 16 -22 8 q14 -34 -8 -70 z"/><rect x="52" y="128" width="30" height="72" rx="12"/><rect x="98" y="132" width="30" height="68" rx="12"/><rect x="146" y="132" width="30" height="68" rx="12"/><rect x="188" y="124" width="30" height="76" rx="12"/><path d="M28 78 q-22 14 -18 48" stroke="#6f7275" stroke-width="7" fill="none" stroke-linecap="round"/></g><g transform="translate(150,400)"><path d="M0 60 q10 -70 70 -90 q10 26 -6 52 q-22 36 -64 38 z" fill="#f2c230"/><path d="M20 70 q30 -62 96 -64 q4 28 -22 50 q-30 24 -74 14 z" fill="#e6b21f"/></g><rect x="650" y="380" width="12" height="130" rx="5" fill="#7fb04a" transform="rotate(-10 650 510)"/><rect x="680" y="380" width="12" height="130" rx="5" fill="#7fb04a" transform="rotate(4 680 510)"/><rect x="710" y="380" width="12" height="130" rx="5" fill="#7fb04a" transform="rotate(14 710 510)"/>
+</svg>

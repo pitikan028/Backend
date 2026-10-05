@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>สมัครสมาชิก | Chokchai Elephant Camp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body data-page="register" class="bg-cream text-dark font-sans min-h-screen flex flex-col">
+
+<div id="site-header"></div>
+
+<main class="flex-1 flex items-start justify-center px-6 py-14">
+  <!-- ส่งไปที่ POST /api/account/register แล้วเข้าสู่ระบบให้ทันที -->
+  <form id="register-form" class="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 lg:p-10 w-full max-w-xl flex flex-col gap-5" novalidate>
+    <div class="text-center">
+      <h1 class="text-2xl font-extrabold text-forest">สมัครสมาชิก</h1>
+      <p class="text-sm text-gray-500 mt-1">จองกิจกรรมได้เร็วขึ้น ดูประวัติการจอง และยกเลิกการจองได้เอง</p>
+    </div>
+
+    <p id="form-message" class="hidden" role="alert"></p>
+
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div>
+        <label for="reg-first-name" class="text-sm font-semibold block mb-2">ชื่อจริง *</label>
+        <input id="reg-first-name" name="first_name" type="text" maxlength="100" autocomplete="given-name" required
+               class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream focus:outline-none focus:border-gold" />
+      </div>
+      <div>
+        <label for="reg-last-name" class="text-sm font-semibold block mb-2">นามสกุล *</label>
+        <input id="reg-last-name" name="last_name" type="text" maxlength="100" autocomplete="family-name" required
+               class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream focus:outline-none focus:border-gold" />
+      </div>
+    </div>
+
+    <div>
+      <label for="reg-email" class="text-sm font-semibold block mb-2">อีเมล *</label>
+      <input id="reg-email" name="email" type="email" maxlength="160" autocomplete="email" required
+             class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream focus:outline-none focus:border-gold" />
+      <p class="text-xs text-gray-500 mt-1">การจองที่เคยทำด้วยอีเมลนี้จะถูกรวมเข้าบัญชีให้อัตโนมัติ</p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div>
+        <label for="reg-phone" class="text-sm font-semibold block mb-2">เบอร์โทร</label>
+        <input id="reg-phone" name="phone" type="tel" maxlength="40" autocomplete="tel" placeholder="08X-XXX-XXXX"
+               class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream focus:outline-none focus:border-gold" />
+      </div>
+      <div>
+        <label for="reg-contact-app" class="text-sm font-semibold block mb-2">แอปติดต่อ</label>
+        <select id="reg-contact-app" name="contact_app" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream">
+          <option value="Line">Line</option>
+          <option value="WhatsApp">WhatsApp</option>
+          <option value="WeChat">WeChat</option>
+          <option value="Instagram">Instagram (IG)</option>
+        </select>
+      </div>
+    </div>
+
+    <div>
+      <label for="reg-contact-id" id="reg-contact-id-label" class="text-sm font-semibold block mb-2">LINE ID *</label>
+      <input id="reg-contact-id" name="contact_id" type="text" maxlength="80" autocomplete="off" required
+             class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream focus:outline-none focus:border-gold" />
+    </div>
+
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div>
+        <label for="reg-password" class="text-sm font-semibold block mb-2">รหัสผ่าน *</label>
+        <input id="reg-password" name="password" type="password" minlength="8" maxlength="200" autocomplete="new-password" required
+               class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream focus:outline-none focus:border-gold" />
+      </div>
+      <div>
+        <label for="reg-password-confirm" class="text-sm font-semibold block mb-2">ยืนยันรหัสผ่าน *</label>
+        <input id="reg-password-confirm" name="password_confirm" type="password" maxlength="200" autocomplete="new-password" required
+               class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream focus:outline-none focus:border-gold" />
+      </div>
+    </div>
+    <p class="text-xs text-gray-500 -mt-2">อย่างน้อย 8 ตัวอักษร และต้องมีทั้งตัวอักษรและตัวเลข</p>
+
+    <button type="submit" class="bg-forest hover:bg-forest-dark text-white font-bold py-3.5 rounded-lg transition">
+      สมัครสมาชิก
+    </button>
+    <p class="text-center text-sm text-gray-600">
+      มีบัญชีอยู่แล้ว? <a href="login.html" data-keep-next class="font-bold text-forest hover:underline">เข้าสู่ระบบ</a>
+    </p>
+  </form>
+</main>
+
+<div id="site-footer"></div>
+
+<script type="module" src="js/pages.js"></script>
+</body>
+</html>

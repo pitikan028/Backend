@@ -21,6 +21,11 @@ export function errorHandler(err, _req, res, _next) {
     message = 'รูปแบบ JSON ที่ส่งมาไม่ถูกต้อง';
   }
 
+  if (err.type === 'entity.too.large') {
+    status = 413;
+    message = 'ไฟล์ที่ส่งมามีขนาดใหญ่เกินไป';
+  }
+
   // unique violation: 23505 = PostgreSQL, ER_DUP_ENTRY = MySQL
   if (err.code === '23505' || err.code === 'ER_DUP_ENTRY') {
     status = 409;

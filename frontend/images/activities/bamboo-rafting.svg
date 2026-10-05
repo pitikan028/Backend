@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="BAMBOO RAFTING">
+<defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9f0e4"/><stop offset="1" stop-color="#9ed3c0"/></linearGradient></defs>
+<rect width="800" height="600" fill="url(#sky)"/>
+<circle cx="640" cy="120" r="56" fill="#fff6cf" opacity="0.9"/>
+<path d="M0 390 q140 -130 300 -40 q130 -110 260 -30 q120 -70 240 10 V600 H0 Z" fill="#3f8a5f" opacity="0.75"/>
+<path d="M0 470 q200 -70 400 -10 q200 60 400 -20 V600 H0 Z" fill="#27603f"/>
+<path d="M0 400 q50 -22 100 0 t100 0 q50 -22 100 0 t100 0 q50 -22 100 0 t100 0 q50 -22 100 0 t100 0 V600 H0 Z" fill="#4aa7b8" opacity="0.9"/><rect x="75" y="336" width="10" height="59" fill="#5b4326"/><path d="M80 225 l51 71 h-20 l41 58 h-143 l41 -58 h-20 z" fill="#2c6a3f"/><rect x="715" y="328" width="10" height="66" fill="#5b4326"/><path d="M720 205 l57 80 h-23 l46 65 h-160 l46 -65 h-23 z" fill="#2c6a3f"/><g transform="translate(250,400)"><rect x="0" y="0" width="320" height="10" rx="5" fill="#d9b866"/><rect x="0" y="13" width="320" height="10" rx="5" fill="#c9a652"/><rect x="0" y="26" width="320" height="10" rx="5" fill="#d9b866"/><rect x="0" y="39" width="320" height="10" rx="5" fill="#c9a652"/><rect x="0" y="52" width="320" height="10" rx="5" fill="#d9b866"/><rect x="250" y="-150" width="8" height="190" rx="4" fill="#8a6a2f" transform="rotate(14 254 -55)"/><circle cx="150" cy="-40" r="16" fill="#3a3a3a"/><rect x="136" y="-24" width="28" height="44" rx="10" fill="#c0563b"/></g><path d="M0 490 q50 -22 100 0 t100 0 q50 -22 100 0 t100 0 q50 -22 100 0 t100 0 q50 -22 100 0 t100 0 V600 H0 Z" fill="#35879a" opacity="0.85"/>
+</svg>

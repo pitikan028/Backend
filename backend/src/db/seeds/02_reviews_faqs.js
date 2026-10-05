@@ -63,10 +63,6 @@ export async function seed(knex) {
 
   for (const faq of faqs) {
     const existing = await knex('faqs').where({ question: faq.question }).first();
-    if (existing) {
-      await knex('faqs').where({ id: existing.id }).update({ ...faq, updated_at: knex.fn.now() });
-    } else {
-      await knex('faqs').insert(faq);
-    }
+    if (!existing) await knex('faqs').insert(faq);
   }
 }

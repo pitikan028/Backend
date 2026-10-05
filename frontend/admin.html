@@ -7,23 +7,7 @@
 <title>ระบบหลังบ้าน | Chokchai Elephant Camp</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          forest: '#21452A',
-          'forest-dark': '#183420',
-          gold: '#BA9330',
-          cream: '#F9F8F2',
-          dark: '#252520',
-        },
-        fontFamily: { sans: ['Inter', 'sans-serif'] }
-      }
-    }
-  }
-</script>
+<link rel="stylesheet" href="css/app.css">
 </head>
 <body class="bg-cream text-dark font-sans min-h-screen">
 
@@ -94,50 +78,66 @@
       </div>
     </div>
 
-    <!-- แท็บ -->
-    <div class="flex flex-wrap gap-2">
-      <button data-tab="bookings" class="bg-forest text-white font-semibold text-sm px-5 py-2.5 rounded-lg transition">
-        การจอง
+    <!-- แท็บ — ปุ่มที่มี data-admin-only จะซ่อนสำหรับบัญชี staff -->
+    <div id="tabs" class="flex flex-wrap gap-2">
+      <button data-tab="bookings" class="bg-white text-gray-600 border border-gray-200 font-semibold text-sm px-5 py-2.5 rounded-lg transition">
+        การจอง <span id="badge-payments" class="text-xs font-bold text-red-600" title="ลูกค้าแจ้งโอนแล้ว รอตรวจสอบ"></span>
       </button>
-      <button data-tab="inquiries" class="text-gray-600 bg-white border border-gray-200 font-semibold text-sm px-5 py-2.5 rounded-lg transition">
+      <button data-tab="activities" class="bg-white text-gray-600 border border-gray-200 font-semibold text-sm px-5 py-2.5 rounded-lg transition">กิจกรรม</button>
+      <button data-tab="inquiries" class="bg-white text-gray-600 border border-gray-200 font-semibold text-sm px-5 py-2.5 rounded-lg transition">
         คำถามจากลูกค้า <span id="badge-inquiries" class="text-xs font-bold text-red-600"></span>
       </button>
-      <button data-tab="reviews" class="text-gray-600 bg-white border border-gray-200 font-semibold text-sm px-5 py-2.5 rounded-lg transition">
+      <button data-tab="reviews" class="bg-white text-gray-600 border border-gray-200 font-semibold text-sm px-5 py-2.5 rounded-lg transition">
         รีวิว <span id="badge-reviews" class="text-xs font-bold text-red-600"></span>
       </button>
+      <button data-tab="users" class="bg-white text-gray-600 border border-gray-200 font-semibold text-sm px-5 py-2.5 rounded-lg transition">ลูกค้า</button>
+      <button data-tab="staff" data-admin-only class="bg-white text-gray-600 border border-gray-200 font-semibold text-sm px-5 py-2.5 rounded-lg transition">ทีมงาน</button>
+      <button data-tab="reports" class="bg-white text-gray-600 border border-gray-200 font-semibold text-sm px-5 py-2.5 rounded-lg transition">รายงาน</button>
+      <button data-tab="notifications" class="bg-white text-gray-600 border border-gray-200 font-semibold text-sm px-5 py-2.5 rounded-lg transition">การแจ้งเตือน</button>
+      <button data-tab="settings" class="bg-white text-gray-600 border border-gray-200 font-semibold text-sm px-5 py-2.5 rounded-lg transition">ตั้งค่าระบบ</button>
     </div>
 
-    <!-- ตัวกรอง (เฉพาะแท็บการจอง) -->
-    <div id="filter-bar" class="flex flex-wrap gap-3">
-      <select id="filter-status" class="border border-gray-300 rounded-lg px-4 py-2.5 bg-white text-sm">
-        <option value="">ทุกสถานะ</option>
-        <option value="pending">รอยืนยัน</option>
-        <option value="confirmed">ยืนยันแล้ว</option>
-        <option value="completed">เสร็จสิ้น</option>
-        <option value="cancelled">ยกเลิก</option>
-      </select>
-      <input id="filter-search" type="search" placeholder="ค้นหารหัสจอง / ชื่อ / อีเมล / เบอร์โทร"
-             class="border border-gray-300 rounded-lg px-4 py-2.5 bg-white text-sm flex-1 min-w-[240px]" />
-    </div>
+    <!-- ตัวกรอง / ปุ่มของแต่ละแท็บ สร้างโดย js/admin.js -->
+    <div id="toolbar" class="flex flex-wrap gap-3 items-end"></div>
 
-    <!-- ตาราง -->
-    <div class="bg-white rounded-xl border border-gray-200 overflow-x-auto">
-      <table class="w-full text-sm min-w-[880px]">
-        <thead id="table-head"></thead>
-        <tbody id="table-body"></tbody>
-      </table>
-    </div>
-
-    <div class="flex items-center justify-between">
-      <p id="pagination-info" class="text-sm text-gray-500"></p>
-      <div class="flex gap-2">
-        <button id="page-prev" class="border border-gray-300 bg-white px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-40">ก่อนหน้า</button>
-        <button id="page-next" class="border border-gray-300 bg-white px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-40">ถัดไป</button>
+    <!-- แท็บที่เป็นตาราง -->
+    <div id="table-view">
+      <div class="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+        <table class="w-full text-sm min-w-[880px]">
+          <thead id="table-head"></thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+      <div id="pagination" class="flex items-center justify-between mt-4">
+        <p id="pagination-info" class="text-sm text-gray-500"></p>
+        <div class="flex gap-2">
+          <button id="page-prev" class="border border-gray-300 bg-white px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-40">ก่อนหน้า</button>
+          <button id="page-next" class="border border-gray-300 bg-white px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-40">ถัดไป</button>
+        </div>
       </div>
     </div>
 
+    <!-- แท็บที่ไม่ใช่ตาราง (รายงาน / ตั้งค่าระบบ) -->
+    <div id="panel-view" class="hidden"></div>
+
   </main>
 </div>
+
+<!-- หน้าต่างฟอร์มกลาง ใช้ร่วมกันทุกแท็บ (เพิ่ม/แก้กิจกรรม, ตอบคำถาม, เพิ่มทีมงาน ฯลฯ) -->
+<dialog id="form-dialog" class="rounded-2xl shadow-2xl p-0 w-full max-w-2xl">
+  <form id="dialog-form" method="dialog" class="p-8 flex flex-col gap-5" novalidate>
+    <div class="flex items-start justify-between gap-4">
+      <h2 id="dialog-title" class="text-xl font-extrabold text-forest"></h2>
+      <button type="button" id="dialog-close" aria-label="ปิดหน้าต่าง" class="text-gray-400 hover:text-dark text-2xl leading-none">&times;</button>
+    </div>
+    <p id="dialog-error" class="hidden bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3" role="alert"></p>
+    <div id="dialog-fields" class="grid sm:grid-cols-2 gap-4"></div>
+    <div class="flex justify-end gap-3">
+      <button type="button" id="dialog-cancel" class="border border-gray-300 font-semibold px-6 py-3 rounded-lg">ปิด</button>
+      <button type="submit" id="dialog-submit" class="bg-forest hover:bg-forest-dark text-white font-bold px-6 py-3 rounded-lg transition disabled:opacity-60">บันทึก</button>
+    </div>
+  </form>
+</dialog>
 
 <div id="toast" class="hidden fixed bottom-6 right-6 bg-forest text-white text-sm font-semibold px-5 py-3 rounded-lg shadow-lg z-50" role="status"></div>
 

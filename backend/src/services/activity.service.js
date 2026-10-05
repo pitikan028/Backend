@@ -8,6 +8,8 @@ const COLUMNS = [
   'name',
   'name_th',
   'description_th',
+  'highlights',
+  'category',
   'duration_label',
   'duration_minutes',
   'adult_price',
@@ -33,15 +35,48 @@ export function serializeActivity(row) {
   };
 }
 
-export async function listActivities({ includeInactive = false } = {}) {
-  const query = db('activities').select(COLUMNS).orderBy([
+const SORTS = {
+  recommended: [
     { column: 'sort_order', order: 'asc' },
     { column: 'id', order: 'asc' },
-  ]);
+  ],
+  price_asc: [
+    { column: 'adult_price', order: 'asc' },
+    { column: 'id', order: 'asc' },
+  ],
+  price_desc: [
+    { column: 'adult_price', order: 'desc' },
+    { column: 'id', order: 'asc' },
+  ],
+  duration: [
+    { column: 'duration_minutes', order: 'asc' },
+    { column: 'id', order: 'asc' },
+  ],
+};
+
+export async function listActivities({ includeInactive = false, q, category, max_price, sort } = {}) {
+  const query = db('activities').select(COLUMNS).orderBy(SORTS[sort] ?? SORTS.recommended);
   if (!includeInactive) query.where('is_active', true);
+  if (category) query.where({ category });
+  if (max_price !== undefined) query.where('adult_price', '<=', max_price);
+  if (q) {
+    const like = `%${q.toLowerCase()}%`;
+    query.where((builder) => {
+      builder
+        .whereRaw('lower(name) like ?', [like])
+        .orWhereRaw('lower(name_th) like ?', [like])
+        .orWhereRaw('lower(description_th) like ?', [like]);
+    });
+  }
 
   const rows = await query;
   return rows.map(serializeActivity);
+}
+
+/** หมวดหมู่ที่มีกิจกรรมเปิดให้จองอยู่จริง ใช้สร้างตัวเลือกในช่องกรองของหน้าเว็บ */
+export async function listCategories() {
+  const rows = await db('activities').distinct('category').where('is_active', true).orderBy('category', 'asc');
+  return rows.map((row) => row.category);
 }
 
 export async function getActivityBySlug(slug, { includeInactive = false } = {}) {

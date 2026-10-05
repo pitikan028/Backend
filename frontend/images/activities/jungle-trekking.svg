@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="ELEPHANT JUNGLE TREKKING">
+<defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6e7b4"/><stop offset="1" stop-color="#9cc38a"/></linearGradient></defs>
+<rect width="800" height="600" fill="url(#sky)"/>
+<circle cx="640" cy="120" r="56" fill="#fff6cf" opacity="0.9"/>
+<path d="M0 390 q140 -130 300 -40 q130 -110 260 -30 q120 -70 240 10 V600 H0 Z" fill="#3f7a45" opacity="0.75"/>
+<path d="M0 470 q200 -70 400 -10 q200 60 400 -20 V600 H0 Z" fill="#21452A"/>
+<rect x="85" y="396" width="10" height="74" fill="#5b4326"/><path d="M90 260 l63 88 h-25 l50 71 h-176 l50 -71 h-25 z" fill="#2c5d33"/><rect x="185" y="418" width="10" height="52" fill="#5b4326"/><path d="M190 320 l45 63 h-18 l36 51 h-126 l36 -51 h-18 z" fill="#356e3c"/><rect x="655" y="390" width="10" height="80" fill="#5b4326"/><path d="M660 240 l69 97 h-28 l55 78 h-193 l55 -78 h-28 z" fill="#2c5d33"/><rect x="735" y="414" width="10" height="56" fill="#5b4326"/><path d="M740 310 l48 67 h-19 l38 54 h-134 l38 -54 h-19 z" fill="#356e3c"/><g transform="translate(300,330) scale(0.85)" fill="#6b6f72"><ellipse cx="120" cy="90" rx="95" ry="62"/><circle cx="225" cy="70" r="48"/><path d="M190 40 q-42 -8 -50 40 q8 42 50 30 z"/><path d="M262 82 q26 40 6 84 q-8 16 -22 8 q14 -34 -8 -70 z"/><rect x="52" y="128" width="30" height="72" rx="12"/><rect x="98" y="132" width="30" height="68" rx="12"/><rect x="146" y="132" width="30" height="68" rx="12"/><rect x="188" y="124" width="30" height="76" rx="12"/><path d="M28 78 q-22 14 -18 48" stroke="#6b6f72" stroke-width="7" fill="none" stroke-linecap="round"/></g>
+</svg>

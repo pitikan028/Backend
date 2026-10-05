@@ -6,36 +6,10 @@
 <title>Chokchai Elephant Camp | ปางช้างเชิงอนุรักษ์ เชียงใหม่</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          forest: '#21452A',
-          'forest-dark': '#183420',
-          gold: '#BA9330',
-          cream: '#F9F8F2',
-          dark: '#252520',
-        },
-        fontFamily: {
-          sans: ['Inter', 'sans-serif'],
-          script: ['Caveat', 'cursive'],
-        }
-      }
-    }
-  }
-</script>
-<style>
-  html { scroll-behavior: smooth; }
-  .img-placeholder {
-    background: repeating-linear-gradient(45deg, #e7ede7, #e7ede7 12px, #dbe4db 12px, #dbe4db 24px);
-  }
-</style>
+<link rel="stylesheet" href="css/app.css">
 </head>
 <body class="bg-cream text-dark font-sans">
 
-<!-- ===== HEADER ===== -->
 <!-- ===== HEADER ===== -->
 <header class="fixed inset-x-0 top-0 z-40 bg-white/30 backdrop-blur-md border-b border-white/30">
   <div class="max-w-7xl mx-auto px-6 lg:px-10 h-20 lg:h-24 flex items-center justify-between">
@@ -54,7 +28,9 @@
       <a href="index.html#contact" class="hover:text-forest transition">Contact us</a>
     </nav>
 
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-3 lg:gap-5">
+      <!-- ลิงก์เข้าสู่ระบบ / บัญชีของฉัน เติมโดย js/common.js -->
+      <div data-auth-nav class="hidden lg:flex items-center gap-5 text-base font-semibold text-dark"></div>
       <a href="activities.html" class="hidden sm:inline-block bg-forest hover:bg-forest/90 text-white text-base lg:text-lg font-bold px-6 lg:px-7 py-3 rounded-lg shadow-md transition">Book Now</a>
       <button id="nav-toggle" class="md:hidden p-2 text-forest" aria-label="เปิดเมนู">
         <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -69,6 +45,7 @@
     <a href="index.html#reviews">Review</a>
     <a href="index.html#map">Maps</a>
     <a href="index.html#contact">Contact us</a>
+    <div data-auth-nav class="flex flex-col gap-4"></div>
     <a href="activities.html" class="bg-forest text-white text-center px-6 py-3 rounded-lg">Book Now</a>
   </div>
 </header>
@@ -166,7 +143,7 @@
       <p class="text-gray-600 leading-relaxed">99 Moo 4, Mae Raem Subdistrict, Mae Rim<br>District, Chiang Mai 50180</p>
       <div>
         <p class="font-bold text-sm">Opening Hours</p>
-        <p class="text-gray-600 text-sm">Daily 08:00 AM - 5:00 PM</p>
+        <p class="text-gray-600 text-sm" data-setting="opening_hours">Daily 08:00 AM - 5:00 PM</p>
       </div>
       <a href="https://www.google.com/maps/search/?api=1&query=Chokchai+Elephant+Camp+Chiang+Mai" target="_blank"
          class="bg-forest-dark hover:bg-forest text-white font-bold px-6 py-3.5 rounded-lg w-fit transition">Get Directions on Google Maps</a>
@@ -219,6 +196,8 @@
         <li><a href="activities.html" class="hover:text-white">Activities</a></li>
         <li><a href="index.html#reviews" class="hover:text-white">Reviews</a></li>
         <li><a href="activities.html" class="hover:text-white">Book Activity</a></li>
+        <li><a href="booking.html" class="hover:text-white">Check My Booking</a></li>
+        <li><a href="account.html" class="hover:text-white">My Account</a></li>
       </ul>
     </div>
     <div>

@@ -11,30 +11,63 @@ const API_BASE = (() => {
 
   const { protocol, hostname, port } = window.location;
   if (protocol === 'file:') return 'http://localhost:3000/api';
-  if (port && port !== '8080' && port !== '80') return `${protocol}//${hostname}:3000/api`;
+  if (port && !['8080', '80', '443', '8443'].includes(port)) return `${protocol}//${hostname}:3000/api`;
   return '/api';
 })();
 
-const TOKEN_KEY = 'chokchai_admin_token';
+/** ที่เก็บ token ใน localStorage — แยก key ระหว่างทีมงานกับลูกค้า เพื่อให้ล็อกอินสองฝั่งพร้อมกันได้ */
+function tokenStore(key) {
+  return {
+    get token() {
+      try {
+        return localStorage.getItem(key);
+      } catch {
+        return null;
+      }
+    },
+    set(token) {
+      try {
+        localStorage.setItem(key, token);
+      } catch {
+        /* โหมดไม่ระบุตัวตนอาจเขียน localStorage ไม่ได้ */
+      }
+    },
+    clear() {
+      try {
+        localStorage.removeItem(key);
+      } catch {
+        /* ไม่เป็นไร */
+      }
+    },
+  };
+}
 
-export const auth = {
-  get token() {
+export const auth = tokenStore('chokchai_admin_token');
+export const userAuth = tokenStore('chokchai_user_token');
+
+const USER_CACHE_KEY = 'chokchai_user';
+
+/** ข้อมูลสมาชิกที่ล็อกอินอยู่ (เก็บสำเนาไว้ให้ header แสดงชื่อได้โดยไม่ต้องเรียก API ทุกหน้า) */
+export const currentUser = {
+  get() {
+    if (!userAuth.token) return null;
     try {
-      return localStorage.getItem(TOKEN_KEY);
+      return JSON.parse(localStorage.getItem(USER_CACHE_KEY));
     } catch {
       return null;
     }
   },
-  set(token) {
+  set(user) {
     try {
-      localStorage.setItem(TOKEN_KEY, token);
+      localStorage.setItem(USER_CACHE_KEY, JSON.stringify(user));
     } catch {
-      /* โหมดไม่ระบุตัวตนอาจเขียน localStorage ไม่ได้ */
+      /* ไม่เป็นไร */
     }
   },
   clear() {
+    userAuth.clear();
     try {
-      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(USER_CACHE_KEY);
     } catch {
       /* ไม่เป็นไร */
     }
@@ -49,9 +82,18 @@ export class ApiRequestError extends Error {
     this.status = status;
     this.details = details;
   }
+
+  /** ข้อความหลัก + รายละเอียดรายฟิลด์ (ถ้ามี) สำหรับแสดงให้ผู้ใช้ */
+  get fullMessage() {
+    if (!this.details?.length) return this.message;
+    return `${this.message} (${this.details.map((item) => item.message).join(', ')})`;
+  }
 }
 
-async function request(path, { method = 'GET', body, query, authenticated = false } = {}) {
+/**
+ * as: 'admin' | 'user' | undefined — เลือกว่าจะแนบ token ของใครไปด้วย
+ */
+async function request(path, { method = 'GET', body, query, as } = {}) {
   let url = `${API_BASE}${path}`;
 
   if (query) {
@@ -64,7 +106,8 @@ async function request(path, { method = 'GET', body, query, authenticated = fals
 
   const headers = {};
   if (body !== undefined) headers['Content-Type'] = 'application/json';
-  if (authenticated && auth.token) headers.Authorization = `Bearer ${auth.token}`;
+  const token = as === 'admin' ? auth.token : as === 'user' ? userAuth.token : null;
+  if (token) headers.Authorization = `Bearer ${token}`;
 
   let response;
   try {
@@ -97,46 +140,115 @@ async function request(path, { method = 'GET', body, query, authenticated = fals
   return payload;
 }
 
+const data = (promise) => promise.then((res) => res.data);
+const admin = (path, options = {}) => request(path, { ...options, as: 'admin' });
+const member = (path, options = {}) => request(path, { ...options, as: 'user' });
+
+async function startSession(path, body) {
+  const session = await data(request(path, { method: 'POST', body }));
+  userAuth.set(session.token);
+  currentUser.set(session.user);
+  return session.user;
+}
+
 export const api = {
   // ---------- สาธารณะ ----------
-  listActivities: () => request('/activities').then((res) => res.data),
-  getActivity: (slug) => request(`/activities/${slug}`).then((res) => res.data),
-  getAvailability: (slug, date) =>
-    request(`/activities/${slug}/availability`, { query: { date } }).then((res) => res.data),
+  settings: () => data(request('/settings')),
+  listActivities: (params = {}) => data(request('/activities', { query: params })),
+  searchActivities: (params = {}) => request('/activities', { query: params }),
+  getActivity: (slug) => data(request(`/activities/${slug}`)),
+  getAvailability: (slug, date) => data(request(`/activities/${slug}/availability`, { query: { date } })),
 
-  createBooking: (payload) => request('/bookings', { method: 'POST', body: payload }).then((res) => res.data),
-  lookupBooking: (ref, email) => request(`/bookings/${ref}`, { query: { email } }).then((res) => res.data),
+  // ถ้าล็อกอินอยู่จะแนบ token ไปด้วย การจองจะเข้าไปอยู่ในประวัติของบัญชี
+  createBooking: (payload) => data(request('/bookings', { method: 'POST', body: payload, as: 'user' })),
+  lookupBooking: (ref, email) => data(request(`/bookings/${ref}`, { query: { email } })),
+  cancelBooking: (ref, email, reason) =>
+    data(request(`/bookings/${ref}/cancel`, { method: 'POST', body: { email, reason } })),
+  payBooking: (ref, email) => data(request(`/bookings/${ref}/pay`, { method: 'POST', body: { email } })),
+
+  paymentStatus: (ref, token) => data(request('/payments/status', { query: { ref, token } })),
+  confirmMockPayment: (ref, token) =>
+    data(request('/payments/mock/confirm', { method: 'POST', body: { ref, token } })),
+
+  notifyTransfer: (ref, token, { note, slip } = {}) =>
+    data(request('/payments/promptpay/notify', { method: 'POST', body: { ref, token, note, slip } })),
 
   listReviews: (params = {}) => request('/reviews', { query: params }),
   submitReview: (payload) => request('/reviews', { method: 'POST', body: payload }),
-  listFaqs: () => request('/faqs').then((res) => res.data),
-  sendInquiry: (payload) => request('/inquiries', { method: 'POST', body: payload }).then((res) => res.data),
+  listFaqs: () => data(request('/faqs')),
+  sendInquiry: (payload) => data(request('/inquiries', { method: 'POST', body: payload })),
+
+  // ---------- สมาชิก ----------
+  register: (payload) => startSession('/account/register', payload),
+  userLogin: (email, password) => startSession('/account/login', { email, password }),
+  userLogout: () => currentUser.clear(),
+  profile: async () => {
+    const user = await data(member('/account/me'));
+    currentUser.set(user);
+    return user;
+  },
+  updateProfile: async (payload) => {
+    const user = await data(member('/account/me', { method: 'PATCH', body: payload }));
+    currentUser.set(user);
+    return user;
+  },
+  changePassword: (payload) => data(member('/account/password', { method: 'POST', body: payload })),
+  myBookings: () => data(member('/account/bookings')),
+  cancelMyBooking: (ref, reason) =>
+    data(member(`/account/bookings/${ref}/cancel`, { method: 'POST', body: { reason } })),
+  payMyBooking: (ref) => data(member(`/account/bookings/${ref}/pay`, { method: 'POST' })),
+  myNotifications: () => member('/account/notifications'),
+  markNotificationsRead: () => member('/account/notifications/read', { method: 'POST' }),
 
   // ---------- แอดมิน ----------
   login: async (email, password) => {
-    const { data } = await request('/auth/login', { method: 'POST', body: { email, password } });
-    auth.set(data.token);
-    return data.user;
+    const session = await data(request('/auth/login', { method: 'POST', body: { email, password } }));
+    auth.set(session.token);
+    return session.user;
   },
-  me: () => request('/auth/me', { authenticated: true }).then((res) => res.data),
+  me: () => data(admin('/auth/me')),
   logout: () => auth.clear(),
 
-  stats: () => request('/admin/stats', { authenticated: true }).then((res) => res.data),
-  adminBookings: (params = {}) => request('/admin/bookings', { query: params, authenticated: true }),
-  updateBooking: (id, payload) =>
-    request(`/admin/bookings/${id}`, { method: 'PATCH', body: payload, authenticated: true }).then(
-      (res) => res.data,
-    ),
-  adminReviews: (params = {}) => request('/admin/reviews', { query: params, authenticated: true }),
-  updateReview: (id, payload) =>
-    request(`/admin/reviews/${id}`, { method: 'PATCH', body: payload, authenticated: true }).then(
-      (res) => res.data,
-    ),
-  adminInquiries: (params = {}) => request('/admin/inquiries', { query: params, authenticated: true }),
-  updateInquiry: (id, payload) =>
-    request(`/admin/inquiries/${id}`, { method: 'PATCH', body: payload, authenticated: true }).then(
-      (res) => res.data,
-    ),
+  stats: () => data(admin('/admin/stats')),
+  report: (params = {}) => data(admin('/admin/reports', { query: params })),
+
+  adminBookings: (params = {}) => admin('/admin/bookings', { query: params }),
+  updateBooking: (id, payload) => data(admin(`/admin/bookings/${id}`, { method: 'PATCH', body: payload })),
+
+  /** รูปสลิปต้องแนบ token ไปด้วย จึงโหลดเป็น blob แล้วคืน URL ชั่วคราวให้ใส่ใน <img> */
+  bookingSlipUrl: async (id) => {
+    const response = await fetch(`${API_BASE}/admin/bookings/${id}/slip`, {
+      headers: { Authorization: `Bearer ${auth.token}` },
+    });
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null);
+      throw new ApiRequestError(payload?.error?.message ?? 'โหลดสลิปไม่สำเร็จ', { status: response.status });
+    }
+    return URL.createObjectURL(await response.blob());
+  },
+
+  adminActivities: () => data(admin('/admin/activities')),
+  createActivity: (payload) => data(admin('/admin/activities', { method: 'POST', body: payload })),
+  updateActivity: (id, payload) => data(admin(`/admin/activities/${id}`, { method: 'PATCH', body: payload })),
+  deleteActivity: (id) => admin(`/admin/activities/${id}`, { method: 'DELETE' }),
+
+  adminReviews: (params = {}) => admin('/admin/reviews', { query: params }),
+  updateReview: (id, payload) => data(admin(`/admin/reviews/${id}`, { method: 'PATCH', body: payload })),
+  adminInquiries: (params = {}) => admin('/admin/inquiries', { query: params }),
+  updateInquiry: (id, payload) => data(admin(`/admin/inquiries/${id}`, { method: 'PATCH', body: payload })),
+
+  adminUsers: (params = {}) => admin('/admin/users', { query: params }),
+  setUserActive: (id, isActive) =>
+    data(admin(`/admin/users/${id}`, { method: 'PATCH', body: { is_active: isActive } })),
+
+  adminStaff: () => data(admin('/admin/staff')),
+  createStaff: (payload) => data(admin('/admin/staff', { method: 'POST', body: payload })),
+  updateStaff: (id, payload) => data(admin(`/admin/staff/${id}`, { method: 'PATCH', body: payload })),
+
+  adminSettings: () => data(admin('/admin/settings')),
+  saveSettings: (payload) => data(admin('/admin/settings', { method: 'PUT', body: payload })),
+
+  adminNotifications: (params = {}) => admin('/admin/notifications', { query: params }),
 };
 
 /** จัดรูปแบบราคาเป็นเลขไทยพร้อมสัญลักษณ์บาท */

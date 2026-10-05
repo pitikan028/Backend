@@ -1,0 +1,13 @@
+{
+  "name": "chokchai-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "เครื่องมือ build CSS ของหน้าเว็บ Chokchai Elephant Camp (ตัวเว็บเป็น static ไม่ต้องใช้ Node ตอนรัน)",
+  "scripts": {
+    "build": "tailwindcss -c tailwind.config.js -i src/tailwind.css -o css/app.css --minify",
+    "dev": "tailwindcss -c tailwind.config.js -i src/tailwind.css -o css/app.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}

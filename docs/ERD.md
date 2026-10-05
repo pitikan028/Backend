@@ -5,6 +5,10 @@
 ```mermaid
 erDiagram
     ACTIVITIES ||--o{ BOOKINGS : "มีการจอง"
+    USERS ||--o{ BOOKINGS : "เป็นผู้จอง (ถ้าล็อกอิน)"
+    USERS ||--o{ NOTIFICATIONS : "ได้รับ"
+    BOOKINGS ||--o{ NOTIFICATIONS : "เกี่ยวกับ"
+    BOOKINGS ||--o| PAYMENT_SLIPS : "มีสลิป"
 
     ACTIVITIES {
         int      id PK
@@ -12,6 +16,8 @@ erDiagram
         string   name "ชื่ออังกฤษ"
         string   name_th "ชื่อไทย"
         text     description_th
+        text     highlights "จุดเด่น บรรทัดละ 1 ข้อ"
+        string   category "elephant/adventure/workshop"
         string   duration_label "เช่น 1.5 ชั่วโมง"
         int      duration_minutes
         decimal  adult_price
@@ -26,6 +32,7 @@ erDiagram
     BOOKINGS {
         int      id PK
         string   booking_ref UK "เช่น CEC-7QK4M2"
+        int      user_id FK "null = จองแบบไม่ล็อกอิน"
         int      activity_id FK
         date     booking_date
         int      adults
@@ -40,14 +47,60 @@ erDiagram
         string   last_name
         string   phone
         string   email
-        string   contact_app
+        string   contact_app "Line/WhatsApp/WeChat/Instagram"
+        string   contact_id "ไอดีของแอปที่เลือก"
         text     note
         string   pickup_type
         string   pickup_detail
+        string   pickup_round "morning/afternoon"
         string   status "pending/confirmed/completed/cancelled"
-        string   payment_status "unpaid/paid/refunded"
+        string   payment_status "unpaid/reviewing/paid/refunded"
         string   payment_ref
+        string   payment_method "mock/promptpay/stripe/manual"
+        timestamp paid_at
+        timestamp slip_uploaded_at "มีค่า = มีสลิปแนบ"
         timestamp cancelled_at
+        string   cancel_reason
+    }
+
+    USERS {
+        int      id PK
+        string   email UK
+        string   password_hash "bcrypt"
+        string   first_name
+        string   last_name
+        string   phone
+        string   contact_app
+        string   contact_id
+        bool     is_active "false = ถูกระงับ"
+        timestamp last_login_at
+    }
+
+    NOTIFICATIONS {
+        int      id PK
+        int      user_id FK "null = ผู้รับไม่ใช่สมาชิก"
+        int      booking_id FK
+        string   recipient "อีเมลผู้รับ"
+        string   type "เช่น booking_created"
+        string   subject
+        text     body
+        string   status "queued/sent/logged/failed"
+        text     error
+        bool     is_read
+    }
+
+    PAYMENT_SLIPS {
+        int      id PK
+        int      booking_id FK "การจองละ 1 ใบ"
+        string   mime_type "image/jpeg, image/png, image/webp"
+        int      size_bytes
+        binary   data "ไฟล์รูป"
+    }
+
+    SETTINGS {
+        string   key PK "เช่น cancel_free_hours"
+        text     value
+        timestamp updated_at
     }
 
     REVIEWS {
@@ -89,8 +142,9 @@ erDiagram
     }
 ```
 
-`REVIEWS`, `FAQS`, `INQUIRIES` และ `ADMIN_USERS` ไม่มีความสัมพันธ์กับตารางอื่น
-เป็นตารางเนื้อหาและบัญชีผู้ใช้ที่อยู่ลำพัง ส่วน `BOOKINGS` เป็นตารางเดียวที่อ้างถึง `ACTIVITIES`
+`REVIEWS`, `FAQS`, `INQUIRIES`, `ADMIN_USERS` และ `SETTINGS` ไม่มีความสัมพันธ์กับตารางอื่น
+`BOOKINGS` อ้างถึง `ACTIVITIES` เสมอ และอ้างถึง `USERS` เมื่อผู้จองล็อกอินอยู่
+ส่วน `NOTIFICATIONS` อ้างถึงทั้ง `USERS` และ `BOOKINGS` (ลบบัญชีหรือการจองแล้วการแจ้งเตือนที่เกี่ยวข้องถูกลบตาม)
 
 ทุกตารางมี `created_at` และ `updated_at` ที่ตั้งค่าเริ่มต้นเป็นเวลาปัจจุบัน
 
@@ -156,6 +210,42 @@ pending ──► confirmed ──► completed
 
 `payment_status` แยกจาก `status` เพราะลูกค้าอาจจ่ายเงินแล้วแต่ยังไม่ได้มาร่วมกิจกรรม
 หรือยกเลิกหลังจ่ายแล้วซึ่งต้องบันทึกเป็น `refunded`
+
+### ทำไมแยก `users` ออกจาก `admin_users`
+
+ลูกค้ากับทีมงานเป็นคนละกลุ่มที่สิทธิ์ต่างกันโดยสิ้นเชิง การแยกตารางทำให้บัญชีลูกค้าไม่มีทางได้สิทธิ์หลังบ้าน
+จากการแก้ค่า `role` ผิดพลาด token ของสองกลุ่มก็แยกชนิดกัน (`typ: user`) — token ลูกค้าเรียก `/api/admin/*` ไม่ได้
+
+### ทำไม `bookings.user_id` เป็น null ได้
+
+ลูกค้าจองได้โดยไม่ต้องสมัครสมาชิก การจองแบบนั้นผูกกับอีเมลอย่างเดียว เมื่อลูกค้าสมัครสมาชิกภายหลังด้วยอีเมลเดิม
+ระบบจะเติม `user_id` ให้การจองเก่าทั้งหมด ถ้าบัญชีถูกลบ `user_id` จะกลับเป็น null (`ON DELETE SET NULL`)
+ประวัติการจองของร้านจึงไม่หาย
+
+### การชำระเงิน
+
+`payment_status` แยกจาก `status` เพราะเป็นคนละเรื่องกัน — การจองที่ยกเลิกแล้วอาจยัง `paid` อยู่ (รอคืนเงิน)
+เมื่อได้รับเงิน ระบบบันทึก `paid_at`, `payment_method` และ `payment_ref` แล้วขยับ `pending → confirmed` ให้อัตโนมัติ
+ค่า `reviewing` ใช้กับ PromptPay เท่านั้น: ลูกค้าแจ้งว่าโอนแล้วแต่ระบบตรวจยอดเข้าบัญชีเองไม่ได้
+จึงพักไว้ให้ทีมงานเช็กยอดแล้วเปลี่ยนเป็น `paid` เอง ข้อความที่ลูกค้าแจ้ง (เช่น เวลาที่โอน) เก็บใน `payment_ref`
+การบันทึกรับเงินล็อกแถวการจองก่อน ถ้าเป็น `paid` อยู่แล้วจะไม่ทำซ้ำ จึงปลอดภัยเมื่อ webhook ยิงซ้ำ
+
+### นโยบายยกเลิก
+
+ลูกค้ายกเลิกเองได้เมื่อสถานะเป็น `pending` หรือ `confirmed` และเวลาปัจจุบันยังไม่ถึง
+`booking_date 00:00 − cancel_free_hours` (ค่าเริ่มต้น 72 ชั่วโมง แก้ได้ในตาราง `settings`)
+ทีมงานยกเลิกจากหน้าหลังบ้านได้เสมอโดยไม่ติดเงื่อนไขเวลา
+
+### `settings` แบบ key-value
+
+ค่าตั้งระบบมีไม่กี่ค่าและเพิ่มได้เรื่อย ๆ จึงเก็บเป็นแถวละ 1 ค่าแทนการเพิ่มคอลัมน์
+รายการ key ที่ใช้ได้ ชนิดข้อมูล และค่าเริ่มต้น กำหนดไว้ที่ `backend/src/services/settings.service.js`
+key ที่ไม่มีแถวในตารางจะใช้ค่าเริ่มต้น
+
+### `notifications` เป็นทั้งบันทึกอีเมลและกล่องแจ้งเตือน
+
+ทุกอีเมลที่ระบบส่งถูกบันทึกไว้ 1 แถว แถวที่มี `user_id` จะแสดงในหน้าบัญชีของลูกค้าด้วย
+ส่วน `status` บอกผลการส่งอีเมลให้ทีมงานตรวจย้อนหลังได้ว่าฉบับไหนไม่ถึงลูกค้า
 
 ### ทำไม `inquiries` ถึงมี `contact` ช่องเดียว
 

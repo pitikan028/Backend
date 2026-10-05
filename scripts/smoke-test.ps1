@@ -16,13 +16,15 @@
 param(
     [string]$BaseUrl = 'http://localhost:8080',
     [string]$AdminEmail = 'admin@chokchai.local',
-    [string]$AdminPassword = 'Admin@1234'
+    [string]$AdminPassword = 'Admin@1234',
+    [string]$MailpitUrl = 'http://localhost:8025'
 )
 
 $ErrorActionPreference = 'Stop'
 $api = "$BaseUrl/api"
 $results = @()
 $testEmail = "smoke.test@example.com"
+$memberEmail = "smoke.member@example.com"
 
 # ใช้ชื่อ property เป็นอังกฤษ เพราะ Windows PowerShell 5.1 ใช้อักษรไทยเป็นชื่อ property ไม่ได้
 # ส่วนหัวตารางภาษาไทยไปกำหนดตอน Format-Table ท้ายสคริปต์แทน
@@ -74,15 +76,17 @@ function Test-Step {
 Write-Host "`nตรวจสอบระบบที่ $BaseUrl`n" -ForegroundColor Cyan
 
 # ---------- 1. Container ----------
-Test-Step 'Container ทำงานครบ 3 ตัว' {
+Test-Step 'Container ทำงานครบ 4 ตัว' {
     $up = docker compose -f "$PSScriptRoot\..\docker-compose.yml" ps --format '{{.Name}} {{.Status}}' 2>$null
     $count = ($up | Where-Object { $_ -match 'Up' } | Measure-Object).Count
-    if ($count -lt 3) { throw "ทำงานอยู่ $count ตัว (ต้องเป็น 3)" }
-    "web, api, postgres ทำงานอยู่"
+    if ($count -lt 4) { throw "ทำงานอยู่ $count ตัว (ต้องเป็น 4)" }
+    "web, api, postgres, mailpit ทำงานอยู่"
 }
 
 # ---------- 2. หน้าเว็บ ----------
-foreach ($page in @('/', '/activities.html', '/admin.html')) {
+$pages = @('/', '/activities.html', '/activity.html', '/register.html', '/login.html',
+           '/account.html', '/booking.html', '/payment.html', '/admin.html', '/css/app.css')
+foreach ($page in $pages) {
     Test-Step "หน้าเว็บ $page" {
         $r = Invoke-WebRequest "$BaseUrl$page" -UseBasicParsing -TimeoutSec 15
         if ($r.StatusCode -ne 200) { throw "HTTP $($r.StatusCode)" }
@@ -215,11 +219,131 @@ Test-Step 'ข้ามลำดับสถานะต้องถูกปฏ
         -Body (@{ status = 'completed' } | ConvertTo-Json) -Expected 409
 }
 
+# ---------- 8. ค้นหากิจกรรม / ค่าตั้งระบบ ----------
+Test-Step 'ค้นหาและกรองกิจกรรม' {
+    $found = (Invoke-RestMethod "$api/activities?q=bathing").data
+    if ($found.Count -ne 1) { throw "ค้น bathing ได้ $($found.Count) รายการ ควรเป็น 1" }
+    $adventure = Invoke-RestMethod "$api/activities?category=adventure&sort=price_desc"
+    "ค้น 'bathing' พบ 1 · หมวด adventure พบ $($adventure.data.Count) · หมวดทั้งหมด: $($adventure.meta.categories -join ', ')"
+}
+
+$settings = $null
+Test-Step 'ค่าตั้งระบบสาธารณะ' {
+    $script:settings = (Invoke-RestMethod "$api/settings").data
+    if ($settings.PSObject.Properties.Name -contains 'admin_notify_email') { throw 'ค่าหลังบ้านรั่วออกมาใน API สาธารณะ' }
+    "เวลาทำการ: $($settings.opening_hours) · ชำระเงิน: $($settings.payment_provider)"
+}
+
+# ---------- 9. สมาชิก ----------
+docker exec chokchai-postgres psql -U chokchai -d chokchai -q -c "DELETE FROM bookings WHERE email = '$memberEmail'; DELETE FROM users WHERE email = '$memberEmail';" 2>$null | Out-Null
+
+$member = $null
+Test-Step 'สมัครสมาชิก' {
+    $body = @{ email = $memberEmail; password = 'Smoke1234'; first_name = 'สมาชิก'; last_name = 'ทดสอบ'; phone = '081-222-2222' } | ConvertTo-Json
+    $r = (Invoke-RestMethod "$api/account/register" -Method Post -Body $body -ContentType 'application/json; charset=utf-8').data
+    $script:member = @{ Authorization = "Bearer $($r.token)" }
+    "สมัครเป็น $($r.user.email)"
+}
+
+Test-Step 'สมัครซ้ำด้วยอีเมลเดิมต้องไม่ได้' {
+    $body = @{ email = $memberEmail; password = 'Smoke1234'; first_name = 'a'; last_name = 'b' } | ConvertTo-Json
+    Assert-Rejected -Url "$api/account/register" -Method 'POST' -Body $body -Expected 409
+}
+
+Test-Step 'รหัสผ่านผิดต้องเข้าสู่ระบบไม่ได้' {
+    $body = @{ email = $memberEmail; password = 'wrong-password1' } | ConvertTo-Json
+    Assert-Rejected -Url "$api/account/login" -Method 'POST' -Body $body -Expected 401
+}
+
+Test-Step 'token ของลูกค้าต้องเข้าหลังบ้านไม่ได้' {
+    Assert-Rejected -Url "$api/admin/stats" -Headers $member -Expected 403
+}
+
+$memberBooking = $null
+Test-Step 'จองแบบสมาชิก แล้วอยู่ในประวัติการจอง' {
+    $body = @{
+        activity_slug = 'ziplining'; booking_date = $date
+        adults = 1; children = 0; infants = 0
+        first_name = 'สมาชิก'; last_name = 'ทดสอบ'
+        phone = '081-222-2222'; email = $memberEmail
+        accept_terms = $true
+    } | ConvertTo-Json
+    $script:memberBooking = (Invoke-RestMethod "$api/bookings" -Method Post -Headers $member -Body $body -ContentType 'application/json; charset=utf-8').data
+    $history = (Invoke-RestMethod "$api/account/bookings" -Headers $member).data
+    if ($history[0].booking_ref -ne $memberBooking.booking_ref) { throw 'ไม่พบการจองในประวัติของบัญชี' }
+    "รหัส $($memberBooking.booking_ref) · ยกเลิกเองได้: $($history[0].cancellation.can_cancel)"
+}
+
+# ---------- 10. ชำระเงิน ----------
+Test-Step 'ชำระเงินออนไลน์ แล้วการจองถูกยืนยันอัตโนมัติ' {
+    if ($settings.payment_provider -ne 'mock') { return "provider = $($settings.payment_provider) — ข้ามการชำระจำลอง" }
+    $checkout = (Invoke-RestMethod "$api/account/bookings/$($memberBooking.booking_ref)/pay" -Method Post -Headers $member).data
+    $token = ([regex]'token=([a-f0-9]+)').Match($checkout.checkout_url).Groups[1].Value
+    $body = @{ ref = $memberBooking.booking_ref; token = $token } | ConvertTo-Json
+    $paid = (Invoke-RestMethod "$api/payments/mock/confirm" -Method Post -Body $body -ContentType 'application/json').data
+    if ($paid.payment_status -ne 'paid' -or $paid.status -ne 'confirmed') { throw "ได้ $($paid.status)/$($paid.payment_status)" }
+    "$($paid.booking_ref) → $($paid.status) / $($paid.payment_status)"
+}
+
+Test-Step 'ลิงก์ชำระเงินปลอมต้องใช้ไม่ได้' {
+    Assert-Rejected -Url "$api/payments/status?ref=$($memberBooking.booking_ref)&token=0000000000000000000000000000000000000000" -Expected 403
+}
+
+# ---------- 11. ยกเลิกการจอง ----------
+Test-Step 'ลูกค้ายกเลิกการจองเอง' {
+    $c = (Invoke-RestMethod "$api/account/bookings/$($memberBooking.booking_ref)/cancel" -Method Post -Headers $member `
+          -Body (@{ reason = 'smoke-test' } | ConvertTo-Json) -ContentType 'application/json; charset=utf-8').data
+    if ($c.status -ne 'cancelled') { throw "สถานะ = $($c.status)" }
+    "$($c.booking_ref) → $($c.status)"
+}
+
+Test-Step 'ยกเลิกซ้ำต้องถูกปฏิเสธ' {
+    Assert-Rejected -Url "$api/account/bookings/$($memberBooking.booking_ref)/cancel" -Method 'POST' -Headers $member -Body '{}' -Expected 409
+}
+
+# ---------- 12. อีเมลแจ้งเตือน ----------
+Test-Step 'การแจ้งเตือนในบัญชีของลูกค้า' {
+    $n = Invoke-RestMethod "$api/account/notifications" -Headers $member
+    $types = $n.data.type -join ', '
+    foreach ($need in @('welcome', 'booking_created', 'booking_cancelled')) {
+        if ($n.data.type -notcontains $need) { throw "ไม่มีการแจ้งเตือนประเภท $need (มี: $types)" }
+    }
+    "$($n.data.Count) รายการ: $types"
+}
+
+Test-Step 'อีเมลถูกส่งถึง Mailpit' {
+    Start-Sleep -Seconds 2
+    try { $mail = Invoke-RestMethod "$MailpitUrl/api/v1/search?query=to:$memberEmail" -TimeoutSec 10 }
+    catch { return 'เปิด Mailpit ไม่ได้ (ถ้าตั้ง SMTP จริงไว้ ข้ามข้อนี้ได้)' }
+    if ($mail.messages_count -lt 3) { throw "พบ $($mail.messages_count) ฉบับ ควรมีอย่างน้อย 3" }
+    "$($mail.messages_count) ฉบับ — เปิดดูได้ที่ $MailpitUrl"
+}
+
+# ---------- 13. หลังบ้านส่วนที่เพิ่มใหม่ ----------
+Test-Step 'รายงานยอดจอง' {
+    $r = (Invoke-RestMethod "$api/admin/reports" -Headers $headers).data
+    "$($r.from) ถึง $($r.to): จอง $($r.totals.bookings) · ยกเลิก $($r.totals.cancelled) · รายได้ $($r.totals.revenue) บาท"
+}
+
+Test-Step 'รายชื่อลูกค้าและทีมงาน' {
+    $u = Invoke-RestMethod "$api/admin/users?q=$memberEmail" -Headers $headers
+    if ($u.data.Count -ne 1) { throw "ค้นลูกค้าได้ $($u.data.Count) รายการ ควรเป็น 1" }
+    $staff = (Invoke-RestMethod "$api/admin/staff" -Headers $headers).data
+    "ลูกค้า: $($u.data[0].email) (จอง $($u.data[0].booking_count) ครั้ง) · ทีมงาน $($staff.Count) บัญชี"
+}
+
+Test-Step 'ค่าตั้งระบบ (อ่านและบันทึก)' {
+    $s = (Invoke-RestMethod "$api/admin/settings" -Headers $headers).data
+    $saved = (Invoke-RestMethod "$api/admin/settings" -Method Put -Headers $headers `
+              -Body (@{ cancel_free_hours = $s.cancel_free_hours } | ConvertTo-Json) -ContentType 'application/json').data
+    "ยกเลิกฟรีก่อน $($saved.cancel_free_hours) ชม. · จองล่วงหน้า $($saved.booking_min_lead_days) วัน · สูงสุด $($saved.booking_max_guests) คน"
+}
+
 # ---------- ล้างข้อมูลทดสอบ ----------
 Test-Step 'ล้างข้อมูลทดสอบ' {
     docker exec chokchai-postgres psql -U chokchai -d chokchai -q -c `
-        "DELETE FROM bookings WHERE email = '$testEmail'; DELETE FROM inquiries WHERE contact = '$testEmail';" 2>$null | Out-Null
-    'ลบการจองและคำถามที่สร้างระหว่างทดสอบแล้ว'
+        "DELETE FROM bookings WHERE email IN ('$testEmail', '$memberEmail'); DELETE FROM inquiries WHERE contact = '$testEmail'; DELETE FROM users WHERE email = '$memberEmail'; DELETE FROM notifications WHERE recipient IN ('$testEmail', '$memberEmail');" 2>$null | Out-Null
+    'ลบการจอง บัญชี คำถาม และการแจ้งเตือนที่สร้างระหว่างทดสอบแล้ว'
 }
 
 # ---------- สรุป ----------

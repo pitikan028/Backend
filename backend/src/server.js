@@ -2,6 +2,7 @@ import config from './config/index.js';
 import { createApp } from './app.js';
 import { db, closeDb } from './db/knex.js';
 import { waitForDatabase } from './db/wait.js';
+import { flushNotifications } from './services/notification.service.js';
 
 // ตอนรันบน Docker ให้ API รัน migration + seed เองตอนบูต จะได้ไม่ต้องสั่งมือหลัง compose up
 const autoMigrate = process.env.AUTO_MIGRATE !== 'false';
@@ -29,6 +30,8 @@ async function bootstrap() {
   const shutdown = async (signal) => {
     console.log(`\nได้รับสัญญาณ ${signal} กำลังปิดระบบ...`);
     server.close(async () => {
+      // รอให้อีเมลที่กำลังส่งอยู่ไปให้ครบก่อนปิด connection ฐานข้อมูล
+      await flushNotifications();
       await closeDb();
       process.exit(0);
     });
