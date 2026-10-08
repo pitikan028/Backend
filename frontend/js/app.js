@@ -96,7 +96,7 @@ async function renderReviews() {
       .map((review) => {
         const badge = SOURCE_BADGES[review.source] ?? SOURCE_BADGES.website;
         return `
-      <div class="bg-[#F7F4EC] rounded-2xl shadow-md px-6 py-6 flex flex-col gap-4">
+      <div class="bg-[#FFFFFF] rounded-2xl shadow-md px-6 py-6 flex flex-col gap-4">
         <div class="flex items-center justify-between">
           <div>
             <p class="font-bold text-lg leading-tight">${escapeHtml(review.author_name)}</p>
@@ -129,7 +129,7 @@ async function renderFaqs() {
         <p class="text-xs font-bold text-forest-dark">Visitor</p>
         <p class="text-sm">${escapeHtml(faq.question)}</p>
       </div>
-      <div class="bg-[#F1F3EC] border border-gray-200 rounded-lg px-3.5 py-3 max-w-md ml-auto">
+      <div class="bg-[#F2F7F1] border border-gray-200 rounded-lg px-3.5 py-3 max-w-md ml-auto">
         <p class="text-xs font-bold text-forest-dark">Elephant Camp</p>
         <p class="text-sm">${escapeHtml(faq.answer)}</p>
       </div>`,
@@ -243,7 +243,7 @@ async function renderActivityCards() {
             <a href="activity.html?slug=${escapeHtml(activity.slug)}"
                class="border border-forest text-forest font-bold py-3 rounded-lg text-center hover:bg-forest hover:text-white transition">Details</a>
             <button type="button" data-book-slug="${escapeHtml(activity.slug)}"
-              class="bg-gold hover:bg-gold/90 text-white font-bold py-3 rounded-lg transition">
+              class="bg-brick hover:bg-brick-dark text-white font-bold py-3 rounded-lg transition">
               BOOK NOW
             </button>
           </div>

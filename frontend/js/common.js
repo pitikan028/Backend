@@ -144,7 +144,7 @@ function renderChrome() {
     // sticky ต้องอยู่ที่ตัว wrapper เพราะ <header> ข้างในสูงเท่า wrapper พอดี จะไม่มีระยะให้เกาะ
     header.className = 'sticky top-0 z-40';
     header.innerHTML = `
-    <header class="bg-white/30 backdrop-blur border-b border-white/30">
+    <header class="bg-white/90 backdrop-blur border-b border-forest/10">
       <div class="mx-auto px-6 lg:px-10 h-20 flex items-center justify-between">
         <a href="index.html" class="flex items-center gap-3 lg:gap-5">
           <img src="images/Logo.webp" alt="โลโก้ปางช้างโชคชัย" class="h-12 lg:h-16 w-auto" />
@@ -153,18 +153,15 @@ function renderChrome() {
         <nav class="hidden md:flex items-center ml-auto gap-8 lg:gap-10 text-base lg:text-lg font-semibold text-dark">
           ${NAV_LINKS.map(([href, label]) => `<a href="${href}" class="hover:text-forest transition">${label}</a>`).join('')}
         </nav>
-        <div class="flex items-center gap-3 lg:gap-10 md:ml-10">
-          <div data-auth-nav class="hidden lg:flex items-center gap-8 lg:gap-10 text-base lg:text-lg font-semibold text-dark"></div>
-          <a href="activities.html" class="hidden sm:inline-block bg-forest hover:bg-forest/90 text-white text-base lg:text-lg font-semibold px-6 lg:px-7 py-3 rounded-lg shadow-md transition">Book Now</a>
+        <div class="flex items-center gap-2 sm:gap-3 md:ml-8">
+          <div data-auth-nav class="flex items-center text-base font-semibold text-dark"></div>
           <button id="nav-toggle" class="md:hidden p-2 text-forest" aria-label="เปิดเมนู">
             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
           </button>
         </div>
       </div>
-      <div id="mobile-menu" class="hidden md:hidden bg-white/80 backdrop-blur-md border-t border-white/40 px-6 py-4 flex flex-col gap-4 text-base font-semibold text-dark">
+      <div id="mobile-menu" class="hidden md:hidden bg-white/95 backdrop-blur-md border-t border-forest/10 px-6 py-4 flex flex-col gap-4 text-base font-semibold text-dark">
         ${NAV_LINKS.map(([href, label]) => `<a href="${href}">${label}</a>`).join('')}
-        <div data-auth-nav class="flex flex-col gap-4"></div>
-        <a href="activities.html" class="bg-forest text-white text-center px-6 py-3 rounded-lg">Book Now</a>
       </div>
     </header>`;
   }
@@ -188,7 +185,7 @@ function renderChrome() {
           <p class="text-white/80 text-sm mt-3" data-setting="opening_hours"></p>
         </div>
         <div>
-          <p class="text-gold font-bold mb-3">Menu</p>
+          <p class="text-mint font-bold mb-3">Menu</p>
           <ul class="text-white/80 text-sm flex flex-col gap-2.5">
             <li><a href="index.html" class="hover:text-white">Home</a></li>
             <li><a href="activities.html" class="hover:text-white">Activities</a></li>
@@ -200,7 +197,7 @@ function renderChrome() {
           </ul>
         </div>
         <div>
-          <p class="text-gold font-bold mb-3">Contact us</p>
+          <p class="text-mint font-bold mb-3">Contact us</p>
           <ul class="text-white/80 text-sm flex flex-col gap-2.5">
             <li>Tel: <span data-setting="contact_phone">095-447-2547</span></li>
             <li class="flex gap-1">
@@ -213,7 +210,7 @@ function renderChrome() {
           </ul>
         </div>
         <div>
-          <p class="text-gold font-bold mb-3">Follow us</p>
+          <p class="text-mint font-bold mb-3">Follow us</p>
           <ul class="text-white/80 text-sm flex flex-col gap-2.5">
             <li><a href="#" class="hover:text-white">Facebook</a></li>
             <li><a href="#" class="hover:text-white">Instagram</a></li>
@@ -238,25 +235,23 @@ function initMobileNav() {
 }
 
 /**
- * เติมลิงก์บัญชีลงในทุกจุดที่มี data-auth-nav (ใช้ทั้งหน้าแรกและหน้าย่อย)
- * ยังไม่ล็อกอิน: My Booking / Log in — ล็อกอินแล้ว: ไอคอนรูปคน + ชื่อ ลิงก์ไปหน้าบัญชี
+ * ปุ่มบัญชีมุมขวาบนของ header (จุดที่มี data-auth-nav) ใช้ทั้งหน้าแรกและหน้าย่อย
+ * ยังไม่ล็อกอิน: Log in — ล็อกอินแล้ว: ชื่อสมาชิก ลิงก์ไปหน้าบัญชี
+ * จอมือถือเหลือแค่ไอคอนรูปคน (ข้อความซ่อนด้วย hidden sm:inline แต่ยังอยู่ใน aria-label)
  */
 export function renderAuthNav() {
   const user = currentUser.get();
-  const linkClass = 'hover:text-forest transition whitespace-nowrap';
-  const html = user
-    ? `<a href="account.html" title="My account" aria-label="My account: ${escapeHtml(user.first_name)}"
-          class="${linkClass} inline-flex items-center gap-2">
-         <span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-forest text-white">
-           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-             <circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" />
-           </svg>
-         </span>
-         <span>${escapeHtml(user.first_name)}</span>
-       </a>`
-    : `<a href="booking.html" class="${linkClass}">My Booking</a>
-       <a href="login.html" class="${linkClass}">Log in</a>`;
+  const label = user ? escapeHtml(user.first_name) : 'Log in';
+  const href = user ? 'account.html' : 'login.html';
+  const html = `
+    <a href="${href}" aria-label="${user ? `My account: ${label}` : 'Log in'}"
+       class="inline-flex items-center gap-2 rounded-full border border-forest/30 bg-white text-forest p-2 sm:py-1.5 sm:pl-2 sm:pr-4 hover:bg-forest hover:text-white transition whitespace-nowrap">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" />
+      </svg>
+      <span class="hidden sm:inline max-w-[9rem] truncate">${label}</span>
+    </a>`;
 
   for (const slot of document.querySelectorAll('[data-auth-nav]')) slot.innerHTML = html;
 

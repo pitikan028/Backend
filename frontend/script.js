@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('reviews-more').href = googleReviews.url;
 
   googleReviews.reviews.filter((r) => r.rating >= 4).forEach((review) => {
-    const card = el('div', 'bg-[#F7F4EC] rounded-2xl shadow-md px-6 py-6 flex flex-col gap-4 shrink-0 snap-start w-[85%] md:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]');
+    const card = el('div', 'bg-[#FFFFFF] rounded-2xl shadow-md px-6 py-6 flex flex-col gap-4 shrink-0 snap-start w-[85%] md:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]');
 
     const head = el('div', 'flex items-center justify-between gap-3');
     const who = el('a', 'flex items-center gap-3 min-w-0');

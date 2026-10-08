@@ -712,7 +712,7 @@ function initActivityDetail() {
             <p id="detail-availability" class="text-sm mt-2" role="status" aria-live="polite"></p>
           </div>
           <a id="detail-book" href="activities.html?book=${encodeURIComponent(activity.slug)}"
-             class="bg-gold hover:bg-gold/90 text-white font-bold text-center py-3.5 rounded-lg transition">Book this activity</a>
+             class="bg-brick hover:bg-brick-dark text-white font-bold text-center py-3.5 rounded-lg transition">Book this activity</a>
         </aside>
       </div>`;
 

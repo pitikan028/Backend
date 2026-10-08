@@ -171,30 +171,43 @@ export function initI18n() {
 /* ============================================================
    ปุ่มสลับภาษา
    ============================================================ */
-/**
- * ปุ่มห้อยอยู่ใต้ขอบขวาของ header (ไม่ได้อยู่ในแถวเมนู) — แถวเมนูของดีไซน์เต็มพอดีที่จอโน้ตบุ๊ก
- * ใส่ปุ่มเพิ่มเข้าไปในแถวแล้วเมนูกับชื่อเว็บจะตกบรรทัด
- */
-export function renderLangSwitch() {
-  const header = document.getElementById('nav-toggle')?.closest('header');
-  if (!header || document.getElementById('lang-switch')) return;
-  // header ของหน้าแรกเป็น fixed อยู่แล้ว ส่วนของหน้าย่อยเป็น static ต้องให้เป็นจุดอ้างอิงของปุ่ม
-  if (getComputedStyle(header).position === 'static') header.style.position = 'relative';
+const GLOBE_ICON = `
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" />
+    </svg>`;
 
-  const target = isThai ? 'en' : 'th';
+function langButton(id, className, label) {
   const button = document.createElement('button');
-  button.id = 'lang-switch';
+  button.id = id;
   button.type = 'button';
   button.setAttribute('data-no-i18n', '');
   button.setAttribute('aria-label', isThai ? 'Switch to English' : 'เปลี่ยนเป็นภาษาไทย');
-  button.title = button.getAttribute('aria-label');
-  button.className =
-    'absolute right-4 lg:right-10 top-full mt-2 inline-flex items-center gap-1.5 rounded-full border border-forest/30 bg-white/90 shadow-md px-3 py-1.5 text-sm font-bold text-forest hover:bg-forest hover:text-white transition';
-  button.innerHTML = `
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-      <circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" />
-    </svg>
-    <span>${isThai ? 'EN' : 'ไทย'}</span>`;
-  button.addEventListener('click', () => setLang(target));
-  header.append(button);
+  button.className = className;
+  button.innerHTML = `${GLOBE_ICON}<span>${label}</span>`;
+  button.addEventListener('click', () => setLang(isThai ? 'en' : 'th'));
+  return button;
+}
+
+/**
+ * จอทั่วไป: ปุ่มอยู่มุมขวาบนของ header ถัดจากปุ่มบัญชี (จุดที่มี data-auth-nav)
+ * จอมือถือ: header ไม่พอสำหรับชื่อเว็บ + ปุ่มสามปุ่ม จึงย้ายไปเป็นแถวสุดท้ายของเมนูมือถือแทน
+ */
+export function renderLangSwitch() {
+  const slot = document.querySelector('header [data-auth-nav]');
+  if (!slot || document.getElementById('lang-switch')) return;
+
+  slot.before(
+    langButton(
+      'lang-switch',
+      'hidden sm:inline-flex shrink-0 items-center gap-1.5 rounded-full border border-forest/30 bg-white px-3 py-2 text-sm font-bold text-forest hover:bg-forest hover:text-white transition',
+      isThai ? 'EN' : 'ไทย',
+    ),
+  );
+  document.getElementById('mobile-menu')?.append(
+    langButton(
+      'lang-switch-mobile',
+      'sm:hidden inline-flex items-center gap-2 self-start rounded-full border border-forest/30 bg-white px-4 py-2 text-sm font-bold text-forest',
+      isThai ? 'English' : 'ภาษาไทย',
+    ),
+  );
 }

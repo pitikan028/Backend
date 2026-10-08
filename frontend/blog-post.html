@@ -20,8 +20,13 @@
             colors: {
               forest: "#21452A",
               "forest-dark": "#183420",
-              gold: "#BA9330",
-              cream: "#F9F8F2",
+              // ชื่อ gold / cream คงไว้เพื่อไม่ต้องไล่แก้ class ทั้งเว็บ — ค่าจริงคือเขียวเน้นและขาวอุ่น
+              gold: "#2F7F55",
+              cream: "#FFFCF7",
+              // ส้มอิฐใช้กับปุ่มจองเท่านั้น
+              brick: "#BF4E2B",
+              "brick-dark": "#A34022",
+              mint: "#CFE8D0",
               dark: "#252520",
             },
             fontFamily: {
@@ -65,7 +70,7 @@
   </head>
   <body class="bg-cream text-dark font-sans">
     <!-- ===== HEADER ===== -->
-    <header class="fixed inset-x-0 top-0 z-40 bg-white/60 backdrop-blur border-b border-white/30">
+    <header class="fixed inset-x-0 top-0 z-40 bg-white/90 backdrop-blur border-b border-forest/10">
       <div class="max-w-7xl mx-auto px-6 lg:px-10 h-20 flex items-center justify-between">
         <a href="index.html" class="flex items-center gap-3 lg:gap-5">
           <img src="images/Logo.webp" alt="โลโก้ปางช้างโชคชัย" class="h-12 lg:h-16 w-auto" />
@@ -79,24 +84,21 @@
           <a href="index.html#map" class="hover:text-forest transition">Maps</a>
           <a href="index.html#contact" class="hover:text-forest transition">Contact us</a>
         </nav>
-        <div class="flex items-center gap-3 lg:gap-10">
-          <!-- ลิงก์ My Booking / Log in หรือชื่อสมาชิก เติมโดย js/auth-nav.js -->
-          <div data-auth-nav class="hidden lg:flex items-center gap-8 lg:gap-10 text-base lg:text-lg font-semibold text-dark"></div>
-          <a href="activities.html" class="hidden sm:inline-block bg-forest hover:bg-forest/90 text-white text-base lg:text-lg font-semibold px-6 lg:px-7 py-3 rounded-lg shadow-md transition">Book Now</a>
+        <div class="flex items-center gap-2 sm:gap-3 md:ml-8">
+          <!-- ปุ่มสลับภาษา + ปุ่ม Log in หรือชื่อสมาชิก เติมโดย js/auth-nav.js -->
+          <div data-auth-nav class="flex items-center text-base font-semibold text-dark"></div>
           <button id="nav-toggle" class="md:hidden p-2 text-forest" aria-label="เปิดเมนู">
             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
           </button>
         </div>
       </div>
-      <div id="mobile-menu" class="hidden md:hidden bg-white/80 backdrop-blur-md border-t border-white/40 px-6 py-4 flex flex-col gap-4 text-base font-semibold text-dark">
+      <div id="mobile-menu" class="hidden md:hidden bg-white/95 backdrop-blur-md border-t border-forest/10 px-6 py-4 flex flex-col gap-4 text-base font-semibold text-dark">
         <a href="index.html">Home</a>
         <a href="index.html#activities">Activity</a>
         <a href="blog.html" class="text-forest">Blog</a>
         <a href="index.html#reviews">Review</a>
         <a href="index.html#map">Maps</a>
         <a href="index.html#contact">Contact us</a>
-        <div data-auth-nav class="flex flex-col gap-4"></div>
-        <a href="activities.html" class="bg-forest text-white text-center px-6 py-3 rounded-lg">Book Now</a>
       </div>
     </header>
 
@@ -132,9 +134,9 @@
       <!-- Call to action -->
       <section class="max-w-3xl mx-auto px-6 mt-16">
         <div class="bg-forest text-white rounded-3xl px-8 py-10 text-center shadow-xl">
-          <h2 class="font-script text-4xl lg:text-5xl text-[#F3E3B5]">Ready to Meet the Elephants?</h2>
+          <h2 class="font-script text-4xl lg:text-5xl text-mint">Ready to Meet the Elephants?</h2>
           <p class="font-['Josefin_Sans',sans-serif] text-white/85 mt-3">Book your day of feeding, bathing and jungle adventures.</p>
-          <a href="activities.html" class="inline-block mt-6 bg-white text-forest font-bold text-lg px-10 py-3.5 rounded-xl border-2 border-gold hover:bg-cream transition">Book Now!</a>
+          <a href="activities.html" class="inline-block mt-6 bg-brick hover:bg-brick-dark text-white font-bold text-lg px-10 py-3.5 rounded-xl shadow-lg transition">Book Now!</a>
         </div>
       </section>
     </main>
@@ -147,7 +149,7 @@
           <p class="text-white/80 text-sm mt-3 max-w-sm">Great things never come from comfort zones wander often, wonder always. Travel brings power and love back into your life.</p>
         </div>
         <div>
-          <p class="text-gold font-bold mb-3">Menu</p>
+          <p class="text-mint font-bold mb-3">Menu</p>
           <ul class="text-white/80 text-sm flex flex-col gap-2.5">
             <li><a href="index.html" class="hover:text-white">Home</a></li>
             <li><a href="index.html#activities" class="hover:text-white">Activities</a></li>
@@ -157,7 +159,7 @@
           </ul>
         </div>
         <div>
-          <p class="text-gold font-bold mb-3">Contact us</p>
+          <p class="text-mint font-bold mb-3">Contact us</p>
           <ul class="text-white/80 text-sm flex flex-col gap-2.5">
             <li>Tel: <a href="tel:0954472547" class="hover:text-white">095-447-2547</a></li>
             <li class="flex gap-1"><span>Line:</span><a href="https://lin.ee/Nnilm4e" target="_blank" class="underline hover:text-white">@chokchaielephant<br />https://lin.ee/Nnilm4e</a></li>
@@ -165,7 +167,7 @@
           </ul>
         </div>
         <div>
-          <p class="text-gold font-bold mb-3">Follow us</p>
+          <p class="text-mint font-bold mb-3">Follow us</p>
           <ul class="text-white/80 text-sm flex flex-col gap-2.5">
             <li><a href="#" class="hover:text-white">Facebook</a></li>
             <li><a href="#" class="hover:text-white">Instagram</a></li>
@@ -216,7 +218,7 @@
           const a = document.createElement("a");
           a.href = "blog-post.html?id=" + p.id;
           a.className =
-            "group block bg-[#F3EEDD] rounded-2xl p-5 hover:shadow-lg transition " +
+            "group block bg-[#F2F7F1] rounded-2xl p-5 hover:shadow-lg transition " +
             (alignRight ? "sm:text-right sm:col-start-2" : "");
           a.innerHTML =
             '<span class="text-xs font-bold uppercase tracking-wider text-gold"></span>' +
