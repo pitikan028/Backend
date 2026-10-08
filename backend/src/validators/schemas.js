@@ -50,9 +50,13 @@ export const activityBodySchema = z.object({
   name: trimmed(160, 'ชื่อกิจกรรม (อังกฤษ)'),
   name_th: trimmed(160, 'ชื่อกิจกรรม (ไทย)'),
   description_th: z.string().trim().max(2000).optional(),
+  // ข้อความภาษาอังกฤษ เว้นว่างได้ หน้าเว็บจะใช้ภาษาไทยแทน
+  description_en: z.string().trim().max(2000).optional(),
   highlights: z.string().trim().max(2000).optional(),
+  highlights_en: z.string().trim().max(2000).optional(),
   category: categorySlug.default('elephant'),
   duration_label: trimmed(60, 'ระยะเวลา'),
+  duration_label_en: z.string().trim().max(60).optional(),
   duration_minutes: z.coerce.number().int().min(0).max(1440).optional(),
   adult_price: z.coerce.number().min(0).max(1_000_000),
   child_price: z.coerce.number().min(0).max(1_000_000),
@@ -162,6 +166,9 @@ export const bookingListQuery = z.object({
   q: z.string().trim().max(120).optional(),
 });
 
+// ส่งออก Excel ใช้ตัวกรองชุดเดียวกับหน้ารายการ แต่เอาทุกแถวที่ตรงเงื่อนไข ไม่แบ่งหน้า
+export const bookingExportQuery = bookingListQuery.omit({ page: true, limit: true });
+
 export const bookingStatusSchema = z
   .object({
     status: z.enum(['pending', 'confirmed', 'cancelled', 'completed']).optional(),
@@ -227,6 +234,19 @@ export const loginSchema = z.object({
   email: z.string().trim().email('รูปแบบอีเมลไม่ถูกต้อง').max(160),
   password: z.string().min(1, 'ต้องกรอกรหัสผ่าน').max(200),
 });
+
+// ลูกค้าเข้าสู่ระบบด้วยอีเมลหรือเบอร์โทร — ยังรับฟิลด์ email แบบเดิมไว้ให้ client เก่าใช้ต่อได้
+export const userLoginSchema = z
+  .object({
+    identifier: z.string().trim().max(160).optional(),
+    email: z.string().trim().max(160).optional(),
+    password: z.string().min(1, 'ต้องกรอกรหัสผ่าน').max(200),
+  })
+  .transform(({ identifier, email, password }) => ({ identifier: identifier || email || '', password }))
+  .refine((data) => data.identifier.length > 0, {
+    message: 'ต้องกรอกอีเมลหรือเบอร์โทร',
+    path: ['identifier'],
+  });
 
 const password = z
   .string()

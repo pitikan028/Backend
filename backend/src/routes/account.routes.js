@@ -11,9 +11,9 @@ import {
   bookingRefParam,
   cancelBookingSchema,
   changePasswordSchema,
-  loginSchema,
   profileUpdateSchema,
   registerSchema,
+  userLoginSchema,
 } from '../validators/schemas.js';
 
 const router = Router();
@@ -44,7 +44,7 @@ router.post(
 router.post(
   '/login',
   authLimiter,
-  validate({ body: loginSchema }),
+  validate({ body: userLoginSchema }),
   asyncHandler(async (req, res) => {
     res.json({ data: await userService.login(req.body) });
   }),

@@ -10,7 +10,11 @@
 
 | ไฟล์ | หน้าที่ |
 | --- | --- |
-| `index.html` | หน้าแรก — Hero, About, กิจกรรม, รีวิว, แผนที่, FAQ, ฟอร์มส่งคำถาม |
+| `index.html` | หน้าแรก — Hero, About, Blog, กิจกรรม, รีวิว, แผนที่, FAQ, ฟอร์มส่งคำถาม (ดีไซน์จาก repo `Chokchai_frontend` branch Donut + Gipsee) |
+| `story.html`, `faq.html` | หน้า Our Story และหน้า FAQ (จาก repo `Chokchai_frontend` branch Gipsee) |
+| `blog.html`, `blog-post.html`, `blog-data.js` | หน้า Blog และข้อมูลบทความ (branch Donut) |
+| `reviews.js` | ข้อมูลรีวิวจาก Google Maps ที่แสดงในหน้าแรก (Gipsee) |
+| `script.js` | เมนูมือถือ, carousel รีวิว/รูป, FAQ ของหน้า static ข้างบน |
 | `activities.html` | หน้าเลือกกิจกรรม ค้นหา / กรอง / เรียง + Booking Modal 4 ขั้นตอน |
 | `activity.html` | รายละเอียดกิจกรรม (`?slug=...`) + เช็กที่ว่างตามวันที่ |
 | `register.html` · `login.html` | สมัครสมาชิก / เข้าสู่ระบบของลูกค้า |
@@ -25,15 +29,44 @@
 | `js/admin.js` | logic ของระบบหลังบ้าน |
 | `css/app.css` | Tailwind ที่ build แล้ว (สร้างจาก `src/tailwind.css`) |
 | `images/` | โลโก้ รูป Hero และภาพประกอบกิจกรรม (`images/activities/*.svg`) |
+| `js/inquiry.js` | ของหน้าแรก: ต่อฟอร์มส่งคำถามเข้ากับ API + เติมลิงก์บัญชีและค่าตั้งระบบ (`renderAuthNav`, `applySettings`) |
+| `js/i18n.js` · `js/i18n-th.js` · `js/lang-boot.js` | สลับภาษาอังกฤษ / ไทย (ดูหัวข้อ "สองภาษา" ด้านล่าง) |
+| `js/chat-widget.js` | ปุ่ม WhatsApp ลอยมุมขวาล่าง กดแล้วเปิดกล่องแชตก่อน แล้วปุ่ม Start Chat จึงพาไป WhatsApp |
+
+หน้าแรกและหน้า static จาก `Chokchai_frontend` ยังใช้ Tailwind ผ่าน CDN และไม่ได้โหลด `js/app.js` (reviews/FAQ มาจาก `reviews.js` + `script.js`)
+เวลาดึงงานใหม่จาก repo นั้นมาวางทับ `index.html` ให้คง `data-auth-nav`, `data-setting`, ลิงก์ `booking.html`/`account.html`, แท็ก `<script src="js/lang-boot.js">` ใน `<head>` และแท็ก `<script type="module" src="js/inquiry.js">` ท้ายไฟล์ไว้ และอย่าทับ `activities.html` (ใน repo นั้นยังเป็นเวอร์ชัน static)
+
+## สองภาษา (อังกฤษ / ไทย)
+
+ต้นฉบับของทุกหน้าเป็นภาษาอังกฤษ เวอร์ชันไทยได้จากการแปลตอนแสดงผล ผู้ใช้สลับด้วยปุ่มใต้มุมขวาของ header
+ภาษาที่เลือกจำไว้ในเบราว์เซอร์ และบังคับผ่านลิงก์ได้ เช่น `index.html?lang=th` หรือ `index.html?lang=en` (ค่าเริ่มต้นคืออังกฤษ)
+หลังบ้าน (`admin.html`) เป็นภาษาไทยอย่างเดียว
+
+| ข้อความแบบไหน | แปลที่ไหน |
+| --- | --- |
+| ข้อความคงที่ ทั้งใน HTML และที่ JavaScript สร้าง | เพิ่มคู่ `'ข้อความอังกฤษ': 'คำแปล'` ใน `js/i18n-th.js` — ไม่ต้องแก้ HTML |
+| ข้อความที่มีตัวแปรแทรก เช่น จำนวนที่ว่าง | ใช้ `t('English ...', 'ไทย ...')` จาก `js/i18n.js` ในโค้ด |
+| ชื่อ / คำอธิบาย / จุดเด่น / ระยะเวลาของกิจกรรม | แก้ในหลังบ้าน → แท็บกิจกรรม (มีช่องไทยและอังกฤษแยกกัน) |
+
+- คีย์ใน `js/i18n-th.js` ต้องตรงกับข้อความบนหน้าเว็บทั้งก้อน แก้คำในหน้าเว็บแล้วต้องแก้คีย์ให้ตรงด้วย
+  ข้อความไหนไม่มีคำแปล หน้าไทยจะแสดงเป็นอังกฤษตามเดิม (ไม่พัง) — ข้อความที่มีแท็กแทรกกลาง เช่น `<strong>` ต้องใส่ทีละท่อน
+- รีวิวจาก Google (`reviews.js`) แสดงตามต้นฉบับที่ลูกค้าเขียน ไม่แปล
+- Blog: ชื่อเรื่อง คำโปรย และเนื้อหาของบทความแปลผ่าน `js/i18n-th.js` เหมือนข้อความอื่น เพิ่มบทความใหม่แล้วให้เพิ่มคำแปลด้วย
+- ใส่ `data-no-i18n` ที่ element ไหน ข้อความข้างในจะไม่ถูกแปล
+
+## ช่วงอายุของราคา
+
+ผู้ใหญ่ / เด็ก / ทารก มีช่วงอายุกำกับในหน้ารายละเอียดกิจกรรมและหน้าต่างจอง กำหนดที่เดียวคือ `AGE_GROUPS` ใน `js/common.js`
+
+## ปุ่มแชต WhatsApp
+
+เบอร์ปลายทางอยู่ที่ `DEFAULT_NUMBER` ใน `js/chat-widget.js` (หน้าไหนมีลิงก์ `wa.me` ลอยของดีไซน์เดิม จะใช้เบอร์จากลิงก์นั้นและแทนที่ปุ่มเดิม)
 
 ## หน้าไหนเรียก API อะไร
 
 | หน้า / ส่วน | Endpoint |
 | --- | --- |
-| การ์ดกิจกรรมหน้าแรก | `GET /api/activities` |
-| คะแนนเฉลี่ยในส่วน About | `GET /api/reviews` → `meta.average_rating` |
-| รีวิว | `GET /api/reviews` |
-| FAQ | `GET /api/faqs` |
+| การ์ดกิจกรรม รีวิว FAQ และ Blog ในหน้าแรก | ไม่เรียก API — เป็นข้อมูล static ใน `index.html`, `reviews.js`, `blog-data.js` |
 | ฟอร์ม Send us Your Question | `POST /api/inquiries` |
 | การ์ด + ค้นหา/กรองในหน้ากิจกรรม | `GET /api/activities?q=&category=&sort=` |
 | หน้ารายละเอียดกิจกรรม | `GET /api/activities/:slug`, `GET .../availability` |

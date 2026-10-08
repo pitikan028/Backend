@@ -68,6 +68,7 @@ router.get('/', (_req, res) => {
         'GET    /api/admin/stats',
         'GET    /api/admin/reports?from=&to=',
         'GET    /api/admin/bookings',
+        'GET    /api/admin/bookings/export',
         'GET    /api/admin/bookings/:id',
         'GET    /api/admin/bookings/:id/slip',
         'PATCH  /api/admin/bookings/:id',

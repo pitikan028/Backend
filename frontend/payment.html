@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- ภาษาที่ผู้ใช้เลือก (EN/TH) ต้องรู้ก่อนวาดหน้า ดู js/i18n.js -->
+<script src="js/lang-boot.js"></script>
 <meta name="robots" content="noindex, nofollow" />
-<title>ชำระเงิน | Chokchai Elephant Camp</title>
+<title>Payment | Chokchai Elephant Camp</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/app.css">
@@ -16,7 +18,7 @@
 <main class="flex-1 flex items-start justify-center px-6 py-14">
   <!-- เนื้อหาสร้างจาก GET /api/payments/status?ref=&token= โดย js/pages.js -->
   <section id="payment-card" class="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 lg:p-10 w-full max-w-lg flex flex-col gap-5" aria-live="polite">
-    <p class="text-center text-gray-400 text-sm py-10">กำลังโหลดข้อมูลการชำระเงิน...</p>
+    <p class="text-center text-gray-400 text-sm py-10">Loading payment details...</p>
   </section>
 </main>
 

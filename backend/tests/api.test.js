@@ -11,6 +11,7 @@ import { createApp } from '../src/app.js';
 import { db, closeDb } from '../src/db/knex.js';
 import config from '../src/config/index.js';
 import crypto from 'node:crypto';
+import ExcelJS from 'exceljs';
 import { verifyStripeSignature } from '../src/services/payment.service.js';
 import { buildPromptPayPayload } from '../src/utils/promptpay.js';
 import { flushNotifications } from '../src/services/notification.service.js';
@@ -382,6 +383,34 @@ describe('สมาชิก: สมัคร / เข้าสู่ระบ�
     expect(res.body.data.token).toBeTruthy();
   });
 
+  it('เข้าสู่ระบบด้วยเบอร์โทรได้ ไม่ว่าจะพิมพ์รูปแบบไหน', async () => {
+    for (const identifier of ['089-000-1111', '0890001111', '+66 89 000 1111']) {
+      const res = await request(app)
+        .post('/api/account/login')
+        .send({ identifier, password: account.password })
+        .expect(200);
+      expect(res.body.data.user.email).toBe(memberEmail);
+    }
+
+    await request(app)
+      .post('/api/account/login')
+      .send({ identifier: '089-000-1111', password: 'wrong-password1' })
+      .expect(401);
+    await request(app)
+      .post('/api/account/login')
+      .send({ identifier: '080-000-0000', password: account.password })
+      .expect(401);
+    await request(app).post('/api/account/login').send({ password: account.password }).expect(422);
+  });
+
+  it('สมัครด้วยเบอร์โทรที่มีบัญชีอื่นใช้อยู่ไม่ได้', async () => {
+    const res = await request(app)
+      .post('/api/account/register')
+      .send({ ...account, email: `other${TEST_DOMAIN}`, phone: '+66890001111' })
+      .expect(409);
+    expect(res.body.error.details.some((item) => item.field === 'phone')).toBe(true);
+  });
+
   it('บันทึกแอปติดต่อ + ไอดี และรอบเวลารับของการจอง', async () => {
     const profile = await request(app)
       .patch('/api/account/me')
@@ -700,6 +729,54 @@ describe('หลังบ้าน: รายงาน / ตั้งค่า /
       sort_order: before.sort_order,
       category: before.category,
     });
+  });
+
+  it('กิจกรรมมีข้อความภาษาอังกฤษ และแอดมินแก้ได้', async () => {
+    const before = await db('activities').where({ slug: 'elephant-bathing' }).first();
+    const list = await request(app).get('/api/activities').expect(200);
+    expect(list.body.data.find((item) => item.slug === 'elephant-bathing')).toHaveProperty('description_en');
+
+    try {
+      const res = await request(app)
+        .patch(`/api/admin/activities/${before.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ duration_label_en: '90 minutes', highlights_en: '' })
+        .expect(200);
+      expect(res.body.data).toMatchObject({ duration_label_en: '90 minutes', highlights_en: '' });
+    } finally {
+      await db('activities')
+        .where({ id: before.id })
+        .update({ duration_label_en: before.duration_label_en, highlights_en: before.highlights_en });
+    }
+  });
+
+  it('GET /api/admin/bookings/export ส่งไฟล์ Excel ตามตัวกรอง', async () => {
+    await request(app).get('/api/admin/bookings/export').expect(401);
+
+    const res = await request(app)
+      .get('/api/admin/bookings/export')
+      .query({ date_from: bookingDate, date_to: bookingDate })
+      .set('Authorization', `Bearer ${token}`)
+      .buffer(true)
+      .parse((response, callback) => {
+        const chunks = [];
+        response.on('data', (chunk) => chunks.push(chunk));
+        response.on('end', () => callback(null, Buffer.concat(chunks)));
+      })
+      .expect(200);
+
+    expect(res.headers['content-type']).toContain('spreadsheetml');
+    expect(res.headers['content-disposition']).toMatch(/filename="chokchai-bookings-.+\.xlsx"/);
+
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(res.body);
+    const sheet = workbook.getWorksheet('Bookings');
+    const expected = await db('bookings').where({ booking_date: bookingDate }).count({ count: '*' });
+
+    expect(sheet.getRow(1).getCell(1).value).toBe('รหัสการจอง');
+    expect(sheet.rowCount - 1).toBe(Number(expected[0].count));
+    expect(sheet.rowCount).toBeGreaterThan(1);
+    expect(String(sheet.getRow(2).getCell(1).value)).toMatch(/^CEC-/);
   });
 });
 

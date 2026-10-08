@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- ภาษาที่ผู้ใช้เลือก (EN/TH) ต้องรู้ก่อนวาดหน้า ดู js/i18n.js -->
+<script src="js/lang-boot.js"></script>
+<title>FAQ | Chokchai Elephant Camp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          forest: '#21452A',
+          'forest-dark': '#183420',
+          gold: '#BA9330',
+          cream: '#F9F8F2',
+          dark: '#252520',
+        },
+        fontFamily: {
+          sans: ['Inter', 'sans-serif'],
+          script: ['Caveat', 'cursive'],
+        }
+      }
+    }
+  }
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  .no-scrollbar { scrollbar-width: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  details > summary { list-style: none; }
+  details > summary::-webkit-details-marker { display: none; }
+  details[open] .faq-chevron { transform: rotate(90deg); }
+  .img-placeholder {
+    background: repeating-linear-gradient(45deg, #e7ede7, #e7ede7 12px, #dbe4db 12px, #dbe4db 24px);
+  }
+</style>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+
+</head>
+<body class="bg-cream text-dark font-sans">
+
+<!-- ===== HEADER ===== -->
+    <header
+      class="fixed inset-x-0 top-0 z-40 bg-white/30 backdrop-blur border-b border-white/30"
+    >
+      <div
+        class="max-w-8xl mx-auto px-6 lg:px-10 h-20 lg:h-20 flex items-center justify-between"
+      >
+        <!-- Logo + name -->
+        <a href="index.html" class="flex items-center gap-3 lg:gap-5">
+          <img
+            src="images/Logo.webp"
+            alt="โลโก้ปางช้างโชคชัย"
+            class="h-12 lg:h-16 w-auto"
+          />
+          <span class="font-script text-2xl lg:text-3xl text-forest"
+            >Chokchai Elephant Camp</span
+          >
+        </a>
+
+        <!-- Desktop nav -->
+        <nav
+          class="hidden md:flex items-center ml-auto gap-8 lg:gap-10 text-base lg:text-lg font-semibold text-dark"
+        >
+          <a href="index.html" class="hover:text-forest transition">Home</a>
+          <a href="index.html#blog" class="hover:text-forest transition">Blog</a>
+          <a href="index.html#activities" class="hover:text-forest transition">Activity</a>
+          <a href="index.html#reviews" class="hover:text-forest transition">Review</a>
+          <a href="index.html#map" class="hover:text-forest transition">Maps</a>
+          <a href="index.html#contact" class="hover:text-forest transition">Contact us</a>
+        </nav>
+
+        <div class="flex items-center gap-3 lg:gap-10 md:ml-10">
+          <!-- ลิงก์ My Booking / Log in หรือชื่อสมาชิก เติมโดย js/auth-nav.js -->
+          <div data-auth-nav class="hidden lg:flex items-center gap-8 lg:gap-10 text-base lg:text-lg font-semibold text-dark"></div>
+          <a
+            href="activities.html"
+            class="hidden sm:inline-block bg-forest hover:bg-forest/90 text-white text-base lg:text-lg font-semibold px-6 lg:px-7 py-3 rounded-lg shadow-md transition"
+            >Book Now</a
+          >
+          <button
+            id="nav-toggle"
+            class="md:hidden p-2 text-forest"
+            aria-label="เปิดเมนู"
+          >
+            <svg
+              width="24"
+              height="24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M3 6h18M3 12h18M3 18h18" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile menu -->
+      <div
+        id="mobile-menu"
+        class="hidden md:hidden bg-white/80 backdrop-blur-md border-t border-white/40 px-6 py-4 flex flex-col gap-4 text-base font-semibold text-dark"
+      >
+        <a href="index.html">Home</a>
+        <a href="index.html#blog">Blog</a>
+        <a href="activities.html">Activity</a>
+        <a href="index.html#reviews">Review</a>
+        <a href="index.html#map">Maps</a>
+        <a href="index.html#contact">Contact us</a>
+        <div data-auth-nav class="flex flex-col gap-4"></div>
+        <a
+          href="activities.html"
+          class="bg-forest text-white text-center px-6 py-3 rounded-lg"
+          >Book Now</a
+        >
+      </div>
+    </header>
+
+<!-- ===== PAGE TITLE ===== -->
+<section class="bg-[#E5E2DA]">
+  <div class="max-w-3xl mx-auto px-6 pt-36 pb-12 text-center">
+    <span class="text-forest-dark font-bold text-sm">Frequently Asked Questions</span>
+    <h1 class="font-script text-dark text-5xl lg:text-6xl mt-3">Chokchai Elephant Camp FAQ</h1>
+    <p class="text-gray-600 text-sm mt-4">Click a question to see the answer</p>
+  </div>
+</section>
+
+<!-- ===== FAQ LIST ===== -->
+<section class="bg-cream">
+  <div class="max-w-3xl mx-auto px-6 py-16">
+    <div class="flex flex-col gap-4">
+      <details id="faq-1" class="bg-white border border-gray-200 rounded-xl shadow-sm scroll-mt-28 open:border-gold transition">
+        <summary class="cursor-pointer px-5 py-4 flex items-center justify-between gap-4 font-bold text-dark hover:text-forest">
+          <span>Can children join the elephant programmes?</span>
+          <span class="faq-chevron text-gold text-2xl leading-none transition-transform">&#8250;</span>
+        </summary>
+        <div class="px-5 pb-5 flex flex-col gap-3 text-sm text-gray-600 leading-relaxed">
+          <p>Yes! Children are very welcome at Chokchai Elephant Camp. We have a dedicated Family &amp; Kids Programme designed for children aged 3 and above. All activities are supervised and child-safe. Children aged 4–10 receive a 50% discount on all programmes. Babies in arms are free of charge.</p>
+        </div>
+      </details>
+      <details id="faq-2" class="bg-white border border-gray-200 rounded-xl shadow-sm scroll-mt-28 open:border-gold transition">
+        <summary class="cursor-pointer px-5 py-4 flex items-center justify-between gap-4 font-bold text-dark hover:text-forest">
+          <span>Is hotel transfer from Chiang Mai included?</span>
+          <span class="faq-chevron text-gold text-2xl leading-none transition-transform">&#8250;</span>
+        </summary>
+        <div class="px-5 pb-5 flex flex-col gap-3 text-sm text-gray-600 leading-relaxed">
+          <p>Hotel pickup and drop-off from Chiang Mai city centre is available as an add-on. You can select this option during the booking process on FareHarbor. We pick up from most hotels in the Nimmanhaemin, Old City, and Nimman areas. We are approximately 1 hour from the city centre.</p>
+        </div>
+      </details>
+      <details id="faq-3" class="bg-white border border-gray-200 rounded-xl shadow-sm scroll-mt-28 open:border-gold transition">
+        <summary class="cursor-pointer px-5 py-4 flex items-center justify-between gap-4 font-bold text-dark hover:text-forest">
+          <span>What should I wear to the elephant camp?</span>
+          <span class="faq-chevron text-gold text-2xl leading-none transition-transform">&#8250;</span>
+        </summary>
+        <div class="px-5 pb-5 flex flex-col gap-3 text-sm text-gray-600 leading-relaxed">
+          <p>We provide traditional shirts for all guests to wear during the programme — these are included in your booking price. Underneath, wear light, comfortable clothes. Bring closed-toe shoes or sandals you don't mind getting muddy. For the bathing session, wear clothes you're comfortable getting wet, or bring a change of clothes. Sunscreen, a hat, and insect repellent are recommended.</p>
+        </div>
+      </details>
+      <details id="faq-4" class="bg-white border border-gray-200 rounded-xl shadow-sm scroll-mt-28 open:border-gold transition">
+        <summary class="cursor-pointer px-5 py-4 flex items-center justify-between gap-4 font-bold text-dark hover:text-forest">
+          <span>Is food included in the programme?</span>
+          <span class="faq-chevron text-gold text-2xl leading-none transition-transform">&#8250;</span>
+        </summary>
+        <div class="px-5 pb-5 flex flex-col gap-3 text-sm text-gray-600 leading-relaxed">
+          <p>Yes! All our packages activities include fresh fruit and sugarcane for elephant feeding, and a traditional Thai lunch for guests. We can accommodate vegetarian and vegan diets please let us know during booking. Fresh drinking water is available throughout the day.</p>
+        </div>
+      </details>
+      <details id="faq-5" class="bg-white border border-gray-200 rounded-xl shadow-sm scroll-mt-28 open:border-gold transition">
+        <summary class="cursor-pointer px-5 py-4 flex items-center justify-between gap-4 font-bold text-dark hover:text-forest">
+          <span>What is your cancellation policy?</span>
+          <span class="faq-chevron text-gold text-2xl leading-none transition-transform">&#8250;</span>
+        </summary>
+        <div class="px-5 pb-5 flex flex-col gap-3 text-sm text-gray-600 leading-relaxed">
+          <p>Please note that all bookings are non-refundable once confirmed, unless the cancellation is made by the camp.</p>
+        </div>
+      </details>
+      <details id="faq-6" class="bg-white border border-gray-200 rounded-xl shadow-sm scroll-mt-28 open:border-gold transition">
+        <summary class="cursor-pointer px-5 py-4 flex items-center justify-between gap-4 font-bold text-dark hover:text-forest">
+          <span>Do you offer private group bookings?</span>
+          <span class="faq-chevron text-gold text-2xl leading-none transition-transform">&#8250;</span>
+        </summary>
+        <div class="px-5 pb-5 flex flex-col gap-3 text-sm text-gray-600 leading-relaxed">
+          <p>Yes, we offer private group bookings under our Cheeva Concept, designed for a more exclusive and personalized experience. Please contact us via WhatsApp or email with your group size and preferred dates for a custom quote.</p>
+        </div>
+      </details>
+      <details id="faq-7" class="bg-white border border-gray-200 rounded-xl shadow-sm scroll-mt-28 open:border-gold transition">
+        <summary class="cursor-pointer px-5 py-4 flex items-center justify-between gap-4 font-bold text-dark hover:text-forest">
+          <span>What makes Chokchai different from other elephant camps in Chiang Mai?</span>
+          <span class="faq-chevron text-gold text-2xl leading-none transition-transform">&#8250;</span>
+        </summary>
+        <div class="px-5 pb-5 flex flex-col gap-3 text-sm text-gray-600 leading-relaxed">
+          <p>Chokchai stands out as one of the largest elephant camps in Chiang Mai, with a large number of elephants that are all under our direct care — we do not rent elephants from elsewhere.</p>
+          <p>This allows us to maintain consistent welfare standards and provide a wide variety of activities in one location, offering guests a complete and seamless experience.</p>
+        </div>
+      </details>
+    </div>
+    <div class="text-center mt-12">
+      <p class="text-gray-600 text-sm mb-4">Can't find what you're looking for?</p>
+      <a href="index.html#contact" class="inline-block bg-gold hover:bg-gold/90 text-white font-bold px-7 py-3.5 rounded-lg transition">Send us Your Question</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="bg-forest-dark text-white">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 pt-14 pb-10 grid gap-10 md:grid-cols-[2fr_1fr_1.6fr_auto]">
+    <div>
+      <p class="font-script text-2xl leading-snug">Chokchai Elephant Camp Thailand<br>@Mae Taeng, Chiangmai, Thailand</p>
+      <p class="text-white/80 text-sm mt-3 max-w-sm">Great things never come from comfort zones wander often, wonder always. Travel brings power and love back into your life.</p>
+    </div>
+    <div>
+      <p class="text-gold font-bold mb-3">Menu</p>
+      <ul class="text-white/80 text-sm flex flex-col gap-2.5">
+        <li><a href="index.html" class="hover:text-white">Home</a></li>
+        <li><a href="activities.html" class="hover:text-white">Activities</a></li>
+        <li><a href="index.html#reviews" class="hover:text-white">Reviews</a></li>
+        <li><a href="activities.html" class="hover:text-white">Book Activity</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="text-gold font-bold mb-3">Contact us</p>
+      <ul class="text-white/80 text-sm flex flex-col gap-2.5">
+        <li>Tel: <a href="tel:0954472547" class="hover:text-white">095-447-2547</a></li>
+        <li class="flex gap-1">
+          <span>Line:</span>
+          <a href="https://lin.ee/Nnilm4e" target="_blank" class="underline hover:text-white">@chokchaielephant<br>https://lin.ee/Nnilm4e</a>
+        </li>
+        <li>E-mail: <a href="mailto:Chokchaielephantcampcnx@gmail.com" class="underline hover:text-white">Chokchaielephantcampcnx@gmail.com</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="text-gold font-bold mb-3">Follow us</p>
+      <ul class="text-white/80 text-sm flex flex-col gap-2.5">
+        <li><a href="#" class="hover:text-white">Facebook</a></li>
+        <li><a href="#" class="hover:text-white">Instagram</a></li>
+        <li><a href="#" class="hover:text-white">TripAdvisor</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+    <div class="border-t border-white/20 py-6 text-center text-white/70 text-xs">
+      Copyright | All Rights Reserved | Powered by chokchai elephant camp thailand
+    </div>
+  </div>
+</footer>
+
+<!-- ===== WHATSAPP FLOATING BUTTON ===== -->
+<a href="https://wa.me/66651234567" target="_blank"
+   class="fixed bottom-6 right-6 z-50 bg-[#25D366] w-16 h-16 rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition">
+  <svg width="30" height="30" viewBox="0 0 24 24" fill="white"><path d="M12.04 2c-5.46 0-9.9 4.44-9.9 9.9 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.46 0 9.9-4.44 9.9-9.9s-4.44-9.9-9.9-9.93zm0 18.02c-1.5 0-2.97-.4-4.24-1.16l-.3-.18-3.12.82.83-3.04-.2-.31a8.15 8.15 0 01-1.25-4.35c0-4.51 3.67-8.18 8.18-8.18 2.18 0 4.23.85 5.78 2.4a8.12 8.12 0 012.4 5.79c0 4.51-3.67 8.21-8.18 8.21zm4.48-6.13c-.25-.12-1.45-.71-1.67-.8-.22-.08-.39-.12-.55.13-.16.24-.63.79-.78.96-.14.16-.29.18-.53.06-.25-.12-1.04-.38-1.98-1.22-.73-.65-1.23-1.46-1.37-1.71-.14-.24-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.14.16-.24.24-.4.08-.16.04-.31-.02-.43-.06-.12-.55-1.33-.76-1.82-.2-.48-.4-.42-.55-.42h-.47c-.16 0-.43.06-.65.31-.22.24-.86.84-.86 2.04 0 1.2.88 2.36 1 2.53.12.16 1.74 2.66 4.22 3.72.59.25 1.05.4 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.45-.59 1.65-1.16.2-.57.2-1.06.14-1.16-.06-.1-.22-.16-.47-.28z"/></svg>
+</a>
+
+<script src="script.js"></script>
+<script type="module" src="js/auth-nav.js"></script>
+</body>
+</html>

@@ -296,10 +296,10 @@ export async function markPaid(bookingId, { method, paymentRef }) {
   });
 }
 
-export async function listBookings(filters) {
-  const { page, limit, status, payment_status, activity_id, date_from, date_to, q } = filters;
-
-  const applyFilters = (query) => {
+/** ตัวกรองของหน้ารายการจองหลังบ้าน ใช้ร่วมกันระหว่างรายการแบบแบ่งหน้าและไฟล์ส่งออก */
+const bookingFilters =
+  ({ status, payment_status, activity_id, date_from, date_to, q }) =>
+  (query) => {
     if (status) query.where('bookings.status', status);
     if (payment_status) query.where('bookings.payment_status', payment_status);
     if (activity_id) query.where('bookings.activity_id', activity_id);
@@ -319,6 +319,10 @@ export async function listBookings(filters) {
     return query;
   };
 
+export async function listBookings(filters) {
+  const { page, limit } = filters;
+  const applyFilters = bookingFilters(filters);
+
   const [{ count }] = await applyFilters(db('bookings')).count({ count: '*' });
   const total = Number(count);
 
@@ -331,6 +335,26 @@ export async function listBookings(filters) {
     data: rows.map(serializeBooking),
     meta: { page, limit, total, total_pages: Math.max(1, Math.ceil(total / limit)) },
   };
+}
+
+// กันไฟล์ส่งออกใหญ่จนกินหน่วยความจำของ API — ถ้าเกินให้แอดมินกรองช่วงวันที่ให้แคบลง
+export const EXPORT_MAX_ROWS = 20000;
+
+/** ทุกการจองที่ตรงตัวกรอง เรียงตามวันที่เข้าร่วมกิจกรรม สำหรับส่งออกเป็นไฟล์ */
+export async function listBookingsForExport(filters) {
+  const rows = await bookingFilters(filters)(withActivity(db('bookings')))
+    .orderBy([
+      { column: 'bookings.booking_date', order: 'asc' },
+      { column: 'bookings.id', order: 'asc' },
+    ])
+    .limit(EXPORT_MAX_ROWS + 1);
+
+  if (rows.length > EXPORT_MAX_ROWS) {
+    throw ApiError.unprocessable(
+      `มีรายการเกิน ${EXPORT_MAX_ROWS} แถว กรุณากรองช่วงวันที่ให้แคบลงก่อนส่งออก`,
+    );
+  }
+  return rows.map(serializeBooking);
 }
 
 export async function getBookingById(id) {

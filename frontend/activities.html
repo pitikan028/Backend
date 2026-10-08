@@ -1,9 +1,11 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>เลือกเซ็ทกิจกรรม | Chokchai Elephant Camp</title>
+<!-- ภาษาที่ผู้ใช้เลือก (EN/TH) ต้องรู้ก่อนวาดหน้า ดู js/i18n.js -->
+<script src="js/lang-boot.js"></script>
+<title>Activities | Chokchai Elephant Camp</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/app.css">
@@ -11,42 +13,13 @@
 <body class="bg-cream text-dark font-sans">
 
 <!-- ===== HEADER (same as index.html) ===== -->
-<header class="sticky top-0 z-40 bg-white border-b border-gray-200">
-  <div class="max-w-7xl mx-auto px-6 lg:px-10 h-20 flex items-center justify-between">
-    <a href="index.html" class="text-xl font-extrabold text-forest">Chokchai Elephant Camp</a>
-    <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-dark">
-      <a href="index.html" class="hover:text-forest">หน้าแรก</a>
-      <a href="index.html#about" class="hover:text-forest">เกี่ยวกับเรา</a>
-      <a href="activities.html" class="text-forest">กิจกรรม</a>
-      <a href="index.html#reviews" class="hover:text-forest">รีวิว</a>
-      <a href="index.html#map" class="hover:text-forest">แผนที่</a>
-      <a href="index.html#contact" class="hover:text-forest">ติดต่อเรา</a>
-    </nav>
-    <div class="flex items-center gap-4">
-      <!-- ลิงก์เข้าสู่ระบบ / บัญชีของฉัน เติมโดย js/common.js -->
-      <div data-auth-nav class="hidden lg:flex items-center gap-4 text-sm font-semibold"></div>
-      <a href="#grid" class="hidden sm:inline-block bg-gold hover:bg-gold/90 text-white text-sm font-bold px-6 py-3 rounded-lg transition">จองเลย</a>
-      <button id="nav-toggle" class="md:hidden p-2" aria-label="เปิดเมนู">
-        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
-      </button>
-    </div>
-  </div>
-  <div id="mobile-menu" class="hidden md:hidden border-t border-gray-100 px-6 py-4 flex flex-col gap-4 text-sm font-semibold">
-    <a href="index.html">หน้าแรก</a>
-    <a href="index.html#about">เกี่ยวกับเรา</a>
-    <a href="activities.html">กิจกรรม</a>
-    <a href="index.html#reviews">รีวิว</a>
-    <a href="index.html#map">แผนที่</a>
-    <a href="index.html#contact">ติดต่อเรา</a>
-    <div data-auth-nav class="flex flex-col gap-4"></div>
-  </div>
-</header>
+<div id="site-header"></div>
 
 <!-- ===== PAGE HERO ===== -->
 <section class="bg-cream text-center px-6 py-16">
-  <span class="text-gold font-bold text-sm">เลือกกิจกรรมที่ใช่สำหรับคุณ</span>
-  <h1 class="text-3xl lg:text-4xl font-extrabold text-forest mt-2">เลือกเซ็ทกิจกรรมของคุณ</h1>
-  <p class="text-gray-600 mt-3 max-w-xl mx-auto">ค้นพบโปรแกรมสังเกตการณ์ช้างและกิจกรรมวัฒนธรรมสุดพิเศษของเรา เลือกเซ็ทที่ใช่ แล้วจองออนไลน์ได้ทันที</p>
+  <span class="text-gold font-bold text-sm">Find the Right Activity for You</span>
+  <h1 class="font-script text-forest-dark text-4xl lg:text-5xl mt-3">Choose Your Activity Set</h1>
+  <p class="text-gray-600 mt-3 max-w-xl mx-auto">Discover our elephant observation programmes and unique cultural activities. Pick the set that suits you and book online in minutes.</p>
 </section>
 
 <!-- ===== ACTIVITY GRID — สร้างจาก GET /api/activities ===== -->
@@ -55,26 +28,26 @@
     <!-- ค้นหาและกรอง — ส่งเป็น query ไปที่ GET /api/activities?q=&category=&sort= -->
     <form id="activity-filters" class="bg-cream border border-gray-200 rounded-2xl p-4 grid gap-3 md:grid-cols-[1fr_auto_auto_auto] items-end" role="search">
       <div>
-        <label for="filter-q" class="text-xs font-semibold text-gray-600 block mb-1.5">ค้นหากิจกรรม</label>
-        <input id="filter-q" name="q" type="search" maxlength="80" placeholder="เช่น อาบน้ำช้าง, rafting"
+        <label for="filter-q" class="text-xs font-semibold text-gray-600 block mb-1.5">Search activities</label>
+        <input id="filter-q" name="q" type="search" maxlength="80" placeholder="e.g. bathing, rafting"
                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 bg-white text-sm focus:outline-none focus:border-gold" />
       </div>
       <div>
-        <label for="filter-category" class="text-xs font-semibold text-gray-600 block mb-1.5">หมวดหมู่</label>
+        <label for="filter-category" class="text-xs font-semibold text-gray-600 block mb-1.5">Category</label>
         <select id="filter-category" name="category" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 bg-white text-sm">
-          <option value="">ทุกหมวดหมู่</option>
+          <option value="">All categories</option>
         </select>
       </div>
       <div>
-        <label for="filter-sort" class="text-xs font-semibold text-gray-600 block mb-1.5">เรียงตาม</label>
+        <label for="filter-sort" class="text-xs font-semibold text-gray-600 block mb-1.5">Sort by</label>
         <select id="filter-sort" name="sort" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 bg-white text-sm">
-          <option value="">แนะนำ</option>
-          <option value="price_asc">ราคาต่ำไปสูง</option>
-          <option value="price_desc">ราคาสูงไปต่ำ</option>
-          <option value="duration">ระยะเวลาสั้นไปยาว</option>
+          <option value="">Recommended</option>
+          <option value="price_asc">Price: low to high</option>
+          <option value="price_desc">Price: high to low</option>
+          <option value="duration">Duration: short to long</option>
         </select>
       </div>
-      <button type="reset" class="border border-gray-300 bg-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-50 transition">ล้างตัวกรอง</button>
+      <button type="reset" class="border border-gray-300 bg-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-50 transition">Clear filters</button>
     </form>
     <p id="filter-count" class="text-sm text-gray-500 mt-3" role="status" aria-live="polite"></p>
   </div>
@@ -82,41 +55,7 @@
 </section>
 
 <!-- ===== FOOTER (same as index.html) ===== -->
-<footer class="bg-forest-dark text-white">
-  <div class="max-w-7xl mx-auto px-6 lg:px-10 py-14 grid md:grid-cols-4 gap-10">
-    <div>
-      <p class="text-xl font-extrabold">Chokchai Elephant Camp</p>
-      <p class="text-white/60 text-sm mt-2">ปางช้างเชิงอนุรักษ์ จ.เชียงใหม่</p>
-    </div>
-    <div>
-      <p class="text-gold font-bold text-sm mb-3">เมนู</p>
-      <ul class="text-white/70 text-sm flex flex-col gap-2">
-        <li><a href="index.html">หน้าแรก</a></li>
-        <li><a href="activities.html">กิจกรรม</a></li>
-        <li><a href="index.html#reviews">รีวิว</a></li>
-        <li><a href="booking.html">ตรวจสอบการจอง</a></li>
-        <li><a href="account.html">บัญชีของฉัน</a></li>
-      </ul>
-    </div>
-    <div>
-      <p class="text-gold font-bold text-sm mb-3">ติดต่อ</p>
-      <ul class="text-white/70 text-sm flex flex-col gap-2">
-        <li>โทร: 095-447-2547</li>
-        <li>Line: @chokchaielephant</li>
-      </ul>
-    </div>
-    <div>
-      <p class="text-gold font-bold text-sm mb-3">ติดตามเรา</p>
-      <ul class="text-white/70 text-sm flex flex-col gap-2">
-        <li><a href="#">Facebook</a></li>
-        <li><a href="#">Instagram</a></li>
-      </ul>
-    </div>
-  </div>
-  <div class="border-t border-white/10 py-6 text-center text-white/50 text-xs">
-    © 2026 Chokchai Elephant Camp | สงวนลิขสิทธิ์
-  </div>
-</footer>
+<div id="site-footer" data-flush></div>
 
 <!-- ============================================================ -->
 <!-- ===== BOOKING MODAL (แพ็กเกจ → ติดต่อ → รับ-ส่ง → ยืนยัน) ===== -->
@@ -124,7 +63,7 @@
 <div id="booking-modal-overlay" class="hidden fixed inset-0 z-50 bg-black/50 flex items-start justify-center p-4 overflow-y-auto">
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl my-8 p-8 lg:p-12 relative">
 
-    <button type="button" data-modal-action="close" aria-label="ปิดหน้าต่าง"
+    <button type="button" data-modal-action="close" aria-label="Close"
             class="absolute top-6 right-6 text-gray-400 hover:text-dark text-2xl leading-none">&times;</button>
 
     <!-- ---------- ฟอร์มจอง ---------- -->
@@ -134,22 +73,22 @@
       <div class="flex items-center mb-8">
         <div class="flex flex-col items-center">
           <div id="step-circle-1" class="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm border bg-gold text-white border-transparent">1</div>
-          <span id="step-label-1" class="text-xs mt-2 font-bold text-gold">แพ็กเกจ</span>
+          <span id="step-label-1" class="text-xs mt-2 font-bold text-gold">Package</span>
         </div>
         <div id="step-line-1" class="flex-1 h-0.5 mx-2 bg-gray-300"></div>
         <div class="flex flex-col items-center">
           <div id="step-circle-2" class="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm border bg-white text-gray-400 border-gray-300">2</div>
-          <span id="step-label-2" class="text-xs mt-2 text-gray-400">ติดต่อ</span>
+          <span id="step-label-2" class="text-xs mt-2 text-gray-400">Contact</span>
         </div>
         <div id="step-line-2" class="flex-1 h-0.5 mx-2 bg-gray-300"></div>
         <div class="flex flex-col items-center">
           <div id="step-circle-3" class="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm border bg-white text-gray-400 border-gray-300">3</div>
-          <span id="step-label-3" class="text-xs mt-2 text-gray-400">รับ-ส่ง</span>
+          <span id="step-label-3" class="text-xs mt-2 text-gray-400">Pickup</span>
         </div>
         <div id="step-line-3" class="flex-1 h-0.5 mx-2 bg-gray-300"></div>
         <div class="flex flex-col items-center">
           <div id="step-circle-4" class="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm border bg-white text-gray-400 border-gray-300">4</div>
-          <span id="step-label-4" class="text-xs mt-2 text-gray-400">ยืนยัน</span>
+          <span id="step-label-4" class="text-xs mt-2 text-gray-400">Confirm</span>
         </div>
       </div>
 
@@ -161,17 +100,17 @@
 
       <!-- STEP 1: แพ็กเกจ -->
       <div id="step-panel-1" class="flex flex-col gap-5">
-        <p class="font-extrabold text-lg flex items-center gap-2">📋 รายละเอียดแพ็กเกจ</p>
+        <p class="font-extrabold text-lg flex items-center gap-2">📋 Package details</p>
         <div>
-          <label for="input-date" class="text-sm font-semibold block mb-2">วันที่เข้าร่วมกิจกรรม</label>
+          <label for="input-date" class="text-sm font-semibold block mb-2">Activity date</label>
           <input type="date" id="input-date" name="booking_date" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream" />
           <!-- ตัวเลขที่ว่างมาจาก GET /api/activities/:slug/availability ทุกครั้งที่เปลี่ยนวันที่ -->
           <p id="availability-label" class="text-sm mt-2" role="status" aria-live="polite"></p>
         </div>
-        <p class="font-bold text-sm">จำนวนผู้เข้าร่วม</p>
+        <p class="font-bold text-sm">Number of guests</p>
         <div class="grid sm:grid-cols-3 gap-4">
           <div>
-            <label for="qty-adult" class="text-sm font-semibold block mb-2">ผู้ใหญ่ (<span id="input-adult-price"></span>)</label>
+            <label for="qty-adult" class="text-sm font-semibold block mb-2">Adults (<span id="input-adult-price"></span>)<span data-age="adult" class="block text-xs font-normal text-gray-500 mt-0.5"></span></label>
             <div class="flex items-center border border-gray-300 rounded-lg bg-cream overflow-hidden">
               <button type="button" data-qty-btn="dec" data-target="qty-adult" class="px-4 py-3 font-bold text-forest">-</button>
               <input id="qty-adult" name="adults" type="number" value="2" min="0" max="100" class="w-full text-center bg-transparent py-3" />
@@ -179,7 +118,7 @@
             </div>
           </div>
           <div>
-            <label for="qty-child" class="text-sm font-semibold block mb-2">เด็ก (<span id="input-child-price"></span>)</label>
+            <label for="qty-child" class="text-sm font-semibold block mb-2">Children (<span id="input-child-price"></span>)<span data-age="child" class="block text-xs font-normal text-gray-500 mt-0.5"></span></label>
             <div class="flex items-center border border-gray-300 rounded-lg bg-cream overflow-hidden">
               <button type="button" data-qty-btn="dec" data-target="qty-child" class="px-4 py-3 font-bold text-forest">-</button>
               <input id="qty-child" name="children" type="number" value="0" min="0" max="100" class="w-full text-center bg-transparent py-3" />
@@ -187,7 +126,7 @@
             </div>
           </div>
           <div>
-            <label for="qty-infant" class="text-sm font-semibold block mb-2">ทารก (0 ฿)</label>
+            <label for="qty-infant" class="text-sm font-semibold block mb-2">Infants (<span id="input-infant-price"></span>)<span data-age="infant" class="block text-xs font-normal text-gray-500 mt-0.5"></span></label>
             <div class="flex items-center border border-gray-300 rounded-lg bg-cream overflow-hidden">
               <button type="button" data-qty-btn="dec" data-target="qty-infant" class="px-4 py-3 font-bold text-forest">-</button>
               <input id="qty-infant" name="infants" type="number" value="0" min="0" max="100" class="w-full text-center bg-transparent py-3" />
@@ -196,32 +135,32 @@
           </div>
         </div>
         <div class="flex justify-end items-baseline gap-2">
-          <span class="font-extrabold text-lg">ยอดรวม :</span>
+          <span class="font-extrabold text-lg">Total:</span>
           <span id="total-amount" class="font-extrabold text-2xl text-gold"></span>
         </div>
         <div class="flex justify-end">
-          <button type="button" data-modal-action="next" class="bg-forest hover:bg-forest-dark text-white font-bold px-8 py-3.5 rounded-lg transition">ถัดไป</button>
+          <button type="button" data-modal-action="next" class="bg-forest hover:bg-forest-dark text-white font-bold px-8 py-3.5 rounded-lg transition">Next</button>
         </div>
       </div>
 
       <!-- STEP 2: ติดต่อ -->
       <div id="step-panel-2" class="hidden flex flex-col gap-5">
-        <p class="font-extrabold text-lg flex items-center gap-2">👤 ข้อมูลติดต่อ</p>
+        <p class="font-extrabold text-lg flex items-center gap-2">👤 Contact details</p>
         <div class="grid sm:grid-cols-2 gap-4">
           <div>
-            <label for="input-firstname" class="text-sm font-semibold block mb-2">ชื่อจริง *</label>
-            <input id="input-firstname" name="first_name" type="text" maxlength="100" placeholder="ชื่อจริงของคุณ" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream" />
+            <label for="input-firstname" class="text-sm font-semibold block mb-2">First name *</label>
+            <input id="input-firstname" name="first_name" type="text" maxlength="100" placeholder="Your first name" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream" />
           </div>
           <div>
-            <label for="input-lastname" class="text-sm font-semibold block mb-2">นามสกุล *</label>
-            <input id="input-lastname" name="last_name" type="text" maxlength="100" placeholder="นามสกุลของคุณ" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream" />
+            <label for="input-lastname" class="text-sm font-semibold block mb-2">Last name *</label>
+            <input id="input-lastname" name="last_name" type="text" maxlength="100" placeholder="Your last name" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream" />
           </div>
           <div>
-            <label for="input-phone" class="text-sm font-semibold block mb-2">เบอร์โทร/มือถือ *</label>
+            <label for="input-phone" class="text-sm font-semibold block mb-2">Phone / mobile *</label>
             <input id="input-phone" name="phone" type="tel" maxlength="40" placeholder="08X-XXX-XXXX" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream" />
           </div>
           <div>
-            <label for="input-contact-app" class="text-sm font-semibold block mb-2">แอปติดต่อ *</label>
+            <label for="input-contact-app" class="text-sm font-semibold block mb-2">Contact app *</label>
             <select id="input-contact-app" name="contact_app" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream">
               <option value="Line">Line</option>
               <option value="WhatsApp">WhatsApp</option>
@@ -234,76 +173,76 @@
           <!-- ชื่อช่องเปลี่ยนตามแอปที่เลือก (LINE ID / เบอร์ WhatsApp / WeChat ID / Instagram) -->
           <label for="input-contact-id" id="label-contact-id" class="text-sm font-semibold block mb-2">LINE ID *</label>
           <input id="input-contact-id" name="contact_id" type="text" maxlength="80" autocomplete="off" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream" />
-          <p class="text-xs text-gray-500 mt-1">ทีมงานจะใช้ช่องทางนี้ยืนยันเวลารับและส่งรายละเอียดการเดินทาง</p>
+          <p class="text-xs text-gray-500 mt-1">Our team will use this to confirm your pickup time and send travel details.</p>
         </div>
         <div>
-          <label for="input-email" class="text-sm font-semibold block mb-2">อีเมล *</label>
-          <input id="input-email" name="email" type="email" maxlength="160" placeholder="อีเมลของคุณ" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream" />
-          <p class="text-xs text-gray-500 mt-1">ใช้อีเมลนี้คู่กับรหัสการจองเพื่อดูสถานะภายหลัง กรุณากรอกให้ถูกต้อง</p>
+          <label for="input-email" class="text-sm font-semibold block mb-2">Email *</label>
+          <input id="input-email" name="email" type="email" maxlength="160" placeholder="Your email" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream" />
+          <p class="text-xs text-gray-500 mt-1">You will need this email and your booking reference to check your booking later, so please enter it carefully.</p>
         </div>
         <div>
-          <label for="input-note" class="text-sm font-semibold block mb-2">ความคิดเห็นเพิ่มเติม</label>
-          <textarea id="input-note" name="note" rows="3" maxlength="1000" placeholder="ระบุความต้องการพิเศษ, อาหารที่แพ้ หรือข้อจำกัดด้านอาหาร" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream"></textarea>
+          <label for="input-note" class="text-sm font-semibold block mb-2">Additional notes</label>
+          <textarea id="input-note" name="note" rows="3" maxlength="1000" placeholder="Special requests, food allergies or dietary restrictions" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream"></textarea>
         </div>
         <div class="flex justify-between">
-          <button type="button" data-modal-action="back" class="border border-forest text-forest font-bold px-8 py-3.5 rounded-lg">ย้อนกลับ</button>
-          <button type="button" data-modal-action="next" class="bg-forest hover:bg-forest-dark text-white font-bold px-8 py-3.5 rounded-lg transition">ถัดไป</button>
+          <button type="button" data-modal-action="back" class="border border-forest text-forest font-bold px-8 py-3.5 rounded-lg">Back</button>
+          <button type="button" data-modal-action="next" class="bg-forest hover:bg-forest-dark text-white font-bold px-8 py-3.5 rounded-lg transition">Next</button>
         </div>
       </div>
 
       <!-- STEP 3: รับ-ส่ง -->
       <div id="step-panel-3" class="hidden flex flex-col gap-5">
-        <p class="font-extrabold text-lg flex items-center gap-2">🚐 จุดรับ-ส่ง</p>
-        <p class="font-semibold text-sm">ต้องการให้ไปรับที่ไหน?</p>
+        <p class="font-extrabold text-lg flex items-center gap-2">🚐 Pickup point</p>
+        <p class="font-semibold text-sm">Where would you like to be picked up?</p>
         <div class="flex flex-col gap-3">
           <label class="flex items-center gap-3">
-            <input type="radio" name="pickup" value="hotel" data-label="โรงแรม (Hotel)" checked class="accent-gold w-5 h-5" />
-            <span>โรงแรม (Hotel)</span>
+            <input type="radio" name="pickup" value="hotel" data-label="Hotel" checked class="accent-gold w-5 h-5" />
+            <span>Hotel</span>
           </label>
           <label class="flex items-center gap-3">
-            <input type="radio" name="pickup" value="meeting_point" data-label="จุดนัดพบ (Meeting Point)" class="accent-gold w-5 h-5" />
-            <span>จุดนัดพบ (Meeting Point)</span>
+            <input type="radio" name="pickup" value="meeting_point" data-label="Meeting point" class="accent-gold w-5 h-5" />
+            <span>Meeting point</span>
           </label>
           <label class="flex items-center gap-3">
-            <input type="radio" name="pickup" value="airbnb" data-label="Airbnb / ที่พักส่วนตัว" class="accent-gold w-5 h-5" />
-            <span>Airbnb / ที่พักส่วนตัว</span>
+            <input type="radio" name="pickup" value="airbnb" data-label="Airbnb / private accommodation" class="accent-gold w-5 h-5" />
+            <span>Airbnb / private accommodation</span>
           </label>
           <label class="flex items-center gap-3">
-            <input type="radio" name="pickup" value="undecided" data-label="ยังไม่ตัดสินใจ" class="accent-gold w-5 h-5" />
-            <span>ยังไม่ตัดสินใจตอนนี้</span>
+            <input type="radio" name="pickup" value="undecided" data-label="Not decided yet" class="accent-gold w-5 h-5" />
+            <span>Not decided yet</span>
           </label>
         </div>
         <div>
-          <label for="input-pickup-detail" class="text-sm font-semibold block mb-2">ชื่อที่พัก / จุดรับ (ถ้ามี)</label>
-          <input id="input-pickup-detail" name="pickup_detail" type="text" maxlength="255" placeholder="เช่น Nimman Hotel ซอย 5" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream" />
+          <label for="input-pickup-detail" class="text-sm font-semibold block mb-2">Accommodation name / pickup point (optional)</label>
+          <input id="input-pickup-detail" name="pickup_detail" type="text" maxlength="255" placeholder="e.g. Nimman Hotel, Soi 5" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream" />
         </div>
         <div>
-          <p class="font-semibold text-sm mb-3">เลือกรอบเวลารับ *</p>
+          <p class="font-semibold text-sm mb-3">Choose a pickup round *</p>
           <!-- เวลาของแต่ละรอบมาจากหน้าตั้งค่าระบบ (GET /api/settings) -->
           <div class="grid sm:grid-cols-2 gap-3">
             <label class="flex items-center gap-3 border border-gray-300 rounded-lg px-4 py-3 bg-cream cursor-pointer has-[:checked]:border-gold has-[:checked]:bg-white">
-              <input type="radio" name="pickup_round" value="morning" data-label="รอบเช้า" checked class="accent-gold w-5 h-5" />
+              <input type="radio" name="pickup_round" value="morning" data-label="Morning round" checked class="accent-gold w-5 h-5" />
               <span>
-                <span class="font-extrabold text-forest block">รอบเช้า</span>
-                <span class="text-sm text-gray-600">เวลารับ <span data-setting="pickup_time_morning">06:00 - 06:30 น.</span></span>
+                <span class="font-extrabold text-forest block">Morning round</span>
+                <span class="text-sm text-gray-600">Pickup time <span data-setting="pickup_time_morning">06:00 - 06:30</span></span>
               </span>
             </label>
             <label class="flex items-center gap-3 border border-gray-300 rounded-lg px-4 py-3 bg-cream cursor-pointer has-[:checked]:border-gold has-[:checked]:bg-white">
-              <input type="radio" name="pickup_round" value="afternoon" data-label="รอบกลางวัน" class="accent-gold w-5 h-5" />
+              <input type="radio" name="pickup_round" value="afternoon" data-label="Afternoon round" class="accent-gold w-5 h-5" />
               <span>
-                <span class="font-extrabold text-forest block">รอบกลางวัน</span>
-                <span class="text-sm text-gray-600">เวลารับ <span data-setting="pickup_time_afternoon">11:30 - 12:00 น.</span></span>
+                <span class="font-extrabold text-forest block">Afternoon round</span>
+                <span class="text-sm text-gray-600">Pickup time <span data-setting="pickup_time_afternoon">11:30 - 12:00</span></span>
               </span>
             </label>
           </div>
         </div>
         <p class="text-xs text-gray-500 leading-relaxed">
-          * เวลารับอาจคลาดเคลื่อนเล็กน้อยตามจุดรับ หากมีการเปลี่ยนแปลงจะแจ้งให้ทราบทางอีเมลล่วงหน้า<br>
-          * บริการรับส่งฟรีในรัศมี 5 กม. จากตัวเมืองเชียงใหม่ นอกเขตนี้มีค่าใช้จ่ายเพิ่มเติม
+          * Pickup times may vary slightly depending on your pickup point. We will email you in advance if anything changes.<br>
+          * Pickup and drop-off are free within 5 km of Chiang Mai city. An extra charge applies outside this area.
         </p>
         <div class="flex justify-between">
-          <button type="button" data-modal-action="back" class="border border-forest text-forest font-bold px-8 py-3.5 rounded-lg">ย้อนกลับ</button>
-          <button type="button" data-modal-action="next" class="bg-forest hover:bg-forest-dark text-white font-bold px-8 py-3.5 rounded-lg transition">ถัดไป</button>
+          <button type="button" data-modal-action="back" class="border border-forest text-forest font-bold px-8 py-3.5 rounded-lg">Back</button>
+          <button type="button" data-modal-action="next" class="bg-forest hover:bg-forest-dark text-white font-bold px-8 py-3.5 rounded-lg transition">Next</button>
         </div>
       </div>
 
@@ -327,27 +266,27 @@
           </div>
         </div>
         <div class="flex justify-end items-baseline gap-2">
-          <span class="font-extrabold text-lg">ยอดรวม :</span>
+          <span class="font-extrabold text-lg">Total:</span>
           <span id="checkout-amount" class="font-extrabold text-2xl text-gold"></span>
         </div>
-        <p class="font-extrabold text-lg flex items-center gap-2">💳 การชำระเงิน</p>
+        <p class="font-extrabold text-lg flex items-center gap-2">💳 Payment</p>
         <!-- แสดงข้อความตามค่า PAYMENT_PROVIDER ของหลังบ้าน (js/app.js สลับให้) -->
         <p id="payment-note-online" class="hidden text-sm text-gray-600 leading-relaxed bg-cream border border-gray-200 rounded-lg px-4 py-3">
-          หลังยืนยันการจอง คุณสามารถ <span class="font-bold text-forest">ชำระเงินออนไลน์ได้ทันที</span>
-          หรือกลับมาชำระภายหลังจากหน้า "ตรวจสอบการจอง" ก็ได้
+          After confirming your booking you can <span class="font-bold text-forest">pay online straight away</span>,
+          or come back and pay later from the "My Booking" page.
         </p>
         <p id="payment-note-offline" class="text-sm text-gray-600 leading-relaxed bg-cream border border-gray-200 rounded-lg px-4 py-3">
-          ระบบจะบันทึกการจองไว้ในสถานะ <span class="font-bold text-forest">รอชำระเงิน</span>
-          แล้วทีมงานจะติดต่อกลับพร้อมช่องทางชำระเงินภายใน 24 ชั่วโมง
+          Your booking will be saved as <span class="font-bold text-forest">awaiting payment</span>,
+          and our team will contact you with payment details within 24 hours.
         </p>
         <label class="flex items-start gap-3 text-sm text-gray-600">
           <input type="checkbox" name="accept_terms" class="accent-gold w-5 h-5 mt-0.5" />
-          <span>ยอมรับว่าสามารถยกเลิกฟรีก่อนวันกิจกรรมอย่างน้อย <span id="cancel-hours">72</span> ชั่วโมง</span>
+          <span>I understand that free cancellation is available up to <span id="cancel-hours">72</span> hours before the activity date</span>
         </label>
         <div class="flex justify-between">
-          <button type="button" data-modal-action="back" class="border border-forest text-forest font-bold px-8 py-3.5 rounded-lg">ย้อนกลับ</button>
+          <button type="button" data-modal-action="back" class="border border-forest text-forest font-bold px-8 py-3.5 rounded-lg">Back</button>
           <button type="button" id="checkout-button" data-modal-action="submit" class="bg-gold hover:bg-gold/90 text-white font-bold px-8 py-3.5 rounded-lg transition">
-            ยืนยันการจอง <span id="checkout-amount-btn"></span>
+            Confirm booking <span id="checkout-amount-btn"></span>
           </button>
         </div>
       </div>
@@ -357,22 +296,22 @@
     <!-- ---------- หน้าสรุปหลังจองสำเร็จ ---------- -->
     <div id="booking-success" class="hidden flex flex-col gap-5 text-center py-6">
       <p class="text-5xl">🐘</p>
-      <h3 class="text-2xl font-extrabold text-forest">จองสำเร็จแล้ว!</h3>
-      <p class="text-gray-600 text-sm">กรุณาบันทึกรหัสการจองนี้ไว้สำหรับติดต่อเจ้าหน้าที่</p>
+      <h3 class="font-script text-forest-dark text-4xl">Booking confirmed!</h3>
+      <p class="text-gray-600 text-sm">Please keep this booking reference for when you contact our staff.</p>
       <p id="success-ref" class="text-3xl font-extrabold tracking-widest text-gold bg-cream rounded-lg py-4"></p>
       <p id="success-detail" class="text-sm text-gray-600"></p>
-      <p class="text-sm">ยอดรวม <span id="success-total" class="font-extrabold text-forest"></span></p>
+      <p class="text-sm">Total <span id="success-total" class="font-extrabold text-forest"></span></p>
       <p class="text-xs text-gray-500">
-        เราส่งรายละเอียดการจองไปที่ <span id="success-email" class="font-semibold"></span> แล้ว
-        <span id="success-note-online" class="hidden">— ชำระเงินตอนนี้เพื่อยืนยันการจองทันที</span>
-        <span id="success-note-offline">— ทีมงานจะติดต่อกลับพร้อมช่องทางชำระเงินภายใน 24 ชั่วโมง</span>
+        We have sent your booking details to <span id="success-email" class="font-semibold"></span>
+        <span id="success-note-online" class="hidden">— pay now to confirm your booking right away</span>
+        <span id="success-note-offline">— our team will contact you with payment details within 24 hours</span>
       </p>
       <div class="flex flex-wrap justify-center gap-3">
         <button type="button" id="success-pay" data-modal-action="pay" class="hidden bg-gold hover:bg-gold/90 text-white font-bold px-8 py-3.5 rounded-lg transition">
-          ชำระเงินตอนนี้ <span id="success-pay-amount"></span>
+          Pay now <span id="success-pay-amount"></span>
         </button>
-        <a id="success-manage" href="booking.html" class="border border-forest text-forest font-bold px-8 py-3.5 rounded-lg">ดูการจองของฉัน</a>
-        <button type="button" data-modal-action="close" class="bg-forest hover:bg-forest-dark text-white font-bold px-8 py-3.5 rounded-lg transition">ปิดหน้าต่าง</button>
+        <a id="success-manage" href="booking.html" class="border border-forest text-forest font-bold px-8 py-3.5 rounded-lg">View my booking</a>
+        <button type="button" data-modal-action="close" class="bg-forest hover:bg-forest-dark text-white font-bold px-8 py-3.5 rounded-lg transition">Close</button>
       </div>
     </div>
 

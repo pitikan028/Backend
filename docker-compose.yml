@@ -111,6 +111,20 @@ services:
       - '${MAILPIT_PORT:-8025}:8025'
 
   # ---------------------------------------------------------------
+  # ลิงก์สาธารณะชั่วคราว (Cloudflare Quick Tunnel) — ให้มือถือหรือคนนอกเครือข่ายเปิดเว็บในเครื่องนี้ได้
+  # ไม่ได้เปิดโดยค่าเริ่มต้น ใช้ผ่านสคริปต์:  .\scripts\share-public.ps1   (ปิด: .\scripts\share-public.ps1 -Stop)
+  # ลิงก์เปลี่ยนทุกครั้งที่เปิด และใช้ได้เฉพาะตอนเครื่องนี้เปิดอยู่ — ไม่ใช่การ deploy ถาวร
+  # ---------------------------------------------------------------
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: chokchai-tunnel
+    profiles: ['tunnel']
+    restart: 'no'
+    depends_on:
+      - web
+    command: tunnel --no-autoupdate --url http://web:80
+
+  # ---------------------------------------------------------------
   # MySQL — ทางเลือกสำรอง ไม่ได้เปิดโดยค่าเริ่มต้นเพื่อประหยัดพื้นที่ดิสก์
   #   เปิดด้วย:  docker compose --profile mysql up -d
   #   แล้วเปลี่ยน DB_CLIENT=mysql, DB_HOST=mysql, DB_PORT=3306 ให้ service api

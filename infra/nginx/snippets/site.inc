@@ -19,7 +19,8 @@ include /etc/nginx/snippets/security-headers.inc;
 location /api/ {
     proxy_pass http://api:3000;
     proxy_http_version 1.1;
-    proxy_set_header Host              $host;
+    # $http_host คงพอร์ตไว้ด้วย (เช่น 192.168.1.5:8080) API ใช้เทียบกับ Origin ว่าเป็นเว็บเดียวกันหรือไม่
+    proxy_set_header Host              $http_host;
     proxy_set_header X-Real-IP         $remote_addr;
     proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;

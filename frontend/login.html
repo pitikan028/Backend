@@ -1,9 +1,11 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>เข้าสู่ระบบ | Chokchai Elephant Camp</title>
+<!-- ภาษาที่ผู้ใช้เลือก (EN/TH) ต้องรู้ก่อนวาดหน้า ดู js/i18n.js -->
+<script src="js/lang-boot.js"></script>
+<title>Log in | Chokchai Elephant Camp</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/app.css">
@@ -16,32 +18,32 @@
   <!-- ส่งไปที่ POST /api/account/login -->
   <form id="login-form" class="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 lg:p-10 w-full max-w-md flex flex-col gap-5" novalidate>
     <div class="text-center">
-      <h1 class="text-2xl font-extrabold text-forest">เข้าสู่ระบบ</h1>
-      <p class="text-sm text-gray-500 mt-1">สำหรับสมาชิก Chokchai Elephant Camp</p>
+      <h1 class="font-script text-forest-dark text-4xl">Log in</h1>
+      <p class="text-sm text-gray-500 mt-1">For Chokchai Elephant Camp members</p>
     </div>
 
     <p id="form-message" class="hidden" role="alert"></p>
 
     <div>
-      <label for="login-email" class="text-sm font-semibold block mb-2">อีเมล</label>
-      <input id="login-email" name="email" type="email" maxlength="160" autocomplete="username" required
+      <label for="login-identifier" class="text-sm font-semibold block mb-2">Email or phone number</label>
+      <input id="login-identifier" name="identifier" type="text" inputmode="email" maxlength="160" autocomplete="username" required
              class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream focus:outline-none focus:border-gold" />
     </div>
     <div>
-      <label for="login-password" class="text-sm font-semibold block mb-2">รหัสผ่าน</label>
+      <label for="login-password" class="text-sm font-semibold block mb-2">Password</label>
       <input id="login-password" name="password" type="password" maxlength="200" autocomplete="current-password" required
              class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream focus:outline-none focus:border-gold" />
     </div>
 
     <button type="submit" class="bg-forest hover:bg-forest-dark text-white font-bold py-3.5 rounded-lg transition">
-      เข้าสู่ระบบ
+      Log in
     </button>
 
     <p class="text-center text-sm text-gray-600">
-      ยังไม่มีบัญชี? <a href="register.html" data-keep-next class="font-bold text-forest hover:underline">สมัครสมาชิก</a>
+      Don't have an account? <a href="register.html" data-keep-next class="font-bold text-forest hover:underline">Sign up</a>
     </p>
     <p class="text-center text-sm text-gray-500">
-      จองไว้โดยไม่ได้สมัครสมาชิก? <a href="booking.html" class="font-semibold text-forest hover:underline">ตรวจสอบการจองด้วยรหัส</a>
+      Booked without an account? <a href="booking.html" class="font-semibold text-forest hover:underline">Check your booking by reference</a>
     </p>
   </form>
 </main>

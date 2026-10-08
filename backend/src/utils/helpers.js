@@ -47,4 +47,15 @@ export function detectContactType(contact) {
   return 'unknown';
 }
 
-export default { generateBookingRef, toNumber, toBoolean, toDateString, detectContactType };
+/**
+ * เบอร์โทรในรูปแบบเดียวสำหรับเทียบกัน — เหลือแต่ตัวเลข และแปลงรหัสประเทศไทย +66 เป็น 0 นำหน้า
+ * เช่น "089-000-1111" และ "+66 89 000 1111" ได้ "0890001111" เหมือนกัน
+ */
+export function normalizePhone(phone) {
+  const text = String(phone ?? '').trim();
+  const digits = text.replace(/\D/g, '');
+  if (!digits) return null;
+  return text.startsWith('+66') ? `0${digits.slice(2).replace(/^0/, '')}` : digits;
+}
+
+export default { generateBookingRef, toNumber, toBoolean, toDateString, detectContactType, normalizePhone };

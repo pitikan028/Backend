@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ภาษาที่ผู้ใช้เลือก (EN/TH) ต้องรู้ก่อนวาดหน้า ดู js/i18n.js -->
+    <script src="js/lang-boot.js"></script>
+    <title>Blog | Chokchai Elephant Camp</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700;800&family=Josefin+Sans:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              forest: "#21452A",
+              "forest-dark": "#183420",
+              gold: "#BA9330",
+              cream: "#F9F8F2",
+              dark: "#252520",
+            },
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+              script: ["Caveat", "cursive"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      html { scroll-behavior: smooth; }
+      .img-placeholder {
+        background: repeating-linear-gradient(45deg, #e7ede7, #e7ede7 12px, #dbe4db 12px, #dbe4db 24px);
+      }
+    </style>
+  </head>
+  <body class="bg-cream text-dark font-sans">
+
+    <!-- ===== HEADER ===== -->
+    <header
+      class="fixed inset-x-0 top-0 z-40 bg-white/30 backdrop-blur border-b border-white/30"
+    >
+      <div
+        class="max-w-8xl mx-auto px-6 lg:px-10 h-20 lg:h-20 flex items-center justify-between"
+      >
+        <!-- Logo + name -->
+        <a href="index.html" class="flex items-center gap-3 lg:gap-5">
+          <img
+            src="images/Logo.webp"
+            alt="โลโก้ปางช้างโชคชัย"
+            class="h-12 lg:h-16 w-auto"
+          />
+          <span class="font-script text-2xl lg:text-3xl text-forest"
+            >Chokchai Elephant Camp</span
+          >
+        </a>
+
+        <!-- Desktop nav -->
+        <nav
+          class="hidden md:flex items-center ml-auto gap-8 lg:gap-10 text-base lg:text-lg font-semibold text-dark"
+        >
+          <a href="index.html" class="hover:text-forest transition">Home</a>
+          <a href="blog.html" class="text-forest underline underline-offset-8 decoration-2 decoration-gold" aria-current="page">Blog</a>
+          <a href="index.html#activities" class="hover:text-forest transition">Activity</a>
+          <a href="index.html#reviews" class="hover:text-forest transition">Review</a>
+          <a href="index.html#map" class="hover:text-forest transition">Maps</a>
+          <a href="index.html#contact" class="hover:text-forest transition">Contact us</a>
+        </nav>
+
+        <div class="flex items-center gap-3 lg:gap-10 md:ml-10">
+          <!-- ลิงก์ My Booking / Log in หรือชื่อสมาชิก เติมโดย js/auth-nav.js -->
+          <div data-auth-nav class="hidden lg:flex items-center gap-8 lg:gap-10 text-base lg:text-lg font-semibold text-dark"></div>
+          <a
+            href="activities.html"
+            class="hidden sm:inline-block bg-forest hover:bg-forest/90 text-white text-base lg:text-lg font-semibold px-6 lg:px-7 py-3 rounded-lg shadow-md transition"
+            >Book Now</a
+          >
+          <button
+            id="nav-toggle"
+            class="md:hidden p-2 text-forest"
+            aria-label="เปิดเมนู"
+          >
+            <svg
+              width="24"
+              height="24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M3 6h18M3 12h18M3 18h18" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile menu -->
+      <div
+        id="mobile-menu"
+        class="hidden md:hidden bg-white/80 backdrop-blur-md border-t border-white/40 px-6 py-4 flex flex-col gap-4 text-base font-semibold text-dark"
+      >
+        <a href="index.html">Home</a>
+        <a href="blog.html" class="text-forest underline underline-offset-8 decoration-2 decoration-gold">Blog</a>
+        <a href="index.html#activities">Activity</a>
+        <a href="index.html#reviews">Review</a>
+        <a href="index.html#map">Maps</a>
+        <a href="index.html#contact">Contact us</a>
+        <div data-auth-nav class="flex flex-col gap-4"></div>
+        <a
+          href="activities.html"
+          class="bg-forest text-white text-center px-6 py-3 rounded-lg"
+          >Book Now</a
+        >
+      </div>
+    </header>
+
+    <!-- ===== BLOG LIST ===== -->
+    <main class="max-w-7xl mx-auto px-6 lg:px-10 pt-32 pb-20">
+      <!-- Heading -->
+      <div class="text-center mb-14">
+        <span class="font-['Josefin_Sans',sans-serif] text-gold font-bold text-sm uppercase tracking-wider">Our Stories</span>
+        <h1 class="font-script text-5xl lg:text-6xl text-forest mt-3 leading-tight">Chokchai Elephant Camp Blog</h1>
+        <p class="font-['Josefin_Sans',sans-serif] text-gray-600 text-lg mt-4 max-w-2xl mx-auto">
+          Elephant facts, jungle adventures and stories from life at our camp.
+        </p>
+      </div>
+
+      <!-- Cards (filled by script) -->
+      <div id="blog-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-7"></div>
+
+      <!-- Pagination (filled by script) -->
+      <nav id="blog-pagination" class="flex justify-center items-center gap-2 mt-14" aria-label="เปลี่ยนหน้า Blog"></nav>
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="bg-forest-dark text-white">
+      <div class="max-w-7xl mx-auto px-6 lg:px-10 pt-14 pb-10 grid gap-10 md:grid-cols-[2fr_1fr_1.6fr_auto]">
+        <div>
+          <p class="font-script text-2xl leading-snug">Chokchai Elephant Camp Thailand<br />@Mae Taeng, Chiangmai, Thailand</p>
+          <p class="text-white/80 text-sm mt-3 max-w-sm">Great things never come from comfort zones wander often, wonder always. Travel brings power and love back into your life.</p>
+        </div>
+        <div>
+          <p class="text-gold font-bold mb-3">Menu</p>
+          <ul class="text-white/80 text-sm flex flex-col gap-2.5">
+            <li><a href="index.html" class="hover:text-white">Home</a></li>
+            <li><a href="index.html#activities" class="hover:text-white">Activities</a></li>
+            <li><a href="blog.html" class="hover:text-white">Blog</a></li>
+            <li><a href="index.html#reviews" class="hover:text-white">Reviews</a></li>
+            <li><a href="activities.html" class="hover:text-white">Book Activity</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="text-gold font-bold mb-3">Contact us</p>
+          <ul class="text-white/80 text-sm flex flex-col gap-2.5">
+            <li>Tel: <a href="tel:0954472547" class="hover:text-white">095-447-2547</a></li>
+            <li class="flex gap-1"><span>Line:</span><a href="https://lin.ee/Nnilm4e" target="_blank" class="underline hover:text-white">@chokchaielephant<br />https://lin.ee/Nnilm4e</a></li>
+            <li>E-mail: <a href="mailto:Chokchaielephantcampcnx@gmail.com" class="underline hover:text-white">Chokchaielephantcampcnx@gmail.com</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="text-gold font-bold mb-3">Follow us</p>
+          <ul class="text-white/80 text-sm flex flex-col gap-2.5">
+            <li><a href="#" class="hover:text-white">Facebook</a></li>
+            <li><a href="#" class="hover:text-white">Instagram</a></li>
+            <li><a href="#" class="hover:text-white">TripAdvisor</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="max-w-7xl mx-auto px-6 lg:px-10">
+        <div class="border-t border-white/20 py-6 text-center text-white/70 text-xs">Copyright | All Rights Reserved | Powered by chokchai elephant camp thailand</div>
+      </div>
+    </footer>
+
+    <script src="blog-data.js"></script>
+    <script>
+      (function () {
+        const PER_PAGE = 9; // จำนวนการ์ดต่อหน้า (17 เรื่อง = 2 หน้า)
+        const grid = document.getElementById("blog-grid");
+        const pager = document.getElementById("blog-pagination");
+
+        const totalPages = Math.max(1, Math.ceil(BLOG_POSTS.length / PER_PAGE));
+        let page = parseInt(new URLSearchParams(location.search).get("page"), 10) || 1;
+        page = Math.min(Math.max(page, 1), totalPages);
+
+        // ----- Cards -----
+        const start = (page - 1) * PER_PAGE;
+        BLOG_POSTS.slice(start, start + PER_PAGE).forEach(function (post) {
+          const card = document.createElement("a");
+          card.href = "blog-post.html?id=" + post.id;
+          card.className =
+            "group flex flex-col bg-[#F3EEDD] rounded-2xl overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-1 transition duration-300";
+          card.innerHTML =
+            '<img class="img-placeholder w-full h-56 object-cover" alt="">' +
+            '<div class="p-6 flex flex-col gap-3 flex-1">' +
+              '<span class="post-category text-xs font-bold uppercase tracking-wider text-gold"></span>' +
+              '<h2 class="post-title font-bold text-xl text-forest leading-snug group-hover:text-forest-dark"></h2>' +
+              '<p class="post-excerpt text-sm text-gray-600 leading-relaxed line-clamp-3"></p>' +
+              '<div class="mt-auto pt-4 border-t border-black/10 font-script text-lg text-gray-500">' +
+                '<span class="post-author"></span> · <span class="post-date"></span>' +
+              "</div>" +
+            "</div>";
+          const img = card.querySelector("img");
+          img.src = post.image;
+          img.alt = post.title;
+          card.querySelector(".post-category").textContent = post.category;
+          card.querySelector(".post-title").textContent = post.title;
+          card.querySelector(".post-excerpt").textContent = post.excerpt;
+          card.querySelector(".post-author").textContent = post.author;
+          card.querySelector(".post-date").textContent = formatBlogDate(post.date);
+          grid.appendChild(card);
+        });
+
+        // ----- Pagination -----
+        if (totalPages === 1) return;
+
+        function pageLink(label, target, opts) {
+          const el = document.createElement(opts.disabled ? "span" : "a");
+          el.textContent = label;
+          if (!opts.disabled) el.href = "blog.html?page=" + target;
+          if (opts.current) el.setAttribute("aria-current", "page");
+          el.className =
+            "min-w-[44px] h-11 px-4 flex items-center justify-center rounded-lg font-semibold transition " +
+            (opts.current
+              ? "bg-forest text-white shadow-md"
+              : opts.disabled
+              ? "text-gray-300 cursor-not-allowed"
+              : "bg-white text-forest border border-gray-200 hover:border-gold hover:text-forest-dark");
+          pager.appendChild(el);
+        }
+
+        pageLink("← Prev", page - 1, { disabled: page === 1 });
+        for (let i = 1; i <= totalPages; i++) {
+          pageLink(String(i), i, { current: i === page });
+        }
+        pageLink("Next →", page + 1, { disabled: page === totalPages });
+      })();
+    </script>
+    <script src="script.js"></script>
+    <script type="module" src="js/auth-nav.js"></script>
+  </body>
+</html>

@@ -14,13 +14,23 @@ export function createApp() {
 
   app.use(helmet());
   app.use(
-    cors({
-      origin(origin, callback) {
-        // ไม่มี origin = เรียกจาก curl / Postman / same-origin ผ่าน nginx proxy
-        if (!origin || config.corsOrigins.includes(origin)) return callback(null, true);
-        return callback(new Error(`CORS: ไม่อนุญาต origin ${origin}`));
-      },
-      credentials: true,
+    cors((req, callback) => {
+      const { origin, host } = req.headers;
+      // หน้าเว็บกับ /api อยู่โดเมนเดียวกันหลัง nginx — เบราว์เซอร์ยังแนบ Origin มากับ POST อยู่ดี
+      // เทียบกับ Host แทนการไล่ใส่ทุกโดเมนใน CORS_ORIGINS จึงเปิดผ่าน IP ในวง LAN หรือลิงก์สาธารณะชั่วคราวได้เลย
+      // (เว็บอื่นปลอมไม่ได้: เบราว์เซอร์เป็นคนตั้ง Origin และ Host เอง)
+      const sameOrigin = Boolean(origin) && URL.canParse(origin) && new URL(origin).host === host;
+
+      // ไม่มี origin = เรียกจาก curl / Postman
+      if (!origin || sameOrigin || config.corsOrigins.includes(origin)) {
+        return callback(null, {
+          origin: true,
+          credentials: true,
+          // ให้หน้าเว็บที่เปิดข้าม origin (Live Server) อ่านชื่อไฟล์ส่งออกได้
+          exposedHeaders: ['Content-Disposition'],
+        });
+      }
+      return callback(new Error(`CORS: ไม่อนุญาต origin ${origin}`));
     }),
   );
   // webhook ของ Stripe ต้องได้ body ดิบ ๆ ไว้ตรวจลายเซ็น จึงต้องดักก่อน express.json()

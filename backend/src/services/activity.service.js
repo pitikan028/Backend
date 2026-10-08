@@ -8,9 +8,12 @@ const COLUMNS = [
   'name',
   'name_th',
   'description_th',
+  'description_en',
   'highlights',
+  'highlights_en',
   'category',
   'duration_label',
+  'duration_label_en',
   'duration_minutes',
   'adult_price',
   'child_price',
@@ -65,7 +68,8 @@ export async function listActivities({ includeInactive = false, q, category, max
       builder
         .whereRaw('lower(name) like ?', [like])
         .orWhereRaw('lower(name_th) like ?', [like])
-        .orWhereRaw('lower(description_th) like ?', [like]);
+        .orWhereRaw('lower(description_th) like ?', [like])
+        .orWhereRaw('lower(description_en) like ?', [like]);
     });
   }
 

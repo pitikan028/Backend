@@ -2,16 +2,18 @@
  * ตัวกลางเรียก REST API ของ Chokchai Elephant Camp
  *
  * ปกติ frontend เสิร์ฟผ่าน nginx ที่ proxy /api ไปให้ container ของ Node อยู่แล้ว
- * จึงใช้ path สัมพัทธ์ได้เลย แต่ถ้าเปิดไฟล์ผ่าน Live Server (พอร์ต 5500) หรือเปิดไฟล์ตรง ๆ
- * จะชี้ไปที่ http://localhost:3000 ให้อัตโนมัติ
+ * จึงใช้ path สัมพัทธ์ได้เลย (ไม่ว่า WEB_PORT จะตั้งเป็นพอร์ตไหน) แต่ถ้าเปิดไฟล์ผ่าน Live Server
+ * (พอร์ต 5500/5501) หรือเปิดไฟล์ตรง ๆ จะชี้ไปที่ http://localhost:3000 ให้อัตโนมัติ
  */
+const LIVE_SERVER_PORTS = ['5500', '5501'];
+
 const API_BASE = (() => {
   const override = document.documentElement.dataset.apiBase;
   if (override) return override.replace(/\/$/, '');
 
   const { protocol, hostname, port } = window.location;
   if (protocol === 'file:') return 'http://localhost:3000/api';
-  if (port && !['8080', '80', '443', '8443'].includes(port)) return `${protocol}//${hostname}:3000/api`;
+  if (LIVE_SERVER_PORTS.includes(port)) return `${protocol}//${hostname}:3000/api`;
   return '/api';
 })();
 
@@ -180,7 +182,8 @@ export const api = {
 
   // ---------- สมาชิก ----------
   register: (payload) => startSession('/account/register', payload),
-  userLogin: (email, password) => startSession('/account/login', { email, password }),
+  // identifier = อีเมลหรือเบอร์โทร
+  userLogin: (identifier, password) => startSession('/account/login', { identifier, password }),
   userLogout: () => currentUser.clear(),
   profile: async () => {
     const user = await data(member('/account/me'));
@@ -225,6 +228,22 @@ export const api = {
       throw new ApiRequestError(payload?.error?.message ?? 'โหลดสลิปไม่สำเร็จ', { status: response.status });
     }
     return URL.createObjectURL(await response.blob());
+  },
+
+  /** ไฟล์ Excel ของรายการจองตามตัวกรอง — ต้องแนบ token จึงโหลดเป็น blob แล้วให้หน้าเว็บสั่งดาวน์โหลดเอง */
+  exportBookings: async (params = {}) => {
+    const query = new URLSearchParams(
+      Object.entries(params).filter(([, value]) => value !== undefined && value !== '' && value !== null),
+    ).toString();
+    const response = await fetch(`${API_BASE}/admin/bookings/export${query ? `?${query}` : ''}`, {
+      headers: { Authorization: `Bearer ${auth.token}` },
+    });
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null);
+      throw new ApiRequestError(payload?.error?.message ?? 'ส่งออกไฟล์ไม่สำเร็จ', { status: response.status });
+    }
+    const filename = /filename="([^"]+)"/.exec(response.headers.get('Content-Disposition') ?? '')?.[1];
+    return { blob: await response.blob(), filename: filename ?? 'chokchai-bookings.xlsx' };
   },
 
   adminActivities: () => data(admin('/admin/activities')),

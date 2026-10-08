@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ภาษาที่ผู้ใช้เลือก (EN/TH) ต้องรู้ก่อนวาดหน้า ดู js/i18n.js -->
+    <script src="js/lang-boot.js"></script>
+    <title>Blog | Chokchai Elephant Camp</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700;800&family=Josefin+Sans:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              forest: "#21452A",
+              "forest-dark": "#183420",
+              gold: "#BA9330",
+              cream: "#F9F8F2",
+              dark: "#252520",
+            },
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+              script: ["Caveat", "cursive"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      html { scroll-behavior: smooth; }
+      .img-placeholder {
+        background: repeating-linear-gradient(45deg, #e7ede7, #e7ede7 12px, #dbe4db 12px, #dbe4db 24px);
+      }
+      /* ----- Blog content styles (ใช้กับเนื้อหาใน blog-data.js) ----- */
+      .blog-content { font-size: 1.125rem; line-height: 1.8; color: #252520; }
+      .blog-content p { margin: 0 0 1.4rem; }
+      .blog-content h2 {
+        font-family: "Caveat", cursive;
+        font-size: 2.5rem;
+        line-height: 1.2;
+        color: #21452A;
+        margin: 2.5rem 0 1rem;
+      }
+      .blog-content img {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        object-fit: cover;
+        border-radius: 1rem;
+        border: 4px solid #fff;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        margin: 2.5rem 0 1rem;
+        background: repeating-linear-gradient(45deg, #e7ede7, #e7ede7 12px, #dbe4db 12px, #dbe4db 24px);
+      }
+      .blog-content ul { list-style: disc; padding-left: 1.5rem; margin: 0 0 1.4rem; }
+      .blog-content li { margin-bottom: 0.4rem; }
+      .blog-content strong { font-weight: 700; }
+      .blog-content a { color: #21452A; text-decoration: underline; }
+    </style>
+  </head>
+  <body class="bg-cream text-dark font-sans">
+    <!-- ===== HEADER ===== -->
+    <header class="fixed inset-x-0 top-0 z-40 bg-white/60 backdrop-blur border-b border-white/30">
+      <div class="max-w-7xl mx-auto px-6 lg:px-10 h-20 flex items-center justify-between">
+        <a href="index.html" class="flex items-center gap-3 lg:gap-5">
+          <img src="images/Logo.webp" alt="โลโก้ปางช้างโชคชัย" class="h-12 lg:h-16 w-auto" />
+          <span class="font-script text-2xl lg:text-3xl text-forest">Chokchai Elephant Camp</span>
+        </a>
+        <nav class="hidden md:flex items-center gap-8 lg:gap-12 text-base font-semibold text-dark">
+          <a href="index.html" class="hover:text-forest transition">Home</a>
+          <a href="index.html#activities" class="hover:text-forest transition">Activity</a>
+          <a href="blog.html" class="text-forest underline underline-offset-8 decoration-2 decoration-gold">Blog</a>
+          <a href="index.html#reviews" class="hover:text-forest transition">Review</a>
+          <a href="index.html#map" class="hover:text-forest transition">Maps</a>
+          <a href="index.html#contact" class="hover:text-forest transition">Contact us</a>
+        </nav>
+        <div class="flex items-center gap-3 lg:gap-10">
+          <!-- ลิงก์ My Booking / Log in หรือชื่อสมาชิก เติมโดย js/auth-nav.js -->
+          <div data-auth-nav class="hidden lg:flex items-center gap-8 lg:gap-10 text-base lg:text-lg font-semibold text-dark"></div>
+          <a href="activities.html" class="hidden sm:inline-block bg-forest hover:bg-forest/90 text-white text-base lg:text-lg font-semibold px-6 lg:px-7 py-3 rounded-lg shadow-md transition">Book Now</a>
+          <button id="nav-toggle" class="md:hidden p-2 text-forest" aria-label="เปิดเมนู">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
+          </button>
+        </div>
+      </div>
+      <div id="mobile-menu" class="hidden md:hidden bg-white/80 backdrop-blur-md border-t border-white/40 px-6 py-4 flex flex-col gap-4 text-base font-semibold text-dark">
+        <a href="index.html">Home</a>
+        <a href="index.html#activities">Activity</a>
+        <a href="blog.html" class="text-forest">Blog</a>
+        <a href="index.html#reviews">Review</a>
+        <a href="index.html#map">Maps</a>
+        <a href="index.html#contact">Contact us</a>
+        <div data-auth-nav class="flex flex-col gap-4"></div>
+        <a href="activities.html" class="bg-forest text-white text-center px-6 py-3 rounded-lg">Book Now</a>
+      </div>
+    </header>
+
+    <!-- ===== ARTICLE ===== -->
+    <main class="pt-32 pb-20">
+      <article class="max-w-3xl mx-auto px-6">
+        <a href="blog.html" class="inline-flex items-center gap-1 text-sm font-semibold text-gray-500 hover:text-forest transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6" /></svg>
+          All stories
+        </a>
+
+        <div class="text-center mt-8">
+          <span id="post-category" class="font-['Josefin_Sans',sans-serif] text-gold font-bold text-sm uppercase tracking-wider"></span>
+          <h1 id="post-title" class="text-3xl md:text-5xl font-bold text-forest leading-tight mt-3"></h1>
+        </div>
+
+        <div class="w-40 h-0.5 bg-gold mx-auto my-8"></div>
+
+        <p class="text-gray-600 text-center lg:text-left">
+          <span id="post-date"></span>
+          <span class="mx-3 text-gray-300">|</span>
+          By <span id="post-author"></span>
+        </p>
+
+        <img id="post-image" src="" alt="" class="img-placeholder w-full aspect-[16/9] object-cover rounded-2xl border-4 border-white shadow-lg mt-6" />
+
+        <div id="post-content" class="blog-content mt-10"></div>
+
+        <!-- Prev / Next -->
+        <nav id="post-nav" class="grid sm:grid-cols-2 gap-4 mt-16 pt-8 border-t border-black/10"></nav>
+      </article>
+
+      <!-- Call to action -->
+      <section class="max-w-3xl mx-auto px-6 mt-16">
+        <div class="bg-forest text-white rounded-3xl px-8 py-10 text-center shadow-xl">
+          <h2 class="font-script text-4xl lg:text-5xl text-[#F3E3B5]">Ready to Meet the Elephants?</h2>
+          <p class="font-['Josefin_Sans',sans-serif] text-white/85 mt-3">Book your day of feeding, bathing and jungle adventures.</p>
+          <a href="activities.html" class="inline-block mt-6 bg-white text-forest font-bold text-lg px-10 py-3.5 rounded-xl border-2 border-gold hover:bg-cream transition">Book Now!</a>
+        </div>
+      </section>
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="bg-forest-dark text-white">
+      <div class="max-w-7xl mx-auto px-6 lg:px-10 pt-14 pb-10 grid gap-10 md:grid-cols-[2fr_1fr_1.6fr_auto]">
+        <div>
+          <p class="font-script text-2xl leading-snug">Chokchai Elephant Camp Thailand<br />@Mae Taeng, Chiangmai, Thailand</p>
+          <p class="text-white/80 text-sm mt-3 max-w-sm">Great things never come from comfort zones wander often, wonder always. Travel brings power and love back into your life.</p>
+        </div>
+        <div>
+          <p class="text-gold font-bold mb-3">Menu</p>
+          <ul class="text-white/80 text-sm flex flex-col gap-2.5">
+            <li><a href="index.html" class="hover:text-white">Home</a></li>
+            <li><a href="index.html#activities" class="hover:text-white">Activities</a></li>
+            <li><a href="blog.html" class="hover:text-white">Blog</a></li>
+            <li><a href="index.html#reviews" class="hover:text-white">Reviews</a></li>
+            <li><a href="activities.html" class="hover:text-white">Book Activity</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="text-gold font-bold mb-3">Contact us</p>
+          <ul class="text-white/80 text-sm flex flex-col gap-2.5">
+            <li>Tel: <a href="tel:0954472547" class="hover:text-white">095-447-2547</a></li>
+            <li class="flex gap-1"><span>Line:</span><a href="https://lin.ee/Nnilm4e" target="_blank" class="underline hover:text-white">@chokchaielephant<br />https://lin.ee/Nnilm4e</a></li>
+            <li>E-mail: <a href="mailto:Chokchaielephantcampcnx@gmail.com" class="underline hover:text-white">Chokchaielephantcampcnx@gmail.com</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="text-gold font-bold mb-3">Follow us</p>
+          <ul class="text-white/80 text-sm flex flex-col gap-2.5">
+            <li><a href="#" class="hover:text-white">Facebook</a></li>
+            <li><a href="#" class="hover:text-white">Instagram</a></li>
+            <li><a href="#" class="hover:text-white">TripAdvisor</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="max-w-7xl mx-auto px-6 lg:px-10">
+        <div class="border-t border-white/20 py-6 text-center text-white/70 text-xs">Copyright | All Rights Reserved | Powered by chokchai elephant camp thailand</div>
+      </div>
+    </footer>
+
+    <script src="blog-data.js"></script>
+    <script>
+      (function () {
+        const id = new URLSearchParams(location.search).get("id");
+        const post = getBlogPost(id);
+
+        // ไม่พบ Blog → แสดงข้อความแทน
+        if (!post) {
+          document.getElementById("post-title").textContent = "Story not found";
+          document.getElementById("post-image").remove();
+          document.getElementById("post-content").innerHTML =
+            '<p class="text-center">This story may have moved. <a href="blog.html">Back to all stories</a></p>';
+          return;
+        }
+
+        document.title = post.title + " | Chokchai Elephant Camp";
+        document.getElementById("post-category").textContent = post.category;
+        document.getElementById("post-title").textContent = post.title;
+        document.getElementById("post-date").textContent = formatBlogDate(post.date);
+        document.getElementById("post-author").textContent = post.author;
+        const img = document.getElementById("post-image");
+        img.src = post.image;
+        img.alt = post.title;
+
+        document.getElementById("post-content").innerHTML =
+          post.content ||
+          "<p>" + post.excerpt + "</p><p><em>Full story coming soon.</em></p>";
+
+        // ----- Prev / Next -----
+        const i = BLOG_POSTS.indexOf(post);
+        const newer = BLOG_POSTS[i - 1];
+        const older = BLOG_POSTS[i + 1];
+        const nav = document.getElementById("post-nav");
+
+        function navCard(p, label, alignRight) {
+          const a = document.createElement("a");
+          a.href = "blog-post.html?id=" + p.id;
+          a.className =
+            "group block bg-[#F3EEDD] rounded-2xl p-5 hover:shadow-lg transition " +
+            (alignRight ? "sm:text-right sm:col-start-2" : "");
+          a.innerHTML =
+            '<span class="text-xs font-bold uppercase tracking-wider text-gold"></span>' +
+            '<p class="font-bold text-forest mt-1 group-hover:text-forest-dark"></p>';
+          a.querySelector("span").textContent = label;
+          a.querySelector("p").textContent = p.title;
+          nav.appendChild(a);
+        }
+
+        if (older) navCard(older, "← Previous story", false);
+        if (newer) navCard(newer, "Next story →", true);
+      })();
+    </script>
+    <script src="script.js"></script>
+    <script type="module" src="js/auth-nav.js"></script>
+  </body>
+</html>
