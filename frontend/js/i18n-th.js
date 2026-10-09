@@ -35,6 +35,8 @@ export const TEXT = {
   'Tel:': 'โทร:',
   'E-mail:': 'อีเมล:',
   'Follow us': 'ติดตามเรา',
+  'Transfer is not included in this package. Please make your own way to Chokchai Elephant Camp and arrive at the start of the round you choose below.':
+    'แพ็กเกจนี้ไม่รวมบริการรับ-ส่ง กรุณาเดินทางมาปางช้างโชคชัยเอง และมาถึงตอนเริ่มรอบที่เลือกด้านล่าง',
   'Copyright | All Rights Reserved | Powered by chokchai elephant camp thailand':
     'สงวนลิขสิทธิ์ | ปางช้างโชคชัย ประเทศไทย',
   'Daily 08:00 AM - 5:00 PM': 'เปิดทุกวัน 08:00 - 17:00 น.',

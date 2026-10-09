@@ -1,4 +1,4 @@
-import { api, currentUser, formatTHB } from './api.js';
+import { api, bookingTotal, currentUser, formatTHB, priceLabel } from './api.js';
 import { lang, locale, t, translate } from './i18n.js';
 import {
   activityMedia,
@@ -15,6 +15,19 @@ import {
 
 /** ระยะเวลาและจำนวนคนตามภาษาที่เลือก — ข้อความอังกฤษของกิจกรรมเว้นว่างได้ จึงถอยไปใช้ภาษาไทย */
 const durationLabel = (activity) => t(activity.duration_label_en || activity.duration_label, activity.duration_label);
+
+/** คำว่า person / group บนป้ายราคา ตามภาษาที่เลือก */
+const priceUnits = () => ({ person: t('person', 'คน'), group: t('group', 'กลุ่ม') });
+
+/** ช่วงจำนวนคนของราคาเหมาแต่ละขั้น เช่น "1-3 people 1,500 ฿, 4 people 2,000 ฿" */
+const tierSummary = (tiers) =>
+  tiers
+    .map((tier, index) => {
+      const from = index === 0 ? 1 : tiers[index - 1].max_guests + 1;
+      const range = from === tier.max_guests ? `${tier.max_guests}` : `${from}-${tier.max_guests}`;
+      return t(`${range} people ${formatTHB(tier.price)}`, `${range} คน ${formatTHB(tier.price)}`);
+    })
+    .join(', ');
 
 const guestLine = ({ adults, children, infants }) =>
   t(`Adults ${adults}, Children ${children}, Infants ${infants}`, `ผู้ใหญ่ ${adults}, เด็ก ${children}, ทารก ${infants}`);
@@ -233,7 +246,7 @@ async function renderActivityCards() {
           <span class="absolute top-4 right-4 bg-white rounded-full px-3 py-1.5 font-bold text-forest text-xs">${escapeHtml(categoryLabel(activity.category, lang))}</span>
           <span class="absolute top-4 left-4 bg-forest text-white text-xs font-bold px-3.5 py-1.5 rounded-full">${escapeHtml(durationLabel(activity))}</span>
           <div class="absolute bottom-0 left-0 right-0 bg-black/45 px-5 py-3">
-            <p class="text-white font-extrabold text-lg">${formatTHB(activity.adult_price)} / ${t('person', 'คน')}</p>
+            <p class="text-white font-extrabold text-lg">${priceLabel(activity, priceUnits())}</p>
           </div>
         </a>
         <div class="p-6 flex flex-col gap-3 flex-1">
@@ -304,8 +317,25 @@ const bookingModal = {
 
     document.getElementById('modal-activity-name').textContent = t(this.activity.name, this.activity.name_th);
     document.getElementById('modal-activity-subtitle').textContent = durationLabel(this.activity);
-    document.getElementById('input-adult-price').textContent = formatTHB(this.activity.adult_price);
-    document.getElementById('input-child-price').textContent = formatTHB(this.activity.child_price);
+    // ราคาเหมาต่อกลุ่ม: ไม่มีราคาต่อคนให้แสดงข้างช่องจำนวน แสดงเป็นหมายเหตุช่วงราคาแทน
+    const tiers = this.activity.price_tiers ?? [];
+    const perPerson = tiers.length === 0;
+    const perGroup = t('per group', 'ราคาเหมา');
+    document.getElementById('input-adult-price').textContent = perPerson ? formatTHB(this.activity.adult_price) : perGroup;
+    document.getElementById('input-child-price').textContent = perPerson ? formatTHB(this.activity.child_price) : perGroup;
+    const groupNote = document.getElementById('group-price-note');
+    groupNote.classList.toggle('hidden', perPerson);
+    const largestGroup = perPerson ? 0 : tiers[tiers.length - 1].max_guests;
+    groupNote.textContent = perPerson
+      ? ''
+      : t(
+          `Group price: ${tierSummary(tiers)}. Larger parties are split into groups of up to ${largestGroup}.`,
+          `ราคาเหมาต่อกลุ่ม: ${tierSummary(tiers)} ถ้ามากกว่านี้จะแบ่งเป็นกลุ่มละไม่เกิน ${largestGroup} คน`,
+        );
+    // กิจกรรมที่รับเฉพาะผู้ใหญ่: ซ่อนช่องเด็กและทารก
+    for (const id of ['qty-child-field', 'qty-infant-field']) {
+      document.getElementById(id).classList.toggle('hidden', Boolean(this.activity.adults_only));
+    }
     document.getElementById('input-infant-price').textContent =
       Number(this.activity.infant_price) === 0 ? t('Free', 'ฟรี') : formatTHB(this.activity.infant_price);
 
@@ -339,6 +369,19 @@ const bookingModal = {
     // form.reset() และการเติมค่าจากบัญชีไม่ยิง event change จึงต้องปรับชื่อช่องไอดีเอง
     this.syncContactLabel();
 
+    // แพ็กเกจที่ไม่รวมรับ-ส่ง: ไม่ถามจุดรับ เหลือแค่ให้เลือกรอบที่จะมาถึง
+    const transfer = this.hasTransfer();
+    document.getElementById('pickup-fields').classList.toggle('hidden', !transfer);
+    document.getElementById('pickup-notes').classList.toggle('hidden', !transfer);
+    document.getElementById('no-transfer-note').classList.toggle('hidden', transfer);
+    document.getElementById('pickup-heading').textContent = transfer
+      ? t('🚐 Pickup point', '🚐 จุดรับ')
+      : t('🚐 Getting to the camp', '🚐 การเดินทางมาปางช้าง');
+    document.getElementById('round-heading').textContent = transfer
+      ? t('Choose a pickup round *', 'เลือกรอบเวลารับ *')
+      : t('Choose your round *', 'เลือกรอบที่จะมา *');
+    for (const element of document.querySelectorAll('[data-pickup-time]')) element.classList.toggle('hidden', !transfer);
+
     const online = this.onlinePayment();
     document.getElementById('payment-note-online').classList.toggle('hidden', !online);
     document.getElementById('payment-note-offline').classList.toggle('hidden', online);
@@ -353,6 +396,11 @@ const bookingModal = {
     document.getElementById('booking-form').classList.remove('hidden');
     document.getElementById('booking-modal-overlay').classList.remove('hidden');
     document.body.classList.add('overflow-hidden');
+  },
+
+  /** false เมื่อแพ็กเกจที่เปิดอยู่ไม่รวมบริการรับ-ส่ง (ลูกค้าเดินทางมาเอง) */
+  hasTransfer() {
+    return this.activity?.includes_transfer !== false;
   },
 
   /** true เมื่อหลังบ้านเปิดรับชำระเงินออนไลน์ (PAYMENT_PROVIDER ไม่ใช่ none) */
@@ -413,10 +461,7 @@ const bookingModal = {
   updateTotal() {
     if (!this.activity) return 0;
     const { adults, children, infants } = this.counts();
-    const total =
-      adults * this.activity.adult_price +
-      children * this.activity.child_price +
-      infants * this.activity.infant_price;
+    const total = bookingTotal(this.activity, { adults, children, infants });
 
     for (const id of ['total-amount', 'checkout-amount', 'checkout-amount-btn']) {
       const element = document.getElementById(id);
@@ -526,11 +571,13 @@ const bookingModal = {
     document.getElementById('summary-visitors').textContent = guestLine({ adults, children, infants });
     const date = document.getElementById('input-date').value;
     document.getElementById('summary-date').textContent = date ? formatDate(date, locale) : translate('Not specified');
-    document.getElementById('summary-pickup').textContent =
-      (pickup?.dataset.label ?? translate('Not specified')) +
-      (form.elements.pickup_detail.value.trim() ? ` — ${form.elements.pickup_detail.value.trim()}` : '');
+    const transfer = this.hasTransfer();
+    document.getElementById('summary-pickup').textContent = transfer
+      ? (pickup?.dataset.label ?? translate('Not specified')) +
+        (form.elements.pickup_detail.value.trim() ? ` — ${form.elements.pickup_detail.value.trim()}` : '')
+      : t('Transfer not included — make your own way to the camp', 'ไม่รวมรับ-ส่ง — เดินทางมาปางช้างเอง');
     const round = form.querySelector('input[name="pickup_round"]:checked');
-    const roundTime = this.settings[`pickup_time_${round?.value ?? 'morning'}`];
+    const roundTime = transfer ? this.settings[`pickup_time_${round?.value ?? 'morning'}`] : null;
     document.getElementById('summary-round').textContent =
       `${round?.dataset.label ?? translate('Morning round')}${roundTime ? t(` — pickup ${roundTime}`, ` — เวลารับ ${roundTime}`) : ''}`;
     document.getElementById('summary-contact').textContent =
@@ -563,8 +610,11 @@ const bookingModal = {
       contact_app: form.elements.contact_app.value,
       contact_id: form.elements.contact_id.value.trim(),
       note: form.elements.note.value.trim() || undefined,
-      pickup_type: form.querySelector('input[name="pickup"]:checked')?.value ?? 'undecided',
-      pickup_detail: form.elements.pickup_detail.value.trim() || undefined,
+      // ไม่รวมรับ-ส่ง = ไม่มีจุดรับ ส่ง undecided ไปพร้อมหมายเหตุให้ทีมงานเห็นในหลังบ้าน
+      pickup_type: this.hasTransfer() ? (form.querySelector('input[name="pickup"]:checked')?.value ?? 'undecided') : 'undecided',
+      pickup_detail: this.hasTransfer()
+        ? form.elements.pickup_detail.value.trim() || undefined
+        : 'ไม่รวมรับ-ส่ง ลูกค้าเดินทางมาเอง',
       pickup_round: form.querySelector('input[name="pickup_round"]:checked')?.value ?? 'morning',
       accept_terms: true,
     };

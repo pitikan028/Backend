@@ -65,6 +65,16 @@ export const activityBodySchema = z.object({
   daily_capacity: z.coerce.number().int().min(1).max(10_000).default(40),
   sort_order: z.coerce.number().int().min(0).default(0),
   is_active: z.coerce.boolean().default(true),
+  // false = ไม่รวมรับ-ส่ง ฟอร์มจองไม่ถามจุดรับ
+  includes_transfer: z.coerce.boolean().default(true),
+  adults_only: z.coerce.boolean().default(false),
+  // ราคาเหมาต่อกลุ่ม "จำนวนคนสูงสุด=ราคา" คั่นด้วย comma เช่น 3=1500,4=2000 — เว้นว่าง = คิดราคาต่อคน
+  group_pricing: z
+    .string()
+    .trim()
+    .max(200)
+    .regex(/^$|^\d+\s*=\s*\d+(\.\d+)?(\s*,\s*\d+\s*=\s*\d+(\.\d+)?)*$/, 'ราคาเหมาต้องอยู่ในรูปแบบ 3=1500,4=2000')
+    .optional(),
 });
 
 // ตอนแก้ไขต้องไม่เติมค่า default ให้ฟิลด์ที่ไม่ได้ส่งมา ไม่งั้นแก้ราคาอย่างเดียวจะรีเซ็ตโควตาไปด้วย

@@ -108,6 +108,8 @@
           <p id="availability-label" class="text-sm mt-2" role="status" aria-live="polite"></p>
         </div>
         <p class="font-bold text-sm">Number of guests</p>
+        <!-- กิจกรรมราคาเหมาต่อกลุ่ม (เช่น ล่องแพ): js/app.js เติมช่วงราคาให้ -->
+        <p id="group-price-note" class="hidden bg-[#F2F7F1] border border-forest/10 text-forest-dark text-sm rounded-lg px-4 py-3"></p>
         <div class="grid sm:grid-cols-3 gap-4">
           <div>
             <label for="qty-adult" class="text-sm font-semibold block mb-2">Adults (<span id="input-adult-price"></span>)<span data-age="adult" class="block text-xs font-normal text-gray-500 mt-0.5"></span></label>
@@ -117,7 +119,7 @@
               <button type="button" data-qty-btn="inc" data-target="qty-adult" class="px-4 py-3 font-bold text-forest">+</button>
             </div>
           </div>
-          <div>
+          <div id="qty-child-field">
             <label for="qty-child" class="text-sm font-semibold block mb-2">Children (<span id="input-child-price"></span>)<span data-age="child" class="block text-xs font-normal text-gray-500 mt-0.5"></span></label>
             <div class="flex items-center border border-gray-300 rounded-lg bg-cream overflow-hidden">
               <button type="button" data-qty-btn="dec" data-target="qty-child" class="px-4 py-3 font-bold text-forest">-</button>
@@ -125,7 +127,7 @@
               <button type="button" data-qty-btn="inc" data-target="qty-child" class="px-4 py-3 font-bold text-forest">+</button>
             </div>
           </div>
-          <div>
+          <div id="qty-infant-field">
             <label for="qty-infant" class="text-sm font-semibold block mb-2">Infants (<span id="input-infant-price"></span>)<span data-age="infant" class="block text-xs font-normal text-gray-500 mt-0.5"></span></label>
             <div class="flex items-center border border-gray-300 rounded-lg bg-cream overflow-hidden">
               <button type="button" data-qty-btn="dec" data-target="qty-infant" class="px-4 py-3 font-bold text-forest">-</button>
@@ -192,7 +194,10 @@
 
       <!-- STEP 3: รับ-ส่ง -->
       <div id="step-panel-3" class="hidden flex flex-col gap-5">
-        <p class="font-extrabold text-lg flex items-center gap-2">🚐 Pickup point</p>
+        <p id="pickup-heading" class="font-extrabold text-lg flex items-center gap-2">🚐 Pickup point</p>
+        <!-- แพ็กเกจที่ไม่รวมรับ-ส่ง (includes_transfer = false): js/app.js ซ่อนส่วนเลือกจุดรับ แล้วแสดงข้อความนี้แทน -->
+        <p id="no-transfer-note" class="hidden bg-amber-50 border border-amber-200 text-amber-800 text-sm rounded-lg px-4 py-3">Transfer is not included in this package. Please make your own way to Chokchai Elephant Camp and arrive at the start of the round you choose below.</p>
+        <div id="pickup-fields" class="flex flex-col gap-5">
         <p class="font-semibold text-sm">Where would you like to be picked up?</p>
         <div class="flex flex-col gap-3">
           <label class="flex items-center gap-3">
@@ -216,27 +221,28 @@
           <label for="input-pickup-detail" class="text-sm font-semibold block mb-2">Accommodation name / pickup point (optional)</label>
           <input id="input-pickup-detail" name="pickup_detail" type="text" maxlength="255" placeholder="e.g. Nimman Hotel, Soi 5" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream" />
         </div>
+        </div>
         <div>
-          <p class="font-semibold text-sm mb-3">Choose a pickup round *</p>
+          <p id="round-heading" class="font-semibold text-sm mb-3">Choose a pickup round *</p>
           <!-- เวลาของแต่ละรอบมาจากหน้าตั้งค่าระบบ (GET /api/settings) -->
           <div class="grid sm:grid-cols-2 gap-3">
             <label class="flex items-center gap-3 border border-gray-300 rounded-lg px-4 py-3 bg-cream cursor-pointer has-[:checked]:border-gold has-[:checked]:bg-white">
               <input type="radio" name="pickup_round" value="morning" data-label="Morning round" checked class="accent-gold w-5 h-5" />
               <span>
                 <span class="font-extrabold text-forest block">Morning round</span>
-                <span class="text-sm text-gray-600">Pickup time <span data-setting="pickup_time_morning">06:00 - 06:30</span></span>
+                <span data-pickup-time class="text-sm text-gray-600">Pickup time <span data-setting="pickup_time_morning">06:00 - 06:30</span></span>
               </span>
             </label>
             <label class="flex items-center gap-3 border border-gray-300 rounded-lg px-4 py-3 bg-cream cursor-pointer has-[:checked]:border-gold has-[:checked]:bg-white">
               <input type="radio" name="pickup_round" value="afternoon" data-label="Afternoon round" class="accent-gold w-5 h-5" />
               <span>
                 <span class="font-extrabold text-forest block">Afternoon round</span>
-                <span class="text-sm text-gray-600">Pickup time <span data-setting="pickup_time_afternoon">11:30 - 12:00</span></span>
+                <span data-pickup-time class="text-sm text-gray-600">Pickup time <span data-setting="pickup_time_afternoon">11:30 - 12:00</span></span>
               </span>
             </label>
           </div>
         </div>
-        <p class="text-xs text-gray-500 leading-relaxed">
+        <p id="pickup-notes" class="text-xs text-gray-500 leading-relaxed">
           * Pickup times may vary slightly depending on your pickup point. We will email you in advance if anything changes.<br>
           * Pickup and drop-off are free within 5 km of Chiang Mai city. An extra charge applies outside this area.
         </p>
@@ -307,7 +313,7 @@
         <span id="success-note-offline">— our team will contact you with payment details within 24 hours</span>
       </p>
       <div class="flex flex-wrap justify-center gap-3">
-        <button type="button" id="success-pay" data-modal-action="pay" class="hidden bg-gold hover:bg-gold/90 text-white font-bold px-8 py-3.5 rounded-lg transition">
+        <button type="button" id="success-pay" data-modal-action="pay" class="hidden bg-forest hover:bg-forest-dark text-white font-bold px-8 py-3.5 rounded-lg transition">
           Pay now <span id="success-pay-amount"></span>
         </button>
         <a id="success-manage" href="booking.html" class="border border-forest text-forest font-bold px-8 py-3.5 rounded-lg">View my booking</a>

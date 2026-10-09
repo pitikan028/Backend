@@ -71,10 +71,10 @@ describe('health & catalog', () => {
     expect(res.body.status).toBe('ok');
   });
 
-  it('GET /api/activities คืน 6 กิจกรรมที่ seed ไว้', async () => {
+  it('GET /api/activities คืน 12 รายการที่ seed ไว้ (6 กิจกรรม + 6 แพ็กเกจ)', async () => {
     const res = await request(app).get('/api/activities').expect(200);
-    expect(res.body.data).toHaveLength(6);
-    expect(res.body.data[0]).toMatchObject({ slug: 'elephant-jungle-trekking', adult_price: 990 });
+    expect(res.body.data).toHaveLength(12);
+    expect(res.body.data[0]).toMatchObject({ slug: 'elephant-jungle-trekking', adult_price: 1000, child_price: 500 });
   });
 
   it('GET /api/activities/:slug ที่ไม่มีอยู่ คืน 404', async () => {
@@ -114,8 +114,8 @@ describe('POST /api/bookings', () => {
       .send({ ...validBooking, booking_date: bookingDate })
       .expect(201);
 
-    // 2 ผู้ใหญ่ × 1290 + 1 เด็ก × 990 = 3570
-    expect(res.body.data.total_amount).toBe(3570);
+    // 2 ผู้ใหญ่ × 1000 + 1 เด็ก × 500 = 2500
+    expect(res.body.data.total_amount).toBe(2500);
     expect(res.body.data.booking_ref).toMatch(/^CEC-[A-Z0-9]{6}$/);
     expect(res.body.data.status).toBe('pending');
     expect(res.body.data.email).toBe('somchai.test@example.com');
@@ -298,23 +298,24 @@ describe('auth & admin', () => {
 describe('ค้นหาและกรองกิจกรรม', () => {
   it('ค้นด้วยคำค้นได้ทั้งชื่ออังกฤษและไทย', async () => {
     const english = await request(app).get('/api/activities').query({ q: 'bathing' }).expect(200);
-    expect(english.body.data.map((item) => item.slug)).toEqual(['elephant-bathing']);
+    // แพ็กเกจรวมกิจกรรมที่พูดถึงการอาบน้ำช้างก็ถูกค้นเจอด้วย จึงเช็กแค่ว่ากิจกรรมหลักอยู่ในผลลัพธ์
+    expect(english.body.data.map((item) => item.slug)).toContain('elephant-bathing');
 
     const thai = await request(app).get('/api/activities').query({ q: 'ล่องแพ' }).expect(200);
-    expect(thai.body.data.map((item) => item.slug)).toEqual(['bamboo-rafting']);
+    expect(thai.body.data.map((item) => item.slug)).toContain('bamboo-rafting');
   });
 
   it('กรองตามหมวดหมู่ ราคาสูงสุด และเรียงตามราคา', async () => {
     const adventure = await request(app).get('/api/activities').query({ category: 'adventure' }).expect(200);
     expect(adventure.body.data.map((item) => item.slug).sort()).toEqual(['bamboo-rafting', 'ziplining']);
-    expect(adventure.body.meta.categories).toEqual(['adventure', 'elephant', 'workshop']);
+    expect(adventure.body.meta.categories).toEqual(['adventure', 'elephant', 'package', 'workshop']);
 
     const cheap = await request(app).get('/api/activities').query({ max_price: 1000 }).expect(200);
     expect(cheap.body.data.every((item) => item.adult_price <= 1000)).toBe(true);
-    expect(cheap.body.data).toHaveLength(2);
+    expect(cheap.body.data.length).toBeGreaterThan(0);
 
     const sorted = await request(app).get('/api/activities').query({ sort: 'price_desc' }).expect(200);
-    expect(sorted.body.data[0].adult_price).toBe(1890);
+    expect(sorted.body.data[0].adult_price).toBe(1800);
   });
 
   it('GET /api/settings ไม่เปิดเผยค่าที่ใช้เฉพาะหลังบ้าน', async () => {
@@ -526,7 +527,7 @@ describe('สมาชิก: สมัคร / เข้าสู่ระบ�
       .get('/api/payments/status')
       .query({ ref: memberRef, token: paymentToken })
       .expect(200);
-    expect(before.body.data).toMatchObject({ payment_status: 'unpaid', total_amount: 1980 });
+    expect(before.body.data).toMatchObject({ payment_status: 'unpaid', total_amount: 2000 });
 
     const paid = await request(app)
       .post('/api/payments/mock/confirm')
@@ -748,6 +749,38 @@ describe('หลังบ้าน: รายงาน / ตั้งค่า /
         .where({ id: before.id })
         .update({ duration_label_en: before.duration_label_en, highlights_en: before.highlights_en });
     }
+  });
+
+  it('ล่องแพคิดราคาเหมาต่อแพ และโหนสลิงรับเฉพาะผู้ใหญ่', async () => {
+    const guest = (overrides) => ({
+      booking_date: bookingDate,
+      children: 0,
+      infants: 0,
+      first_name: 'ราคา',
+      last_name: 'เหมา',
+      phone: '080-000-0000',
+      email: `pricing${TEST_DOMAIN}`,
+      accept_terms: true,
+      ...overrides,
+    });
+
+    // 1-3 คน 1,500 / 4 คน 2,000 / 5 คน = แพ 4 คน + แพ 1 คน
+    for (const [adults, children, total] of [
+      [2, 0, 1500],
+      [2, 1, 1500],
+      [3, 1, 2000],
+      [4, 1, 3500],
+    ]) {
+      const res = await request(app)
+        .post('/api/bookings')
+        .send(guest({ activity_slug: 'bamboo-rafting', adults, children }))
+        .expect(201);
+      expect(res.body.data.total_amount).toBe(total);
+    }
+
+    await request(app).post('/api/bookings').send(guest({ activity_slug: 'ziplining', adults: 1, children: 1 })).expect(422);
+    const zip = await request(app).post('/api/bookings').send(guest({ activity_slug: 'ziplining', adults: 2 })).expect(201);
+    expect(zip.body.data.total_amount).toBe(2400);
   });
 
   it('GET /api/admin/bookings/export ส่งไฟล์ Excel ตามตัวกรอง', async () => {

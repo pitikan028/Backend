@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Chokchai Elephant Camp | ปางช้างเชิงอนุรักษ์ เชียงใหม่</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          forest: '#21452A',
+          'forest-dark': '#183420',
+          gold: '#BA9330',
+          cream: '#F9F8F2',
+          dark: '#252520',
+        },
+        fontFamily: {
+          sans: ['Inter', 'sans-serif'],
+          script: ['Caveat', 'cursive'],
+        }
+      }
+    }
+  }
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  .img-placeholder {
+    background: repeating-linear-gradient(45deg, #e7ede7, #e7ede7 12px, #dbe4db 12px, #dbe4db 24px);
+  }
+</style>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+
+</head>
+<body class="bg-cream text-dark font-sans">
+
+<!-- ===== HEADER ===== -->
+<header class="fixed inset-x-0 top-0 z-40 bg-white/30 backdrop-blur border-b border-white/30">
+  <div class="max-w-8xl mx-auto px-6 lg:px-10 h-20 lg:h-20 flex items-center justify-between">
+    <!-- Logo + name -->
+    <a href="index.html" class="flex items-center gap-3 lg:gap-5">
+      <img src="images/Logo.webp" alt="โลโก้ปางช้างโชคชัย" class="h-12 lg:h-16 w-auto">
+      <span class="font-script text-2xl lg:text-3xl text-forest">Chokchai Elephant Camp</span>
+    </a>
+
+    <!-- Desktop nav -->
+    <nav class="hidden md:flex items-center gap-8 lg:gap-12 text-base lg:text-semi font-semibold text-dark">
+      <a href="index.html" class="hover:text-forest transition">Home</a>
+      <a href="activities.html" class="hover:text-forest transition">Activity</a>
+      <a href="index.html#reviews" class="hover:text-forest transition">Review</a>
+      <a href="index.html#map" class="hover:text-forest transition">Maps</a>
+      <a href="index.html#contact" class="hover:text-forest transition">Contact us</a>
+    </nav>
+
+    <div class="flex items-center gap-3">
+      <a href="activities.html" class="hidden sm:inline-block bg-forest hover:bg-forest/90 text-white text-base lg:text-lg font-semibold px-6 lg:px-7 py-3 rounded-lg shadow-md transition">Book Now</a>
+      <button id="nav-toggle" class="md:hidden p-2 text-forest" aria-label="เปิดเมนู">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile menu -->
+  <div id="mobile-menu" class="hidden md:hidden bg-white/80 backdrop-blur-md border-t border-white/40 px-6 py-4 flex flex-col gap-4 text-base font-semibold text-dark">
+    <a href="index.html">Home</a>
+    <a href="activities.html">Activity</a>
+    <a href="index.html#reviews">Review</a>
+    <a href="index.html#map">Maps</a>
+    <a href="index.html#contact">Contact us</a>
+    <a href="activities.html" class="bg-forest text-white text-center px-6 py-3 rounded-lg">Book Now</a>
+  </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="relative text-white overflow-hidden">
+  <!-- Background image -->
+  <img
+    src="images/Hero.JPG"
+    alt="แม่ช้างและลูกช้างเดินลุยน้ำในแม่น้ำ"
+    class="absolute inset-0 w-full h-full object-cover"
+  >
+  <!-- Dark overlay so the text stays readable -->
+  <div class="absolute inset-0 bg-black/40"></div>
+
+  <div class="relative max-w-7xl mx-auto px-6 lg:px-10 py-24 lg:py-32 flex flex-col items-center text-center gap-6">
+    <span class="text-gold font-semibold text-sm tracking-wide">Ethical Elephant Camp</span>
+    <h1 class="font-script text-5xl lg:text-6xl leading-tight max-w-3xl">
+      Wild Days. Epic Memories.
+    </h1>
+    <p class="font-['Josefin_Sans',sans-serif] text-white/80 max-w-xl text-lg">
+      Feed elephants by hand. Bathe in jungle rivers. Zip through the treetops. Raft bamboo streams. All in one unforgettable day.
+    </p>
+    <div class="flex flex-wrap justify-center gap-4 mt-2">
+      <a href="activities.html" class="bg-gold hover:bg-gold/90 px-8 py-4 rounded-lg font-bold transition">Book Now</a>
+      <a href="#activities" class="border border-white/70 hover:bg-white/10 px-8 py-4 rounded-lg font-bold transition">View Activities</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ABOUT ===== -->
+<section id="about" class="relative overflow-hidden">
+  <!-- Background image -->
+  <img
+    src="images/About.JPG"
+    alt=""
+    aria-hidden="true"
+    class="absolute inset-0 w-full h-full object-cover"
+  >
+  <!-- Gold overlay (fades the background) -->
+  <div class="absolute inset-0 bg-[#EFE4C2]/80"></div>
+
+  <div class="relative max-w-7xl mx-auto px-6 lg:px-10 pt-20 pb-12">
+    <div class="grid md:grid-cols-2 gap-10 lg:gap-14 items-center">
+      <!-- Photo -->
+      <img
+        src="images/About.JPG"
+        alt="ครอบครัวช้างยืนอาบน้ำในแม่น้ำกับควาญช้าง"
+        class="w-full h-80 lg:h-[490px] object-cover rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.25)]"
+      >
+
+      <!-- Text -->
+      <div class="flex flex-col gap-5">
+        <span class="font-['Josefin_Sans',sans-serif] text-gold font-semibold text-2xl">Who we are?</span>
+        <h2 class="font-script text-4xl lg:text-6xl text-forest leading-snug">
+          More Than a Camp.<br>It's an Adventure.
+        </h2>
+        <p class="text-grey-1000 text-base lg:text-lg leading-relaxed">
+          Set deep in the jungles of Chiang Mai, Chokchai Elephant Camp is where thrill-seekers and animal lovers come together. We've been creating unforgettable days for over 15 years — combining the magic of elephants with the rush of jungle adventures.
+          <br><br>
+          Whether you're travelling with your crew or looking for something epic to do, we've got the perfect mix of heart and adrenaline waiting for you.
+        </p>
+        <div class="flex gap-10 lg:gap-12 mt-2">
+          <div>
+            <p class="text-3xl lg:text-4xl font-extrabold text-forest">15+</p>
+            <p class="text-sm text-grey-1000">Experiences</p>
+          </div>
+          <div>
+            <!-- คะแนนเฉลี่ยมาจาก GET /api/reviews → meta.average_rating -->
+            <p id="average-rating" class="text-3xl lg:text-4xl font-extrabold text-forest">4.9★</p>
+            <p class="text-sm text-grey-1000">Rating</p>
+          </div>
+          <div>
+            <p class="text-3xl lg:text-4xl font-extrabold text-forest">Ethical</p>
+            <p class="text-sm text-grey-1000">Elephant Care</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Discover link -->
+    <div class="flex justify-center mt-16">
+      <a href="story.html"
+         class="group inline-flex items-center gap-1 font-['Josefin_Sans',sans-serif] text-lg text-gray-700 underline underline-offset-4 hover:text-forest transition">
+        Discover Our Story
+        <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M9 6l6 6-6 6"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ACTIVITIES (unchanged from original design) ===== -->
+<section id="activities" class="bg-cream">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 py-20">
+    <div class="text-center mb-14">
+      <span id="activities-count" class="text-gold font-bold text-sm">6 กิจกรรมสุดพิเศษ</span>
+      <h2 class="text-3xl lg:text-4xl font-extrabold text-dark mt-2">Choose Your Elephant Experience</h2>
+    </div>
+    <!-- การ์ดถูกสร้างจากข้อมูล GET /api/activities โดย js/app.js -->
+    <div id="activities-grid" class="grid md:grid-cols-3 gap-7"></div>
+  </div>
+</section>
+
+
+
+<!-- ===== REVIEWS ===== -->
+<section id="reviews" class="bg-[#E5E2DA]">
+  <div class="max-w-7xl mx-auto px-6 lg:px-24 py-20">
+    <div class="text-center mb-12">
+      <span class="text-forest-dark font-bold text-sm">What Our Visitors Say</span>
+      <h2 class="font-script text-dark text-4xl lg:text-5xl mt-3">Reviews from Google and TripAdvisor</h2>
+    </div>
+    <!-- รีวิวมาจาก GET /api/reviews (เฉพาะที่แอดมินอนุมัติแล้ว) -->
+    <div id="reviews-grid" class="grid md:grid-cols-3 gap-6 items-start"></div>
+  </div>
+</section>
+
+<!-- ===== MAP ===== -->
+<section id="map" class="bg-cream">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 py-16 grid md:grid-cols-5 gap-12 items-center">
+    <div class="md:col-span-2 flex flex-col gap-4">
+      <span class="text-gold font-bold text-sm">Map &amp; Directions</span>
+      <h2 class="font-script text-forest-dark text-6xl">Visit us</h2>
+      <p class="text-gray-600 leading-relaxed">99 Moo 4, Mae Raem Subdistrict, Mae Rim<br>District, Chiang Mai 50180</p>
+      <div>
+        <p class="font-bold text-sm">Opening Hours</p>
+        <p class="text-gray-600 text-sm">Daily 08:00 AM - 5:00 PM</p>
+      </div>
+      <a href="https://www.google.com/maps/search/?api=1&query=Chokchai+Elephant+Camp+Chiang+Mai" target="_blank"
+         class="bg-forest-dark hover:bg-forest text-white font-bold px-6 py-3.5 rounded-lg w-fit transition">Get Directions on Google Maps</a>
+    </div>
+    <div class="md:col-span-3 rounded-3xl overflow-hidden shadow-lg h-[440px]">
+      <iframe
+        class="w-full h-full"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        src="https://www.google.com/maps?q=Chokchai+Elephant+Camp+Chiang+Mai&output=embed">
+      </iframe>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FAQ / ASK A QUESTION ===== -->
+<section id="contact" class="bg-white">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 py-24 grid md:grid-cols-2 gap-14 items-center">
+    <div class="bg-[#F9F8F3] rounded-2xl border border-gray-200 overflow-hidden">
+      <div class="bg-forest-dark px-5 py-4 text-white font-bold">FAQs</div>
+      <!-- คำถามที่พบบ่อยมาจาก GET /api/faqs -->
+      <div id="faq-list" class="p-5 flex flex-col gap-4"></div>
+    </div>
+    <!-- ส่งไปที่ POST /api/inquiries แล้วแอดมินเห็นในหน้า admin.html -->
+    <form id="inquiry-form" class="flex flex-col gap-4" novalidate>
+      <span class="text-gold font-bold text-sm">Have a Question?</span>
+      <h2 class="font-script text-forest-dark text-5xl">Send us Your Question</h2>
+      <p class="text-gray-600 text-sm">Our team will respond within 24 hours</p>
+      <input type="text" name="contact" required maxlength="160" placeholder="Your email or phone number"
+             class="bg-[#F7F6F1] border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-gold" />
+      <textarea name="message" required maxlength="2000" placeholder="Type your question here..." rows="4"
+                class="bg-[#F7F6F1] border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-gold"></textarea>
+      <button type="submit" class="bg-gold hover:bg-gold/90 text-white font-bold py-3.5 rounded-lg w-fit px-7 transition">Send Question</button>
+      <p id="inquiry-status" class="text-sm font-semibold" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="bg-forest-dark text-white">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 pt-14 pb-10 grid gap-10 md:grid-cols-[2fr_1fr_1.6fr_auto]">
+    <div>
+      <p class="font-script text-2xl leading-snug">Chokchai Elephant Camp Thailand<br>@Mae Taeng, Chiangmai, Thailand</p>
+      <p class="text-white/80 text-sm mt-3 max-w-sm">Great things never come from comfort zones wander often, wonder always. Travel brings power and love back into your life.</p>
+    </div>
+    <div>
+      <p class="text-gold font-bold mb-3">Menu</p>
+      <ul class="text-white/80 text-sm flex flex-col gap-2.5">
+        <li><a href="index.html" class="hover:text-white">Home</a></li>
+        <li><a href="activities.html" class="hover:text-white">Activities</a></li>
+        <li><a href="index.html#reviews" class="hover:text-white">Reviews</a></li>
+        <li><a href="activities.html" class="hover:text-white">Book Activity</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="text-gold font-bold mb-3">Contact us</p>
+      <ul class="text-white/80 text-sm flex flex-col gap-2.5">
+        <li>Tel: <a href="tel:0954472547" class="hover:text-white">095-447-2547</a></li>
+        <li class="flex gap-1">
+          <span>Line:</span>
+          <a href="https://lin.ee/Nnilm4e" target="_blank" class="underline hover:text-white">@chokchaielephant<br>https://lin.ee/Nnilm4e</a>
+        </li>
+        <li>E-mail: <a href="mailto:Chokchaielephantcampcnx@gmail.com" class="underline hover:text-white">Chokchaielephantcampcnx@gmail.com</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="text-gold font-bold mb-3">ติดตามเรา</p>
+      <ul class="text-white/80 text-sm flex flex-col gap-2.5">
+        <li><a href="#" class="hover:text-white">Facebook</a></li>
+        <li><a href="#" class="hover:text-white">Instagram</a></li>
+        <li><a href="#" class="hover:text-white">TripAdvisor</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+    <div class="border-t border-white/20 py-6 text-center text-white/70 text-xs">
+      Copyright | All Rights Reserved | Powered by chokchai elephant camp thailand
+    </div>
+  </div>
+</footer>
+
+<!-- ===== WHATSAPP FLOATING BUTTON ===== -->
+<a href="https://wa.me/66651234567" target="_blank"
+   class="fixed bottom-6 right-6 z-50 bg-[#25D366] w-16 h-16 rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition">
+  <svg width="30" height="30" viewBox="0 0 24 24" fill="white"><path d="M12.04 2c-5.46 0-9.9 4.44-9.9 9.9 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.46 0 9.9-4.44 9.9-9.9s-4.44-9.9-9.9-9.93zm0 18.02c-1.5 0-2.97-.4-4.24-1.16l-.3-.18-3.12.82.83-3.04-.2-.31a8.15 8.15 0 01-1.25-4.35c0-4.51 3.67-8.18 8.18-8.18 2.18 0 4.23.85 5.78 2.4a8.12 8.12 0 012.4 5.79c0 4.51-3.67 8.21-8.18 8.21zm4.48-6.13c-.25-.12-1.45-.71-1.67-.8-.22-.08-.39-.12-.55.13-.16.24-.63.79-.78.96-.14.16-.29.18-.53.06-.25-.12-1.04-.38-1.98-1.22-.73-.65-1.23-1.46-1.37-1.71-.14-.24-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.14.16-.24.24-.4.08-.16.04-.31-.02-.43-.06-.12-.55-1.33-.76-1.82-.2-.48-.4-.42-.55-.42h-.47c-.16 0-.43.06-.65.31-.22.24-.86.84-.86 2.04 0 1.2.88 2.36 1 2.53.12.16 1.74 2.66 4.22 3.72.59.25 1.05.4 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.45-.59 1.65-1.16.2-.57.2-1.06.14-1.16-.06-.1-.22-.16-.47-.28z"/></svg>
+</a>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

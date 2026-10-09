@@ -273,4 +273,38 @@ export const api = {
 /** จัดรูปแบบราคาเป็นเลขไทยพร้อมสัญลักษณ์บาท */
 export const formatTHB = (amount) => `${Number(amount).toLocaleString('th-TH')} ฿`;
 
+/**
+ * ยอดรวมของการจอง — ต้องคิดแบบเดียวกับ calculateTotal() ฝั่ง API (ยอดจริงคำนวณที่เซิร์ฟเวอร์อีกครั้ง)
+ * กิจกรรมราคาเหมาต่อกลุ่ม (price_tiers): แบ่งเป็นกลุ่มขนาดใหญ่สุดก่อน ที่เหลือใช้ช่วงราคาที่เล็กที่สุดที่รับได้
+ */
+export function bookingTotal(activity, { adults, children, infants }) {
+  const tiers = activity.price_tiers ?? [];
+  if (tiers.length) {
+    const guests = adults + children;
+    if (guests <= 0) return 0;
+    const largest = tiers[tiers.length - 1];
+    const rest = guests % largest.max_guests;
+    const restTier = rest > 0 ? tiers.find((tier) => tier.max_guests >= rest) : null;
+    return Math.floor(guests / largest.max_guests) * largest.price + (restTier ? restTier.price : 0);
+  }
+  return adults * activity.adult_price + children * activity.child_price + infants * activity.infant_price;
+}
+
+/**
+ * ราคาบนการ์ดกิจกรรม: "500 - 1,000 ฿ / person", "1,200 ฿ / person" หรือ "1,500 - 2,000 ฿ / group"
+ * units = คำว่า person / group ตามภาษาที่แสดง
+ */
+export function priceLabel(activity, units = { person: 'person', group: 'group' }) {
+  const amount = (value) => Number(value).toLocaleString('th-TH');
+  const range = (values, unit) => {
+    const low = Math.min(...values);
+    const high = Math.max(...values);
+    return `${low === high ? amount(low) : `${amount(low)} - ${amount(high)}`} ฿ / ${unit}`;
+  };
+  const tiers = activity.price_tiers ?? [];
+  if (tiers.length) return range(tiers.map((tier) => tier.price), units.group);
+  if (activity.adults_only) return range([activity.adult_price], units.person);
+  return range([activity.adult_price, activity.child_price], units.person);
+}
+
 export default api;

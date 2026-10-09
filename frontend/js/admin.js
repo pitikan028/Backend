@@ -394,7 +394,7 @@ const activityFields = (isEdit) => [
   { name: 'name', label: 'ชื่อกิจกรรม (อังกฤษ)', required: true, maxlength: 160 },
   { name: 'name_th', label: 'ชื่อกิจกรรม (ไทย)', required: true, maxlength: 160 },
   { name: 'slug', label: 'slug (ใช้ใน URL)', required: true, maxlength: 80, placeholder: 'elephant-bathing', help: 'ตัวพิมพ์เล็ก ตัวเลข และขีดกลางเท่านั้น', readonly: isEdit },
-  { name: 'category', label: 'หมวดหมู่', required: true, maxlength: 40, list: 'category-options', help: 'เช่น elephant, adventure, workshop' },
+  { name: 'category', label: 'หมวดหมู่', required: true, maxlength: 40, list: 'category-options', help: 'เช่น elephant, adventure, workshop, package' },
   { name: 'duration_label', label: 'ระยะเวลา (ข้อความที่แสดง)', required: true, maxlength: 60, placeholder: '1.5 ชั่วโมง' },
   { name: 'duration_label_en', label: 'ระยะเวลา (อังกฤษ)', maxlength: 60, placeholder: '1.5 hours', keepEmpty: true },
   { name: 'duration_minutes', label: 'ระยะเวลา (นาที)', type: 'number', min: 0, max: 1440 },
@@ -408,13 +408,17 @@ const activityFields = (isEdit) => [
   { name: 'description_en', label: 'คำอธิบาย (อังกฤษ — แสดงบนหน้าเลือกกิจกรรม)', type: 'textarea', wide: true, keepEmpty: true },
   { name: 'highlights', label: 'จุดเด่น (บรรทัดละ 1 ข้อ)', type: 'textarea', rows: 4, wide: true, keepEmpty: true },
   { name: 'highlights_en', label: 'จุดเด่น (อังกฤษ — บรรทัดละ 1 ข้อ)', type: 'textarea', rows: 4, wide: true, keepEmpty: true },
+  { name: 'group_pricing', label: 'ราคาเหมาต่อกลุ่ม (เว้นว่าง = คิดราคาต่อคน)', maxlength: 200, placeholder: '3=1500,4=2000', keepEmpty: true, wide: true,
+    help: 'รูปแบบ จำนวนคนสูงสุด=ราคา คั่นด้วย comma เช่น 3=1500,4=2000 คือ 1-3 คน 1,500 บาท และ 4 คน 2,000 บาท' },
+  { name: 'adults_only', label: 'ผู้เข้าร่วม', type: 'checkbox', checkboxLabel: 'รับเฉพาะผู้ใหญ่ (ฟอร์มจองไม่มีช่องเด็ก/ทารก)', wide: true },
+  { name: 'includes_transfer', label: 'รับ-ส่ง', type: 'checkbox', checkboxLabel: 'รวมบริการรับ-ส่ง (ถ้าไม่ติ๊ก ฟอร์มจองจะไม่ถามจุดรับ)', wide: true },
   { name: 'is_active', label: 'สถานะ', type: 'checkbox', checkboxLabel: 'เปิดรับจอง (แสดงบนหน้าเว็บ)', wide: true },
 ];
 
 const activitiesTab = {
   toolbar: () => `
     <button type="button" data-action="activity-create" class="bg-forest hover:bg-forest-dark text-white text-sm font-bold px-5 py-2.5 rounded-lg transition">+ เพิ่มกิจกรรม</button>
-    <datalist id="category-options"><option value="elephant"><option value="adventure"><option value="workshop"></datalist>`,
+    <datalist id="category-options"><option value="elephant"><option value="adventure"><option value="workshop"><option value="package"></datalist>`,
 
   async render() {
     const activities = await api.adminActivities();

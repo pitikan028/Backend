@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import { db, insertReturning } from '../db/knex.js';
 import config from '../config/index.js';
 import ApiError from '../utils/ApiError.js';
-import { generateBookingRef, toDateString, toNumber } from '../utils/helpers.js';
+import { generateBookingRef, groupPrice, parsePriceTiers, toBoolean, toDateString, toNumber } from '../utils/helpers.js';
 import { getBookingRules } from './settings.service.js';
 
 // การจองที่ยังไม่ถูกยกเลิก = นับเป็นที่นั่งที่ถูกใช้ไปแล้ว
@@ -33,6 +33,10 @@ export function serializeBooking(row) {
 
 /** คำนวณยอดรวมจากราคาในฐานข้อมูล — ไม่ใช้ราคาที่ client ส่งมา */
 export function calculateTotal(activity, { adults, children, infants }) {
+  // กิจกรรมราคาเหมาต่อกลุ่ม (เช่น ล่องแพ): คิดตามจำนวนผู้ใหญ่ + เด็ก ทารกไม่นับ
+  const tiers = parsePriceTiers(activity.group_pricing);
+  if (tiers.length) return Math.round(groupPrice(tiers, adults + children) * 100) / 100;
+
   const total =
     adults * Number(activity.adult_price) +
     children * Number(activity.child_price) +
@@ -114,6 +118,12 @@ export async function createBooking(input, customer = null) {
     // MySQL และ PostgreSQL รองรับ SELECT ... FOR UPDATE เหมือนกัน
     const activity = await activityQuery.forUpdate().first();
     if (!activity) throw ApiError.notFound('ไม่พบกิจกรรมที่เลือก หรือกิจกรรมนี้ปิดรับจองอยู่');
+
+    if (toBoolean(activity.adults_only) && input.children + input.infants > 0) {
+      throw ApiError.unprocessable('กิจกรรมนี้รับเฉพาะผู้ใหญ่ ไม่สามารถจองสำหรับเด็กหรือทารกได้', [
+        { field: 'children', message: 'กิจกรรมนี้รับเฉพาะผู้ใหญ่' },
+      ]);
+    }
 
     const seats = input.adults + input.children;
     const booked = await countBookedSeats(activity.id, input.booking_date, trx);

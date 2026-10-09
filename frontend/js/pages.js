@@ -45,6 +45,36 @@ const priceRow = (price, label, group) => `
     </span>
   </li>`;
 
+/** แถวราคาของกิจกรรม: ราคาเหมาต่อกลุ่ม / เฉพาะผู้ใหญ่ / ผู้ใหญ่-เด็ก-ทารก */
+function priceRows(activity) {
+  const tiers = activity.price_tiers ?? [];
+
+  if (tiers.length) {
+    const words = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'];
+    const word = (count) => words[count] ?? String(count);
+    return tiers
+      .map((tier, index) => {
+        const from = index === 0 ? 1 : tiers[index - 1].max_guests + 1;
+        const label =
+          from === tier.max_guests
+            ? t(`${word(tier.max_guests)} People`, `${tier.max_guests} คน`)
+            : t(`${word(from)} - ${word(tier.max_guests)} People`, `${from}-${tier.max_guests} คน`);
+        return `
+  <li class="flex items-center gap-3">
+    <span class="bg-emerald-100 text-emerald-900 font-extrabold text-sm text-center rounded-md px-2.5 py-1 min-w-[4.75rem]">${formatTHB(tier.price)}</span>
+    <span class="block font-bold leading-tight">${label}</span>
+  </li>`;
+      })
+      .join('');
+  }
+  if (activity.adults_only) return priceRow(formatTHB(activity.adult_price), 'Adults', 'adult');
+  return [
+    priceRow(formatTHB(activity.adult_price), 'Adults', 'adult'),
+    priceRow(formatTHB(activity.child_price), 'Children', 'child'),
+    priceRow(Number(activity.infant_price) === 0 ? 'Free' : formatTHB(activity.infant_price), 'Infants', 'infant'),
+  ].join('');
+}
+
 /** ลิงก์สลับระหว่างหน้า login/register ต้องพก ?next= ไปด้วย จะได้กลับไปหน้าที่ตั้งใจไว้ */
 function keepNextOnLinks() {
   const next = params.get('next');
@@ -210,7 +240,7 @@ function initAccount() {
         ? bookings.map((booking) => bookingCard(booking, { paymentProvider, lang })).join('')
         : `<div class="bg-white rounded-2xl border border-gray-200 p-10 text-center">
              <p class="text-gray-500">You have no bookings yet</p>
-             <a href="activities.html" class="inline-block mt-4 bg-gold hover:bg-gold/90 text-white font-bold px-6 py-3 rounded-lg transition">Browse activities</a>
+             <a href="activities.html" class="inline-block mt-4 bg-forest hover:bg-forest-dark text-white font-bold px-6 py-3 rounded-lg transition">Browse activities</a>
            </div>`;
     } catch (error) {
       panel.innerHTML = '';
@@ -532,7 +562,7 @@ function initPayment() {
                  class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-cream" />
         </div>
         <p id="payment-message" class="hidden" role="alert"></p>
-        <button id="transfer-notify" type="button" class="bg-gold hover:bg-gold/90 text-white font-bold py-3.5 rounded-lg transition">
+        <button id="transfer-notify" type="button" class="bg-forest hover:bg-forest-dark text-white font-bold py-3.5 rounded-lg transition">
           I have transferred
         </button>
         <a href="${lookupUrl}" class="text-center text-sm text-gray-500 hover:text-forest">Pay later</a>`;
@@ -585,7 +615,7 @@ function initPayment() {
         </p>
         ${summaryRows(payment)}
         <p id="payment-message" class="hidden" role="alert"></p>
-        <button id="mock-pay" type="button" class="bg-gold hover:bg-gold/90 text-white font-bold py-3.5 rounded-lg transition">
+        <button id="mock-pay" type="button" class="bg-forest hover:bg-forest-dark text-white font-bold py-3.5 rounded-lg transition">
           ${t('Pay', 'ชำระเงิน')} ${formatTHB(payment.total_amount)}
         </button>
         <a href="booking.html?ref=${encodeURIComponent(payment.booking_ref)}&email=${encodeURIComponent(payment.email)}" class="text-center text-sm text-gray-500 hover:text-forest">Pay later</a>`;
@@ -701,9 +731,7 @@ function initActivityDetail() {
         <aside class="lg:col-span-2 bg-white rounded-2xl border border-gray-200 shadow-md p-6 flex flex-col gap-5 lg:sticky lg:top-28">
           <h2 class="font-script text-forest-dark text-3xl">Price</h2>
           <ul class="flex flex-col gap-3">
-            ${priceRow(formatTHB(activity.adult_price), 'Adults', 'adult')}
-            ${priceRow(formatTHB(activity.child_price), 'Children', 'child')}
-            ${priceRow(Number(activity.infant_price) === 0 ? 'Free' : formatTHB(activity.infant_price), 'Infants', 'infant')}
+            ${priceRows(activity)}
           </ul>
           <div>
             <label for="detail-date" class="text-sm font-semibold block mb-2">Check availability by date</label>
