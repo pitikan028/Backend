@@ -11,8 +11,10 @@ import {
   bookingRefParam,
   cancelBookingSchema,
   changePasswordSchema,
+  forgotPasswordSchema,
   profileUpdateSchema,
   registerSchema,
+  resetPasswordSchema,
   userLoginSchema,
 } from '../validators/schemas.js';
 
@@ -47,6 +49,39 @@ router.post(
   validate({ body: userLoginSchema }),
   asyncHandler(async (req, res) => {
     res.json({ data: await userService.login(req.body) });
+  }),
+);
+
+/* ---------- ลืมรหัสผ่าน ---------- */
+
+// ขอรหัสตอบ 200 เสมอ authLimiter (ไม่นับคำขอที่สำเร็จ) จึงกันไม่ได้ ต้องนับทุกคำขอ
+const resetLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { error: { message: 'พยายามบ่อยเกินไป กรุณารอ 15 นาทีแล้วลองใหม่' } },
+});
+
+router.post(
+  '/password/forgot',
+  resetLimiter,
+  validate({ body: forgotPasswordSchema }),
+  asyncHandler(async (req, res) => {
+    const reset = await userService.requestPasswordReset(req.body.email);
+    if (reset) await notificationService.notifyPasswordResetCode(reset);
+    // ตอบเหมือนกันไม่ว่าอีเมลนี้จะเป็นสมาชิกหรือไม่
+    res.json({ data: { message: 'ถ้าอีเมลนี้เป็นสมาชิก เราได้ส่งรหัสยืนยันไปให้แล้ว' } });
+  }),
+);
+
+router.post(
+  '/password/reset',
+  resetLimiter,
+  validate({ body: resetPasswordSchema }),
+  asyncHandler(async (req, res) => {
+    await userService.resetPassword(req.body);
+    res.json({ data: { message: 'ตั้งรหัสผ่านใหม่เรียบร้อยแล้ว' } });
   }),
 );
 

@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import config from '../config/index.js';
@@ -122,6 +123,63 @@ export async function changePassword(id, { current_password, new_password }) {
   await db('users')
     .where({ id })
     .update({ password_hash: await bcrypt.hash(new_password, 10), updated_at: db.fn.now() });
+}
+
+/* ---------- ลืมรหัสผ่าน: รหัสยืนยันทางอีเมล ---------- */
+
+const RESET_CODE_MINUTES = 15;
+const RESET_MAX_ATTEMPTS = 5;
+const RESET_COOLDOWN_SECONDS = 60;
+
+const hashResetCode = (code) => crypto.createHmac('sha256', config.jwt.secret).update(code).digest('hex');
+
+/**
+ * สร้างรหัสยืนยัน 6 หลักให้บัญชีของอีเมลนี้ คืน { user, code, expires_minutes }
+ * คืน null เมื่อไม่มีบัญชี บัญชีถูกระงับ หรือเพิ่งขอรหัสไปไม่ถึง 1 นาที
+ * (route ตอบเหมือนกันทุกกรณี เพื่อไม่ให้ใช้เช็กได้ว่าอีเมลไหนเป็นสมาชิก)
+ */
+export async function requestPasswordReset(email) {
+  const user = await db('users').where({ email: email.toLowerCase() }).first();
+  if (!user || !toBoolean(user.is_active)) return null;
+
+  const latest = await db('password_resets').where({ user_id: user.id }).orderBy('id', 'desc').first();
+  if (latest && Date.now() - new Date(latest.created_at).getTime() < RESET_COOLDOWN_SECONDS * 1000) return null;
+
+  const code = String(crypto.randomInt(0, 1_000_000)).padStart(6, '0');
+  await db('password_resets').where({ user_id: user.id }).del();
+  await db('password_resets').insert({
+    user_id: user.id,
+    code_hash: hashResetCode(code),
+    expires_at: new Date(Date.now() + RESET_CODE_MINUTES * 60 * 1000),
+    created_at: new Date(),
+  });
+
+  return { user, code, expires_minutes: RESET_CODE_MINUTES };
+}
+
+export async function resetPassword({ email, code, new_password }) {
+  const invalid = () => ApiError.badRequest('รหัสยืนยันไม่ถูกต้องหรือหมดอายุแล้ว กรุณาขอรหัสใหม่');
+
+  const user = await db('users').where({ email: email.toLowerCase() }).first();
+  if (!user) throw invalid();
+
+  const reset = await db('password_resets').where({ user_id: user.id }).orderBy('id', 'desc').first();
+  if (!reset || new Date(reset.expires_at).getTime() < Date.now() || reset.attempts >= RESET_MAX_ATTEMPTS) {
+    throw invalid();
+  }
+
+  const expected = Buffer.from(reset.code_hash, 'hex');
+  const given = Buffer.from(hashResetCode(code), 'hex');
+  if (!crypto.timingSafeEqual(expected, given)) {
+    // เดาผิดครบจำนวนครั้ง รหัสนี้ใช้ไม่ได้อีก ต้องขอใหม่
+    await db('password_resets').where({ id: reset.id }).increment('attempts', 1);
+    throw invalid();
+  }
+
+  await db('users')
+    .where({ id: user.id })
+    .update({ password_hash: await bcrypt.hash(new_password, 10), updated_at: db.fn.now() });
+  await db('password_resets').where({ user_id: user.id }).del();
 }
 
 /* ---------- แอดมินจัดการบัญชีลูกค้า ---------- */

@@ -46,6 +46,8 @@ const COLUMNS = [
   { header: 'รอบรับ', key: 'pickup_round', width: 12 },
   { header: 'หมายเหตุ', key: 'note', width: 30 },
   { header: 'จองเมื่อ', key: 'created_at', width: 18 },
+  { header: 'ช่องทางที่จอง', key: 'source', width: 16 },
+  { header: 'เลขอ้างอิงของช่องทาง', key: 'source_ref', width: 22 },
 ];
 
 /**
@@ -91,6 +93,8 @@ export async function buildBookingsWorkbook(bookings) {
       pickup_round: ROUND_LABELS[booking.pickup_round] ?? booking.pickup_round,
       note: safeText(booking.note),
       created_at: booking.created_at ? dayjs(booking.created_at).format('YYYY-MM-DD HH:mm') : '',
+      source: booking.source === 'website' ? 'เว็บไซต์' : safeText(booking.source),
+      source_ref: safeText(booking.source_ref),
     });
   }
 

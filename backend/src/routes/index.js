@@ -50,6 +50,8 @@ router.get('/', (_req, res) => {
         'GET    /api/account/me',
         'PATCH  /api/account/me',
         'POST   /api/account/password',
+        'POST   /api/account/password/forgot',
+        'POST   /api/account/password/reset',
         'GET    /api/account/bookings',
         'GET    /api/account/bookings/:ref',
         'POST   /api/account/bookings/:ref/cancel',

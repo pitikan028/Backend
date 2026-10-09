@@ -15,7 +15,7 @@ export const flushNotifications = () => Promise.allSettled([...pending]);
  * แถวในตาราง notifications ถูกสร้างทันที (ลูกค้าเห็นในหน้าบัญชีได้เลย)
  * ส่วนอีเมลส่งแบบไม่ต้องรอ เพื่อไม่ให้ SMTP ช้าทำให้การจองช้าตาม
  */
-export async function notify({ type, recipient, subject, body, userId = null, bookingId = null }) {
+export async function notify({ type, recipient, subject, body, emailBody = body, userId = null, bookingId = null }) {
   const row = await insertReturning(db, 'notifications', {
     user_id: userId,
     booking_id: bookingId,
@@ -27,7 +27,7 @@ export async function notify({ type, recipient, subject, body, userId = null, bo
   });
 
   if (isMailEnabled()) {
-    const job = sendMail({ to: recipient, subject, text: body })
+    const job = sendMail({ to: recipient, subject, text: emailBody })
       .then((result) =>
         db('notifications')
           .where({ id: row.id })
@@ -37,7 +37,7 @@ export async function notify({ type, recipient, subject, body, userId = null, bo
       .finally(() => pending.delete(job));
     pending.add(job);
   } else {
-    await sendMail({ to: recipient, subject, text: body });
+    await sendMail({ to: recipient, subject, text: emailBody });
   }
 
   return row;
@@ -120,6 +120,21 @@ export const notifyWelcome = safely((user) =>
     userId: user.id,
     subject: 'Welcome to Chokchai Elephant Camp',
     body: `Hello ${user.first_name},\n\nYour account has been created. You can book activities, view your booking history and cancel bookings from your account page.\n\n${config.appUrl}/account.html`,
+  }),
+);
+
+/**
+ * รหัสยืนยันสำหรับตั้งรหัสผ่านใหม่ — รหัสอยู่ในอีเมลเท่านั้น
+ * ข้อความที่บันทึกลงตาราง notifications (ลูกค้าและหลังบ้านเปิดดูได้) ไม่มีรหัส
+ */
+export const notifyPasswordResetCode = safely(({ user, code, expires_minutes: minutes }) =>
+  notify({
+    type: 'password_reset_code',
+    recipient: user.email,
+    userId: user.id,
+    subject: 'Your password reset code',
+    body: `Hello ${user.first_name},\n\nWe sent a verification code to ${user.email} to reset your password. If you did not request this, you can ignore it.`,
+    emailBody: `Hello ${user.first_name},\n\nYour verification code is:\n\n${code}\n\nEnter this code on the reset password page to choose a new password. The code expires in ${minutes} minutes.\n\nIf you did not request this, you can ignore this email. Your password will not change.`,
   }),
 );
 

@@ -13,6 +13,7 @@ import dayjs from 'dayjs';
 import {
   activityBodySchema,
   activityUpdateSchema,
+  adminCreateBookingSchema,
   adminReviewListQuery,
   bookingExportQuery,
   bookingListQuery,
@@ -69,6 +70,15 @@ router.get(
   }),
 );
 
+// เพิ่มการจองจากช่องทางอื่นเอง (Trip.com, walk-in ฯลฯ) — ไม่ส่งอีเมลหาลูกค้า เพราะลูกค้าได้ใบยืนยันจากช่องทางนั้นแล้ว
+router.post(
+  '/bookings',
+  validate({ body: adminCreateBookingSchema }),
+  asyncHandler(async (req, res) => {
+    res.status(201).json({ data: await bookingService.createManualBooking(req.body) });
+  }),
+);
+
 // ไฟล์ Excel ของทุกรายการที่ตรงตัวกรอง — ต้องประกาศก่อน /bookings/:id ไม่งั้น "export" จะถูกมองเป็น id
 router.get(
   '/bookings/export',
@@ -120,6 +130,11 @@ router.patch(
     const booking = await bookingService.updateBookingStatus(req.params.id, req.body);
 
     // แจ้งลูกค้าเฉพาะเมื่อมีอะไรเปลี่ยนจริง ไม่ส่งซ้ำถ้ากดบันทึกค่าเดิม
+    // การจองที่แอดมินเพิ่มเองอาจไม่มีอีเมลลูกค้า จึงไม่มีใครให้แจ้ง
+    if (!booking.email) {
+      res.json({ data: booking });
+      return;
+    }
     if (booking.status !== before.status) await notificationService.notifyBookingStatus(booking);
     if (booking.payment_status === 'paid' && before.payment_status !== 'paid') {
       await notificationService.notifyPaymentReceived(booking);

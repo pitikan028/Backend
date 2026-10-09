@@ -161,6 +161,7 @@ function initLogin() {
   const form = $('login-form');
   const message = $('form-message');
   if (params.get('expired')) setMessage(message, 'Your session has expired. Please log in again.');
+  if (params.get('reset')) setMessage(message, 'Your password has been reset. Please log in with your new password.', true);
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -181,6 +182,79 @@ function initLogin() {
           401: 'Incorrect email, phone number or password.',
           403: 'This account has been suspended. Please contact our staff.',
           429: 'Too many login attempts. Please wait 15 minutes and try again.',
+        }[error.status];
+        setMessage(message, text ?? errorText(error));
+      }
+    });
+    return undefined;
+  });
+}
+
+/* ============================================================
+   ลืมรหัสผ่าน: ขอรหัสยืนยันทางอีเมล แล้วตั้งรหัสผ่านใหม่
+   ============================================================ */
+function initForgotPassword() {
+  const forgotForm = $('forgot-form');
+  const resetForm = $('reset-form');
+  const message = $('form-message');
+  let email = '';
+
+  const sendCode = async (button) => {
+    setMessage(message, '');
+    await withBusy(button, async () => {
+      try {
+        await api.forgotPassword(email);
+        forgotForm.classList.add('hidden');
+        resetForm.classList.remove('hidden');
+        // API ตอบเหมือนกันไม่ว่าอีเมลนี้จะเป็นสมาชิกหรือไม่ ข้อความจึงต้องไม่ยืนยันว่ามีบัญชี
+        setMessage(
+          message,
+          t(
+            `If ${email} is registered, we have sent a 6-digit code to it. The code expires in 15 minutes.`,
+            `ถ้า ${email} เป็นสมาชิก เราได้ส่งรหัส 6 หลักไปที่อีเมลนี้แล้ว รหัสหมดอายุใน 15 นาที`,
+          ),
+          true,
+        );
+        resetForm.elements.code.focus();
+      } catch (error) {
+        const text = { 429: 'Too many attempts. Please wait a few minutes and try again.' }[error.status];
+        setMessage(message, text ?? errorText(error));
+      }
+    });
+  };
+
+  forgotForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    email = forgotForm.elements.email.value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return setMessage(message, 'Please enter a valid email address.');
+    return sendCode(forgotForm.querySelector('button[type="submit"]'));
+  });
+
+  $('resend-code').addEventListener('click', (event) => sendCode(event.currentTarget));
+
+  resetForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const code = resetForm.elements.code.value.trim();
+    const password = resetForm.elements.new_password.value;
+
+    if (!/^[0-9]{6}$/.test(code)) return setMessage(message, 'Please enter the 6-digit code from the email.');
+    if (password.length < 8 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
+      return setMessage(message, 'Your password must be at least 8 characters and include both letters and numbers.');
+    }
+    if (password !== resetForm.elements.password_confirm.value) {
+      return setMessage(message, 'The new passwords do not match.');
+    }
+
+    setMessage(message, '');
+    await withBusy(resetForm.querySelector('button[type="submit"]'), async () => {
+      try {
+        await api.resetPassword({ email, code, new_password: password });
+        window.location.href = 'login.html?reset=1';
+      } catch (error) {
+        const text = {
+          400: 'The code is incorrect or has expired. Please request a new code.',
+          422: 'Please check your details and try again.',
+          429: 'Too many attempts. Please wait a few minutes and try again.',
         }[error.status];
         setMessage(message, text ?? errorText(error));
       }
@@ -783,6 +857,7 @@ function initActivityDetail() {
 const PAGES = {
   register: initRegister,
   login: initLogin,
+  forgot: initForgotPassword,
   account: initAccount,
   booking: initBookingLookup,
   payment: initPayment,

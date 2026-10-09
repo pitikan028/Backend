@@ -437,7 +437,21 @@ export const TEXT = {
   'This account has been suspended. Please contact our staff.': 'บัญชีนี้ถูกระงับการใช้งาน กรุณาติดต่อเจ้าหน้าที่',
   'Too many login attempts. Please wait 15 minutes and try again.':
     'พยายามเข้าสู่ระบบบ่อยเกินไป กรุณารอ 15 นาทีแล้วลองใหม่',
-  'Sign up | Chokchai Elephant Camp': 'สมัครสมาชิก | Chokchai Elephant Camp',
+  'Forgot your password?': 'ลืมรหัสผ่าน?',
+  'Your password has been reset. Please log in with your new password.':
+    'ตั้งรหัสผ่านใหม่เรียบร้อยแล้ว กรุณาเข้าสู่ระบบด้วยรหัสผ่านใหม่',
+  'Reset password | Chokchai Elephant Camp': 'ตั้งรหัสผ่านใหม่ | Chokchai Elephant Camp',
+  'Reset password': 'ตั้งรหัสผ่านใหม่',
+  'We will email you a verification code': 'เราจะส่งรหัสยืนยันไปที่อีเมลของคุณ',
+  'Send verification code': 'ส่งรหัสยืนยัน',
+  'Verification code': 'รหัสยืนยัน',
+  'Set new password': 'ตั้งรหัสผ่านใหม่',
+  'Send a new code': 'ส่งรหัสใหม่อีกครั้ง',
+  'Back to log in': 'กลับไปหน้าเข้าสู่ระบบ',
+  'Please enter the 6-digit code from the email.': 'กรุณากรอกรหัส 6 หลักจากอีเมล',
+  'The code is incorrect or has expired. Please request a new code.':
+    'รหัสไม่ถูกต้องหรือหมดอายุแล้ว กรุณาขอรหัสใหม่',
+  'Sign up | Chokchai Elephant Camp':'สมัครสมาชิก | Chokchai Elephant Camp',
   'Book faster, view your booking history and cancel bookings yourself':
     'จองได้เร็วขึ้น ดูประวัติการจอง และยกเลิกการจองได้ด้วยตัวเอง',
   'Bookings you made earlier with this email will be added to your account automatically.':

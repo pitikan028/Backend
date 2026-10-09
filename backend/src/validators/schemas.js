@@ -127,6 +127,37 @@ export const createBookingSchema = z
     path: ['infants'],
   });
 
+/**
+ * แอดมินเพิ่มการจองที่มาจากช่องทางอื่น (Trip.com, Klook, walk-in ฯลฯ) เอง
+ * ข้อมูลติดต่อเว้นว่างได้ เพราะ OTA มักไม่ส่งอีเมล/เบอร์ของลูกค้ามาให้
+ */
+export const adminCreateBookingSchema = z
+  .object({
+    activity_id: z.coerce.number({ invalid_type_error: 'ต้องระบุกิจกรรม' }).int().positive(),
+    booking_date: isoDate,
+    adults: z.coerce.number().int().min(0).max(1000).default(0),
+    children: z.coerce.number().int().min(0).max(1000).default(0),
+    infants: z.coerce.number().int().min(0).max(1000).default(0),
+    first_name: trimmed(100, 'ชื่อจริง'),
+    last_name: z.string().trim().max(100).default(''),
+    phone: z.union([z.literal(''), z.string().trim().max(40).regex(/^[+()\d\s-]{6,}$/, 'รูปแบบเบอร์โทรไม่ถูกต้อง')]).default(''),
+    email: z.union([z.literal(''), z.string().trim().email('รูปแบบอีเมลไม่ถูกต้อง').max(160)]).default(''),
+    source: trimmed(40, 'ช่องทางที่จอง'),
+    source_ref: z.string().trim().max(80).optional(),
+    // เว้นว่าง = คำนวณจากราคากิจกรรม ใส่เองเมื่อยอดที่ได้รับจริงจากช่องทางนั้นต่างจากราคาหน้าเว็บ
+    total_amount: z.coerce.number().min(0).max(10_000_000).optional(),
+    status: z.enum(['pending', 'confirmed', 'completed']).default('confirmed'),
+    payment_status: z.enum(['unpaid', 'paid']).default('unpaid'),
+    pickup_type: z.enum(['hotel', 'meeting_point', 'airbnb', 'undecided']).default('undecided'),
+    pickup_detail: z.string().trim().max(255).optional(),
+    pickup_round: z.enum(['morning', 'afternoon']).default('morning'),
+    note: z.string().trim().max(1000).optional(),
+  })
+  .refine((data) => data.adults + data.children > 0, {
+    message: 'ต้องมีผู้ใหญ่หรือเด็กอย่างน้อย 1 คน',
+    path: ['adults'],
+  });
+
 export const bookingLookupQuery = z.object({
   email: z.string().trim().email('ต้องระบุอีเมลที่ใช้ตอนจอง').max(160),
 });
@@ -291,6 +322,16 @@ export const profileUpdateSchema = z
 
 export const changePasswordSchema = z.object({
   current_password: z.string().min(1, 'ต้องกรอกรหัสผ่านปัจจุบัน').max(200),
+  new_password: password,
+});
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().trim().email('รูปแบบอีเมลไม่ถูกต้อง').max(160),
+});
+
+export const resetPasswordSchema = z.object({
+  email: z.string().trim().email('รูปแบบอีเมลไม่ถูกต้อง').max(160),
+  code: z.string().trim().regex(/^[0-9]{6}$/, 'รหัสยืนยันต้องเป็นตัวเลข 6 หลัก'),
   new_password: password,
 });
 

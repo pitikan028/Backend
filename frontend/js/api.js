@@ -197,6 +197,9 @@ export const api = {
     return user;
   },
   changePassword: (payload) => data(member('/account/password', { method: 'POST', body: payload })),
+  // ลืมรหัสผ่าน: ขอรหัสยืนยันทางอีเมล แล้วตั้งรหัสผ่านใหม่ด้วยรหัสนั้น
+  forgotPassword: (email) => data(request('/account/password/forgot', { method: 'POST', body: { email } })),
+  resetPassword: (payload) => data(request('/account/password/reset', { method: 'POST', body: payload })),
   myBookings: () => data(member('/account/bookings')),
   cancelMyBooking: (ref, reason) =>
     data(member(`/account/bookings/${ref}/cancel`, { method: 'POST', body: { reason } })),
@@ -217,6 +220,7 @@ export const api = {
   report: (params = {}) => data(admin('/admin/reports', { query: params })),
 
   adminBookings: (params = {}) => admin('/admin/bookings', { query: params }),
+  adminCreateBooking: (payload) => data(admin('/admin/bookings', { method: 'POST', body: payload })),
   updateBooking: (id, payload) => data(admin(`/admin/bookings/${id}`, { method: 'PATCH', body: payload })),
 
   /** รูปสลิปต้องแนบ token ไปด้วย จึงโหลดเป็น blob แล้วคืน URL ชั่วคราวให้ใส่ใน <img> */

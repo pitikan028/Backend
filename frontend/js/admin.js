@@ -12,6 +12,11 @@ const NEXT_STATUSES = {
 };
 
 const PAYMENT_METHODS = { mock: 'ชำระจำลอง', promptpay: 'PromptPay', stripe: 'Stripe', manual: 'รับเงินนอกระบบ' };
+const PICKUP_TYPES = { undecided: 'ยังไม่ระบุ', hotel: 'โรงแรม', meeting_point: 'จุดนัดพบ', airbnb: 'Airbnb' };
+// ตัวเลือกแนะนำของช่อง "ช่องทางที่จอง" ตอนแอดมินเพิ่มการจองเอง (พิมพ์ชื่ออื่นได้)
+const BOOKING_SOURCES = ['Trip.com', 'Klook', 'GetYourGuide', 'Viator', 'KKday', 'Agoda', 'Walk-in', 'โทรศัพท์', 'LINE'];
+// การจองที่ไม่ได้มาจากหน้าเว็บ = แอดมินเพิ่มเองจากช่องทางอื่น
+const isExternal = (booking) => Boolean(booking.source) && booking.source !== 'website';
 const INQUIRY_STATUS = { new: 'ใหม่', answered: 'ตอบแล้ว', closed: 'ปิดแล้ว' };
 const MAIL_STATUS = {
   sent: { label: 'ส่งแล้ว', className: 'bg-emerald-100 text-emerald-800' },
@@ -261,6 +266,9 @@ const row = (cells, extra = '') =>
    ============================================================ */
 const bookingsTab = {
   toolbar: () => `
+    <button type="button" data-action="booking-create" title="บันทึกการจองที่มาจากช่องทางอื่น เช่น Trip.com, Klook หรือ walk-in"
+            class="bg-forest hover:bg-forest-dark text-white text-sm font-bold px-5 py-2.5 rounded-lg transition">+ เพิ่มการจอง</button>
+    <datalist id="source-options">${BOOKING_SOURCES.map((source) => `<option value="${source}">`).join('')}</datalist>
     <select id="filter-status" class="${inputClass}">
       <option value="">ทุกสถานะ</option>
       ${Object.entries(BOOKING_STATUS).map(([value, info]) => `<option value="${value}">${info.label}</option>`).join('')}
@@ -275,7 +283,7 @@ const bookingsTab = {
     <label class="text-xs text-gray-500 font-semibold flex flex-col gap-1">ถึง
       <input id="filter-to" type="date" class="${inputClass}" />
     </label>
-    <input id="filter-search" type="search" placeholder="ค้นหารหัสจอง / ชื่อ / อีเมล / เบอร์โทร" class="${inputClass} flex-1 min-w-[240px]" />
+    <input id="filter-search" type="search" placeholder="ค้นหารหัสจอง / ชื่อ / อีเมล / เบอร์โทร / ช่องทาง" class="${inputClass} flex-1 min-w-[240px]" />
     <button type="button" data-action="booking-export" title="ดาวน์โหลดรายการจองตามตัวกรองที่เลือก เป็นไฟล์ Excel"
             class="border border-gray-300 bg-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-50 transition">ดาวน์โหลด Excel</button>`,
 
@@ -322,11 +330,12 @@ const bookingsTab = {
         actions.push(actionButton('รายละเอียด', `data-action="booking-detail" data-id="${booking.id}"`, 'gray'));
 
         return row([
-          `<span class="font-mono font-bold text-forest">${escapeHtml(booking.booking_ref)}</span>`,
+          `<span class="font-mono font-bold text-forest">${escapeHtml(booking.booking_ref)}</span>
+           ${isExternal(booking) ? `<div class="text-xs text-sky-700 font-semibold">${escapeHtml(booking.source)}</div>` : ''}`,
           escapeHtml(booking.activity?.name_th ?? '-'),
           `<span class="whitespace-nowrap">${escapeHtml(booking.booking_date)}</span>`,
           `<div class="font-semibold">${escapeHtml(booking.first_name)} ${escapeHtml(booking.last_name)}</div>
-           <div class="text-xs text-gray-500">${escapeHtml(booking.email)} · ${escapeHtml(booking.phone)}</div>`,
+           <div class="text-xs text-gray-500">${escapeHtml([booking.email, booking.phone].filter(Boolean).join(' · '))}</div>`,
           `<span class="whitespace-nowrap text-xs">${booking.adults}ญ ${booking.children}ด ${booking.infants}ท</span>`,
           `<div class="font-bold whitespace-nowrap">${formatTHB(booking.total_amount)}</div>
            <div class="text-xs ${booking.payment_status === 'reviewing' ? 'text-amber-700 font-bold' : 'text-gray-500'}">${PAYMENT_STATUS[booking.payment_status].label}</div>
@@ -338,6 +347,41 @@ const bookingsTab = {
       'ไม่พบการจอง',
     );
     renderPagination(meta);
+  },
+
+  /** ฟอร์มบันทึกการจองที่มาจากช่องทางอื่น — รายการจะไปอยู่ในตารางและไฟล์ Excel เหมือนการจองจากหน้าเว็บ */
+  async create() {
+    const activities = await api.adminActivities();
+    openDialog({
+      title: 'เพิ่มการจองจากช่องทางอื่น',
+      submitLabel: 'บันทึกการจอง',
+      fields: [
+        { name: 'source', label: 'ช่องทางที่จอง', required: true, maxlength: 40, list: 'source-options', placeholder: 'Trip.com', help: 'เลือกจากรายการหรือพิมพ์เอง' },
+        { name: 'source_ref', label: 'เลขที่การจองของช่องทางนั้น', maxlength: 80, placeholder: 'เช่น เลข order ของ Trip.com' },
+        { name: 'activity_id', label: 'กิจกรรม', type: 'select', required: true, wide: true,
+          options: activities.map((activity) => [activity.id, `${activity.name_th}${activity.is_active ? '' : ' (ปิดรับจองอยู่)'}`]) },
+        { name: 'booking_date', label: 'วันที่เข้าร่วม', type: 'date', required: true },
+        { name: 'pickup_round', label: 'รอบเวลารับ', type: 'select', options: Object.entries(PICKUP_ROUNDS) },
+        { name: 'adults', label: 'ผู้ใหญ่', type: 'number', required: true, min: 0, max: 1000 },
+        { name: 'children', label: 'เด็ก', type: 'number', required: true, min: 0, max: 1000 },
+        { name: 'infants', label: 'ทารก', type: 'number', required: true, min: 0, max: 1000 },
+        { name: 'total_amount', label: 'ยอดรวม (บาท)', type: 'number', min: 0, step: '0.01', help: 'เว้นว่าง = คำนวณจากราคากิจกรรม' },
+        { name: 'first_name', label: 'ชื่อ', required: true, maxlength: 100 },
+        { name: 'last_name', label: 'นามสกุล', maxlength: 100 },
+        { name: 'phone', label: 'เบอร์โทร', type: 'tel', maxlength: 40 },
+        { name: 'email', label: 'อีเมล', type: 'email', maxlength: 160 },
+        { name: 'status', label: 'สถานะ', type: 'select', options: ['confirmed', 'pending', 'completed'].map((value) => [value, BOOKING_STATUS[value].label]) },
+        { name: 'payment_status', label: 'การชำระเงิน', type: 'select', options: ['paid', 'unpaid'].map((value) => [value, PAYMENT_STATUS[value].label]) },
+        { name: 'pickup_type', label: 'จุดรับ', type: 'select', options: Object.entries(PICKUP_TYPES) },
+        { name: 'pickup_detail', label: 'รายละเอียดจุดรับ', maxlength: 255, placeholder: 'ชื่อโรงแรม / ที่อยู่' },
+        { name: 'note', label: 'หมายเหตุ', type: 'textarea', maxlength: 1000, wide: true },
+      ],
+      values: { booking_date: localDateString(), adults: 1, children: 0, infants: 0 },
+      onSubmit: async (values) => {
+        const booking = await api.adminCreateBooking(values);
+        toast(`เพิ่มการจอง ${booking.booking_ref} แล้ว`);
+      },
+    });
   },
 
   /** เปิดรูปสลิปพร้อมยอดที่ต้องได้รับ ให้เทียบกับยอดเข้าบัญชีได้ในหน้าต่างเดียว */
@@ -366,7 +410,8 @@ const bookingsTab = {
         ${line('กิจกรรม', `${booking.activity?.name_th} (${booking.activity?.name})`)}
         ${line('วันที่เข้าร่วม', formatDate(booking.booking_date))}
         ${line('ผู้จอง', `${booking.first_name} ${booking.last_name}`)}
-        ${line('ประเภทลูกค้า', booking.user_id ? 'สมาชิก' : 'ไม่ได้ล็อกอิน (guest)')}
+        ${line('ช่องทางที่จอง', isExternal(booking) ? `${booking.source}${booking.source_ref ? ` · ${booking.source_ref}` : ''}` : 'เว็บไซต์')}
+        ${line('ประเภทลูกค้า', isExternal(booking) ? 'เพิ่มโดยทีมงาน' : booking.user_id ? 'สมาชิก' : 'ไม่ได้ล็อกอิน (guest)')}
         ${line('อีเมล', booking.email)}
         ${line('เบอร์โทร', booking.phone)}
         ${line(`ช่องทางติดต่อ (${booking.contact_app})`, booking.contact_id)}
@@ -1044,6 +1089,9 @@ async function runAction(action, id, value) {
       });
       toast(value === 'paid' ? 'บันทึกการรับเงินและยืนยันการจองแล้ว' : 'บันทึกการคืนเงินแล้ว');
       return true;
+    case 'booking-create':
+      await bookingsTab.create();
+      return false;
     case 'booking-detail':
       bookingsTab.detail(item);
       return false;

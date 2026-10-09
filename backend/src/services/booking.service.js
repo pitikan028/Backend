@@ -167,25 +167,76 @@ export async function createBooking(input, customer = null) {
       payment_status: 'unpaid',
     };
 
-    // โอกาสชน booking_ref ต่ำมาก (32^6) แต่ถ้าชนจริงให้สุ่มใหม่แทนที่จะโยน error ใส่ลูกค้า
-    for (let attempt = 0; attempt < 5; attempt += 1) {
-      try {
-        const created = await insertReturning(trx, 'bookings', payload);
-        return serializeBooking({
-          ...created,
-          activity_slug: activity.slug,
-          activity_name: activity.name,
-          activity_name_th: activity.name_th,
-        });
-      } catch (error) {
-        const isDuplicateRef = error.code === '23505' || error.code === 'ER_DUP_ENTRY';
-        if (!isDuplicateRef || attempt === 4) throw error;
-        payload.booking_ref = generateBookingRef();
-      }
-    }
-
-    throw new Error('สร้างรหัสการจองไม่สำเร็จ');
+    return insertBooking(trx, payload, activity);
   });
+}
+
+/** บันทึกการจองลงฐานข้อมูล คืนการจองพร้อมข้อมูลกิจกรรม */
+async function insertBooking(conn, payload, activity) {
+  // โอกาสชน booking_ref ต่ำมาก (32^6) แต่ถ้าชนจริงให้สุ่มใหม่แทนที่จะโยน error ใส่ลูกค้า
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    try {
+      const created = await insertReturning(conn, 'bookings', payload);
+      return serializeBooking({
+        ...created,
+        activity_slug: activity.slug,
+        activity_name: activity.name,
+        activity_name_th: activity.name_th,
+      });
+    } catch (error) {
+      const isDuplicateRef = error.code === '23505' || error.code === 'ER_DUP_ENTRY';
+      if (!isDuplicateRef || attempt === 4) throw error;
+      payload.booking_ref = generateBookingRef();
+    }
+  }
+
+  throw new Error('สร้างรหัสการจองไม่สำเร็จ');
+}
+
+/**
+ * แอดมินเพิ่มการจองที่มาจากช่องทางอื่นเอง (Trip.com, Klook, walk-in ฯลฯ)
+ *
+ * เป็นการบันทึกสิ่งที่เกิดขึ้นจริงแล้ว จึงไม่บังคับกติกาของหน้าเว็บ (จองล่วงหน้ากี่วัน, จำนวนคนสูงสุด,
+ * โควตาต่อวัน, กิจกรรมที่ปิดรับจอง) แต่ที่นั่งยังถูกนับเข้าโควตาของวันนั้น หน้าเว็บจึงเห็นที่ว่างลดลงตามจริง
+ */
+export async function createManualBooking(input) {
+  const activity = await db('activities').where({ id: input.activity_id }).first();
+  if (!activity) throw ApiError.notFound('ไม่พบกิจกรรมที่เลือก');
+
+  const isPaid = input.payment_status === 'paid';
+
+  return insertBooking(
+    db,
+    {
+      booking_ref: generateBookingRef(),
+      user_id: null,
+      activity_id: activity.id,
+      booking_date: input.booking_date,
+      adults: input.adults,
+      children: input.children,
+      infants: input.infants,
+      unit_adult_price: activity.adult_price,
+      unit_child_price: activity.child_price,
+      unit_infant_price: activity.infant_price,
+      total_amount: input.total_amount ?? calculateTotal(activity, input),
+      currency: 'THB',
+      first_name: input.first_name,
+      last_name: input.last_name,
+      phone: input.phone,
+      email: input.email.toLowerCase(),
+      note: input.note ?? null,
+      pickup_type: input.pickup_type,
+      pickup_detail: input.pickup_detail ?? null,
+      pickup_round: input.pickup_round,
+      status: input.status,
+      payment_status: input.payment_status,
+      payment_method: isPaid ? 'manual' : null,
+      paid_at: isPaid ? db.fn.now() : null,
+      source: input.source,
+      source_ref: input.source_ref ?? null,
+    },
+    activity,
+  );
 }
 
 const withActivity = (query) =>
@@ -323,7 +374,9 @@ const bookingFilters =
           .orWhereRaw('lower(bookings.email) like ?', [like])
           .orWhereRaw('lower(bookings.first_name) like ?', [like])
           .orWhereRaw('lower(bookings.last_name) like ?', [like])
-          .orWhereRaw('lower(bookings.phone) like ?', [like]);
+          .orWhereRaw('lower(bookings.phone) like ?', [like])
+          .orWhereRaw('lower(bookings.source) like ?', [like])
+          .orWhereRaw('lower(bookings.source_ref) like ?', [like]);
       });
     }
     return query;

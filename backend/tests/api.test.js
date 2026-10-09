@@ -15,6 +15,7 @@ import ExcelJS from 'exceljs';
 import { verifyStripeSignature } from '../src/services/payment.service.js';
 import { buildPromptPayPayload } from '../src/utils/promptpay.js';
 import { flushNotifications } from '../src/services/notification.service.js';
+import * as userService from '../src/services/user.service.js';
 
 const app = createApp();
 const bookingDate = dayjs().add(30, 'day').format('YYYY-MM-DD');
@@ -464,6 +465,62 @@ describe('สมาชิก: สมัคร / เข้าสู่ระบ�
     await request(app).post('/api/account/login').send({ email: memberEmail, password: 'NewPassw0rd' }).expect(200);
   });
 
+  it('ลืมรหัสผ่าน: ตั้งรหัสผ่านใหม่ด้วยรหัสยืนยันจากอีเมล', async () => {
+    // อีเมลที่ไม่ใช่สมาชิกก็ตอบ 200 เหมือนกัน และไม่สร้างรหัส
+    await request(app)
+      .post('/api/account/password/forgot')
+      .send({ email: `nobody${TEST_DOMAIN}` })
+      .expect(200);
+    await request(app).post('/api/account/password/forgot').send({ email: 'not-an-email' }).expect(422);
+
+    await request(app).post('/api/account/password/forgot').send({ email: memberEmail }).expect(200);
+    const member = await db('users').where({ email: memberEmail }).first();
+    expect(await db('password_resets').where({ user_id: member.id })).toHaveLength(1);
+
+    // ข้อความที่บันทึกไว้ให้เปิดดูได้ต้องไม่มีรหัส
+    const notice = await db('notifications').where({ user_id: member.id, type: 'password_reset_code' }).first();
+    expect(notice.body).not.toMatch(/[0-9]{6}/);
+
+    // ขอซ้ำภายใน 1 นาทีไม่ได้รหัสใหม่
+    expect(await userService.requestPasswordReset(memberEmail)).toBeNull();
+
+    // รหัสจริงอยู่ในอีเมลเท่านั้น เทสต์จึงขอรหัสจาก service ตรง ๆ
+    await db('password_resets').where({ user_id: member.id }).del();
+    const { code } = await userService.requestPasswordReset(memberEmail);
+    const wrongCode = code === '000000' ? '111111' : '000000';
+
+    await request(app)
+      .post('/api/account/password/reset')
+      .send({ email: memberEmail, code: wrongCode, new_password: 'Reset1234x' })
+      .expect(400);
+    await request(app)
+      .post('/api/account/password/reset')
+      .send({ email: memberEmail, code, new_password: 'short' })
+      .expect(422);
+    await request(app)
+      .post('/api/account/password/reset')
+      .send({ email: memberEmail, code, new_password: 'Reset1234x' })
+      .expect(200);
+
+    await request(app).post('/api/account/login').send({ email: memberEmail, password: 'Reset1234x' }).expect(200);
+    await request(app).post('/api/account/login').send({ email: memberEmail, password: 'NewPassw0rd' }).expect(401);
+
+    // รหัสใช้ได้ครั้งเดียว
+    await request(app)
+      .post('/api/account/password/reset')
+      .send({ email: memberEmail, code, new_password: 'Another1234x' })
+      .expect(400);
+
+    // รหัสหมดอายุใช้ไม่ได้
+    await db('password_resets').where({ user_id: member.id }).del();
+    const second = await userService.requestPasswordReset(memberEmail);
+    await db('password_resets').where({ user_id: member.id }).update({ expires_at: new Date(Date.now() - 1000) });
+    await request(app)
+      .post('/api/account/password/reset')
+      .send({ email: memberEmail, code: second.code, new_password: 'Another1234x' })
+      .expect(400);
+  });
+
   it('การจองตอนล็อกอินอยู่เข้าไปอยู่ในประวัติของบัญชี พร้อมการแจ้งเตือน', async () => {
     const created = await request(app)
       .post('/api/bookings')
@@ -781,6 +838,72 @@ describe('หลังบ้าน: รายงาน / ตั้งค่า /
     await request(app).post('/api/bookings').send(guest({ activity_slug: 'ziplining', adults: 1, children: 1 })).expect(422);
     const zip = await request(app).post('/api/bookings').send(guest({ activity_slug: 'ziplining', adults: 2 })).expect(201);
     expect(zip.body.data.total_amount).toBe(2400);
+  });
+
+  it('POST /api/admin/bookings เพิ่มการจองจากช่องทางอื่นเอง', async () => {
+    const activity = await db('activities').where({ slug: 'ziplining' }).first();
+    // วันที่ผ่านมาแล้ว: การจองที่แอดมินเพิ่มเองไม่ติดกติกาจองล่วงหน้าของหน้าเว็บ
+    const pastDate = dayjs().subtract(3, 'day').format('YYYY-MM-DD');
+    const manual = {
+      activity_id: activity.id,
+      booking_date: pastDate,
+      adults: 2,
+      first_name: 'Trip',
+      source: 'Trip.com',
+      source_ref: 'TRIP-TEST-0001',
+      payment_status: 'paid',
+    };
+
+    await request(app).post('/api/admin/bookings').send(manual).expect(401);
+    await request(app)
+      .post('/api/admin/bookings')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ ...manual, source: '' })
+      .expect(422);
+
+    try {
+      // ไม่มีอีเมล/เบอร์โทร และไม่ระบุยอด = คำนวณจากราคากิจกรรม
+      const created = await request(app)
+        .post('/api/admin/bookings')
+        .set('Authorization', `Bearer ${token}`)
+        .send(manual)
+        .expect(201);
+
+      expect(created.body.data).toMatchObject({
+        source: 'Trip.com',
+        source_ref: 'TRIP-TEST-0001',
+        status: 'confirmed',
+        payment_status: 'paid',
+        payment_method: 'manual',
+        total_amount: 2400,
+        email: '',
+      });
+      expect(created.body.data.booking_ref).toMatch(/^CEC-[A-Z0-9]{6}$/);
+
+      // ระบุยอดเองได้ และค้นหาด้วยเลขอ้างอิงของช่องทางได้
+      await request(app)
+        .post('/api/admin/bookings')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ ...manual, source_ref: 'TRIP-TEST-0002', total_amount: 1999.5, payment_status: 'unpaid' })
+        .expect(201);
+
+      const list = await request(app)
+        .get('/api/admin/bookings')
+        .query({ q: 'trip-test-0002' })
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+      expect(list.body.data).toHaveLength(1);
+      expect(list.body.data[0]).toMatchObject({ total_amount: 1999.5, payment_status: 'unpaid', payment_method: null });
+
+      // เปลี่ยนสถานะการจองที่ไม่มีอีเมลได้โดยไม่พัง
+      await request(app)
+        .patch(`/api/admin/bookings/${created.body.data.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ status: 'completed' })
+        .expect(200);
+    } finally {
+      await db('bookings').where('source_ref', 'like', 'TRIP-TEST-%').del();
+    }
   });
 
   it('GET /api/admin/bookings/export ส่งไฟล์ Excel ตามตัวกรอง', async () => {
