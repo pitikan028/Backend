@@ -178,7 +178,8 @@ export const api = {
   listReviews: (params = {}) => request('/reviews', { query: params }),
   submitReview: (payload) => request('/reviews', { method: 'POST', body: payload }),
   listFaqs: () => data(request('/faqs')),
-  sendInquiry: (payload) => data(request('/inquiries', { method: 'POST', body: payload })),
+  // แนบ token สมาชิกไปด้วย (ถ้าล็อกอิน) เพื่อให้คำตอบจากทีมงานเด้งเข้า Notifications ของบัญชีนั้น
+  sendInquiry: (payload) => data(request('/inquiries', { method: 'POST', body: payload, as: 'user' })),
 
   // ---------- สมาชิก ----------
   register: (payload) => startSession('/account/register', payload),

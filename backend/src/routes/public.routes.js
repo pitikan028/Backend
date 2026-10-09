@@ -175,9 +175,10 @@ router.get(
 router.post(
   '/inquiries',
   writeLimiter,
+  optionalUser,
   validate({ body: createInquirySchema }),
   asyncHandler(async (req, res) => {
-    res.status(201).json({ data: await contentService.createInquiry(req.body) });
+    res.status(201).json({ data: await contentService.createInquiry(req.body, req.customer) });
   }),
 );
 

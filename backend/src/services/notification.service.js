@@ -55,35 +55,55 @@ const safely = (fn) => async (...args) => {
 
 /* ---------- ข้อความ ---------- */
 
-const money = (amount) => `${Number(amount).toLocaleString('th-TH')} บาท`;
+// ข้อความถึงลูกค้าเป็นภาษาอังกฤษ (ตรงกับหน้าบัญชีของฉัน) ส่วนสำเนาถึงทีมงานยังเป็นภาษาไทยเหมือนหลังบ้าน
+const money = (amount, lang = 'th') =>
+  lang === 'en' ? `${Number(amount).toLocaleString('en-US')} THB` : `${Number(amount).toLocaleString('th-TH')} บาท`;
 
 const bookingLink = (booking) =>
   `${config.appUrl}/booking.html?ref=${encodeURIComponent(booking.booking_ref)}&email=${encodeURIComponent(booking.email)}`;
 
-const PICKUP_ROUNDS = { morning: 'รอบเช้า', afternoon: 'รอบกลางวัน' };
+const PICKUP_ROUNDS = {
+  th: { morning: 'รอบเช้า', afternoon: 'รอบกลางวัน' },
+  en: { morning: 'Morning round', afternoon: 'Afternoon round' },
+};
 
-const bookingSummary = (booking) =>
-  [
+const bookingSummary = (booking, lang = 'th') => {
+  const rounds = PICKUP_ROUNDS[lang];
+  const round = rounds[booking.pickup_round] ?? rounds.morning;
+
+  if (lang === 'en') {
+    return [
+      `Booking reference: ${booking.booking_ref}`,
+      `Activity: ${booking.activity?.name ?? ''}`,
+      `Activity date: ${booking.booking_date}`,
+      `Pickup: ${round}`,
+      `Guests: Adults ${booking.adults}, Children ${booking.children}, Infants ${booking.infants}`,
+      `Total: ${money(booking.total_amount, 'en')}`,
+    ].join('\n');
+  }
+
+  return [
     `รหัสการจอง: ${booking.booking_ref}`,
     `กิจกรรม: ${booking.activity?.name_th ?? ''} (${booking.activity?.name ?? ''})`,
     `วันที่เข้าร่วม: ${booking.booking_date}`,
-    `รอบรับ: ${PICKUP_ROUNDS[booking.pickup_round] ?? PICKUP_ROUNDS.morning}`,
+    `รอบรับ: ${round}`,
     `จำนวน: ผู้ใหญ่ ${booking.adults} เด็ก ${booking.children} ทารก ${booking.infants}`,
     `ยอดรวม: ${money(booking.total_amount)}`,
   ].join('\n');
+};
 
 const STATUS_TEXT = {
   confirmed: {
-    subject: 'การจองของคุณได้รับการยืนยันแล้ว',
-    intro: 'ทีมงานยืนยันการจองของคุณเรียบร้อยแล้ว แล้วพบกันที่ปางช้างนะคะ',
+    subject: 'Your booking is confirmed',
+    intro: 'Our team has confirmed your booking. See you at the camp!',
   },
   completed: {
-    subject: 'ขอบคุณที่มาเยี่ยมปางช้างของเรา',
-    intro: 'หวังว่าคุณจะได้รับประสบการณ์ที่ดี หากมีเวลาฝากรีวิวให้เราบนหน้าเว็บด้วยนะคะ',
+    subject: 'Thank you for visiting our elephant camp',
+    intro: 'We hope you had a wonderful time. If you have a moment, please leave us a review on our website.',
   },
   cancelled: {
-    subject: 'การจองของคุณถูกยกเลิกแล้ว',
-    intro: 'การจองด้านล่างถูกยกเลิกเรียบร้อยแล้ว',
+    subject: 'Your booking has been cancelled',
+    intro: 'The booking below has been cancelled.',
   },
 };
 
@@ -98,8 +118,8 @@ export const notifyWelcome = safely((user) =>
     type: 'welcome',
     recipient: user.email,
     userId: user.id,
-    subject: 'ยินดีต้อนรับสู่ Chokchai Elephant Camp',
-    body: `สวัสดีคุณ ${user.first_name}\n\nสมัครสมาชิกเรียบร้อยแล้ว คุณสามารถจองกิจกรรม ดูประวัติการจอง และยกเลิกการจองได้จากหน้าบัญชีของคุณ\n\n${config.appUrl}/account.html`,
+    subject: 'Welcome to Chokchai Elephant Camp',
+    body: `Hello ${user.first_name},\n\nYour account has been created. You can book activities, view your booking history and cancel bookings from your account page.\n\n${config.appUrl}/account.html`,
   }),
 );
 
@@ -109,8 +129,8 @@ export const notifyBookingCreated = safely(async (booking) => {
     recipient: booking.email,
     userId: booking.user_id ?? null,
     bookingId: booking.id,
-    subject: `เราได้รับการจองของคุณแล้ว (${booking.booking_ref})`,
-    body: `สวัสดีคุณ ${booking.first_name}\n\nขอบคุณที่จองกิจกรรมกับเรา รายละเอียดการจองมีดังนี้\n\n${bookingSummary(booking)}\n\nสถานะตอนนี้: รอชำระเงิน / รอยืนยัน\nดูสถานะ ชำระเงิน หรือยกเลิกการจองได้ที่\n${bookingLink(booking)}`,
+    subject: `We have received your booking (${booking.booking_ref})`,
+    body: `Hello ${booking.first_name},\n\nThank you for booking with us. Here are your booking details:\n\n${bookingSummary(booking, 'en')}\n\nCurrent status: awaiting payment / confirmation\nCheck the status, pay or cancel your booking here:\n${bookingLink(booking)}`,
   });
   await notifyTeam(
     'team_booking_created',
@@ -126,7 +146,7 @@ export const notifyBookingStatus = safely(async (booking, { byCustomer = false }
 
   const refundNote =
     booking.status === 'cancelled' && booking.payment_status === 'paid'
-      ? '\n\nการจองนี้ชำระเงินแล้ว ทีมงานจะติดต่อกลับเรื่องการคืนเงินภายใน 3 วันทำการ'
+      ? '\n\nThis booking has been paid. Our team will contact you about the refund within 3 business days.'
       : '';
 
   await notify({
@@ -135,7 +155,7 @@ export const notifyBookingStatus = safely(async (booking, { byCustomer = false }
     userId: booking.user_id ?? null,
     bookingId: booking.id,
     subject: `${text.subject} (${booking.booking_ref})`,
-    body: `สวัสดีคุณ ${booking.first_name}\n\n${text.intro}\n\n${bookingSummary(booking)}${refundNote}\n\n${bookingLink(booking)}`,
+    body: `Hello ${booking.first_name},\n\n${text.intro}\n\n${bookingSummary(booking, 'en')}${refundNote}\n\n${bookingLink(booking)}`,
   });
 
   if (byCustomer && booking.status === 'cancelled') {
@@ -154,8 +174,8 @@ export const notifyPaymentReceived = safely((booking) =>
     recipient: booking.email,
     userId: booking.user_id ?? null,
     bookingId: booking.id,
-    subject: `ได้รับการชำระเงินแล้ว (${booking.booking_ref})`,
-    body: `สวัสดีคุณ ${booking.first_name}\n\nเราได้รับการชำระเงิน ${money(booking.total_amount)} เรียบร้อยแล้ว การจองของคุณได้รับการยืนยัน\n\n${bookingSummary(booking)}\n\n${bookingLink(booking)}`,
+    subject: `Payment received (${booking.booking_ref})`,
+    body: `Hello ${booking.first_name},\n\nWe have received your payment of ${money(booking.total_amount, 'en')}. Your booking is confirmed.\n\n${bookingSummary(booking, 'en')}\n\n${bookingLink(booking)}`,
   }),
 );
 
@@ -165,8 +185,8 @@ export const notifyTransferReported = safely(async (booking) => {
     recipient: booking.email,
     userId: booking.user_id ?? null,
     bookingId: booking.id,
-    subject: `เราได้รับแจ้งการโอนเงินแล้ว (${booking.booking_ref})`,
-    body: `สวัสดีคุณ ${booking.first_name}\n\nขอบคุณที่แจ้งการโอนเงิน ${money(booking.total_amount)} ทีมงานจะตรวจสอบยอดเงินและยืนยันการจองให้ภายใน 24 ชั่วโมง\n\n${bookingSummary(booking)}\n\n${bookingLink(booking)}`,
+    subject: `We have received your transfer notice (${booking.booking_ref})`,
+    body: `Hello ${booking.first_name},\n\nThank you for reporting your transfer of ${money(booking.total_amount, 'en')}. Our team will check the payment and confirm your booking within 24 hours.\n\n${bookingSummary(booking, 'en')}\n\n${bookingLink(booking)}`,
   });
   await notifyTeam(
     'team_payment_reviewing',
@@ -174,6 +194,28 @@ export const notifyTransferReported = safely(async (booking) => {
     `${bookingSummary(booking)}\n\nผู้จอง: ${booking.first_name} ${booking.last_name} · ${booking.phone}\nรายละเอียดที่ลูกค้าแจ้ง: ${booking.payment_ref ?? '-'}\nสลิป: ${booking.slip_uploaded_at ? 'แนบมาแล้ว เปิดดูได้จากปุ่ม "ดูสลิป" ในหน้าหลังบ้าน' : 'ไม่ได้แนบ'}\n\nตรวจยอดเข้าบัญชีแล้วกด "บันทึกรับเงิน" ในหน้าหลังบ้าน`,
     booking.id,
   );
+});
+
+/**
+ * ทีมงานตอบคำถามจากฟอร์ม Send us Your Question
+ * สมาชิก: เข้า Notifications ในหน้าบัญชี (+ อีเมลถ้าตั้ง SMTP)
+ * ไม่ใช่สมาชิกแต่กรอกอีเมล: ส่งอีเมล / กรอกเบอร์โทร: ทีมงานโทรกลับเอง
+ */
+export const notifyInquiryAnswered = safely(async (inquiry) => {
+  const user = inquiry.user_id
+    ? await db('users').select('id', 'email', 'first_name').where({ id: inquiry.user_id }).first()
+    : null;
+  const recipient = user?.email ?? (inquiry.contact_type === 'email' ? inquiry.contact : null);
+  if (!recipient) return null;
+
+  return notify({
+    type: 'inquiry_answered',
+    recipient,
+    userId: user?.id ?? null,
+    // ข้อความถึงลูกค้าเป็นภาษาอังกฤษ เหมือนการแจ้งเตือนอื่นในไฟล์นี้
+    subject: 'Our team has answered your question',
+    body: `Hello ${user?.first_name ?? 'there'},\n\nYour question:\n${inquiry.message}\n\nOur answer:\n${inquiry.answer}\n\nIf you have more questions, send them from the home page of our website or message us on LINE @chokchaielephant.`,
+  });
 });
 
 /* ---------- อ่านการแจ้งเตือน ---------- */

@@ -1,6 +1,7 @@
 import { db } from '../db/knex.js';
 import ApiError from '../utils/ApiError.js';
-import { detectContactType, toBoolean } from '../utils/helpers.js';
+import { detectContactType, normalizePhone, toBoolean } from '../utils/helpers.js';
+import { notifyInquiryAnswered } from './notification.service.js';
 
 /* ---------- reviews ---------- */
 
@@ -71,12 +72,31 @@ export async function listFaqs() {
 
 /* ---------- inquiries ---------- */
 
-export async function createInquiry({ contact, message }) {
+/** หาสมาชิกที่เป็นเจ้าของคำถาม: ล็อกอินอยู่ใช้บัญชีนั้นเลย ไม่งั้นลองจับคู่จากอีเมล/เบอร์ที่กรอก */
+async function findInquiryOwner(contact, contactType, customer) {
+  if (customer?.id) return customer.id;
+  if (contactType === 'email') {
+    const user = await db('users').select('id').whereRaw('LOWER(email) = ?', [contact.toLowerCase()]).first();
+    return user?.id ?? null;
+  }
+  if (contactType === 'phone') {
+    const phone = normalizePhone(contact);
+    if (!phone) return null;
+    // เบอร์ซ้ำหลายบัญชีไม่เดา
+    const rows = await db('users').select('id').where({ phone_normalized: phone }).limit(2);
+    return rows.length === 1 ? rows[0].id : null;
+  }
+  return null;
+}
+
+export async function createInquiry({ contact, message }, customer = null) {
+  const contactType = detectContactType(contact);
   await db('inquiries').insert({
     contact,
-    contact_type: detectContactType(contact),
+    contact_type: contactType,
     message,
     status: 'new',
+    user_id: await findInquiryOwner(contact, contactType, customer),
   });
   return { message: 'ส่งคำถามเรียบร้อย ทีมงานจะติดต่อกลับภายใน 24 ชั่วโมง' };
 }
@@ -108,5 +128,10 @@ export async function updateInquiry(id, data) {
   if (update.status === 'answered') update.answered_at = db.fn.now();
 
   await db('inquiries').where({ id }).update(update);
-  return db('inquiries').where({ id }).first();
+  const updated = await db('inquiries').where({ id }).first();
+
+  // ส่งคำตอบให้ลูกค้าเมื่อมีคำตอบใหม่หรือแก้คำตอบ (ปิดเรื่องเฉย ๆ ไม่ส่งซ้ำ)
+  if (data.answer && data.answer !== existing.answer) await notifyInquiryAnswered(updated);
+
+  return updated;
 }
