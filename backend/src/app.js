@@ -22,7 +22,7 @@ export function createApp() {
       const sameOrigin = Boolean(origin) && URL.canParse(origin) && new URL(origin).host === host;
 
       // ไม่มี origin = เรียกจาก curl / Postman
-      if (!origin || sameOrigin || config.corsOrigins.includes(origin)) {
+      if (!origin || sameOrigin || config.corsOrigins.includes('*') || config.corsOrigins.includes(origin)) {
         return callback(null, {
           origin: true,
           credentials: true,

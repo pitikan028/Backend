@@ -1,0 +1,13 @@
+{
+  "name": "chokchai-app",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "npm --prefix frontend run build",
+    "start": "npm --prefix backend start",
+    "dev": "npm --prefix backend run dev"
+  },
+  "dependencies": {
+    "@neon/config": "^1.9.1",
+    "@neon/env": "^1.6.1"
+  }
+}
