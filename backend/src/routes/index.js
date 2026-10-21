@@ -7,20 +7,85 @@ import adminRoutes from './admin.routes.js';
 import accountRoutes from './account.routes.js';
 import paymentRoutes from './payment.routes.js';
 
+import { storageService } from '../services/storage.service.js';
+
 const router = Router();
 
-/** health check ที่ Docker ใช้ตรวจว่า container พร้อมรับ traffic แล้ว */
+/** health check ที่ตรวจความพร้อมของระบบและฐานข้อมูล */
 router.get('/health', async (_req, res) => {
   try {
     await db.raw('select 1');
     res.json({
       status: 'ok',
       database: config.db.isPostgres ? 'postgres' : 'mysql',
+      is_neon_cloud: Boolean(config.db.connectionString),
       uptime_seconds: Math.round(process.uptime()),
     });
   } catch (error) {
     res.status(503).json({ status: 'degraded', database: 'unreachable', message: error.message });
   }
+});
+
+/** ตรวจสอบสถานะการเชื่อมต่อบริการทั้งหมดบน Neon (Postgres, Auth, Storage, Functions) */
+router.get('/neon/status', async (_req, res) => {
+  const results = {
+    branch: config.neon.branch,
+    services: {
+      postgres: { configured: Boolean(config.db.connectionString) },
+      auth: { configured: Boolean(config.neon.authBaseUrl) },
+      object_storage: { configured: storageService.isConfigured() },
+      functions: { configured: Boolean(config.neon.functionHelloUrl) },
+    },
+  };
+
+  // 1. Test Postgres
+  try {
+    const dbResult = await db.raw('select current_database() as db_name, current_user as db_user');
+    results.services.postgres.status = 'ok';
+    results.services.postgres.details = dbResult.rows ? dbResult.rows[0] : dbResult[0];
+  } catch (err) {
+    results.services.postgres.status = 'error';
+    results.services.postgres.error = err.message;
+  }
+
+  // 2. Test Neon Object Storage (S3)
+  try {
+    const storageTest = await storageService.testConnection();
+    results.services.object_storage.status = storageTest.ok ? 'ok' : 'error';
+    results.services.object_storage.details = storageTest;
+  } catch (err) {
+    results.services.object_storage.status = 'error';
+    results.services.object_storage.error = err.message;
+  }
+
+  // 3. Test Neon Functions
+  if (config.neon.functionHelloUrl) {
+    try {
+      const resp = await fetch(config.neon.functionHelloUrl);
+      const text = await resp.text();
+      results.services.functions.status = resp.ok ? 'ok' : 'error';
+      results.services.functions.details = { response: text.trim() };
+    } catch (err) {
+      results.services.functions.status = 'error';
+      results.services.functions.error = err.message;
+    }
+  }
+
+  // 4. Test Neon Auth (JWKS)
+  if (config.neon.authJwksUrl) {
+    try {
+      const resp = await fetch(config.neon.authJwksUrl);
+      const data = await resp.json();
+      results.services.auth.status = resp.ok ? 'ok' : 'error';
+      results.services.auth.details = { jwks_keys_count: data.keys?.length ?? 0 };
+    } catch (err) {
+      results.services.auth.status = 'error';
+      results.services.auth.error = err.message;
+    }
+  }
+
+  const allHealthy = Object.values(results.services).every((s) => s.status === 'ok');
+  res.status(allHealthy ? 200 : 207).json(results);
 });
 
 /** รายการ endpoint ทั้งหมด ไว้เปิดดูตอน dev */

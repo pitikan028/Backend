@@ -1,6 +1,21 @@
 import dotenv from 'dotenv';
+import path from 'node:path';
+import fs from 'node:fs';
 
-dotenv.config();
+const loadEnv = () => {
+  const candidates = [
+    path.resolve(process.cwd(), '.env.local'),
+    path.resolve(process.cwd(), '.env'),
+    path.resolve(process.cwd(), '../.env.local'),
+    path.resolve(process.cwd(), '../.env'),
+  ];
+  for (const file of candidates) {
+    if (fs.existsSync(file)) {
+      dotenv.config({ path: file });
+    }
+  }
+};
+loadEnv();
 
 const required = (key, fallback) => {
   const value = process.env[key] ?? fallback;
@@ -25,6 +40,7 @@ if (!['postgres', 'postgresql', 'pg', 'mysql', 'mysql2'].includes(dbClient)) {
   throw new Error(`Unsupported DB_CLIENT "${dbClient}" (use "postgres" or "mysql")`);
 }
 const isPostgres = dbClient.startsWith('p');
+const databaseUrl = process.env.DATABASE_URL?.trim();
 
 export const config = {
   nodeEnv,
@@ -38,12 +54,14 @@ export const config = {
   db: {
     client: isPostgres ? 'pg' : 'mysql2',
     isPostgres,
+    connectionString: databaseUrl || undefined,
+    ssl: process.env.DB_SSL ? process.env.DB_SSL === 'true' : Boolean(databaseUrl),
     host: process.env.DB_HOST ?? 'localhost',
     port: toInt(process.env.DB_PORT, isPostgres ? 5432 : 3306),
     user: process.env.DB_USER ?? 'chokchai',
     password: process.env.DB_PASSWORD ?? 'chokchai',
     database: process.env.DB_NAME ?? 'chokchai',
-    poolMin: toInt(process.env.DB_POOL_MIN, 2),
+    poolMin: toInt(process.env.DB_POOL_MIN, databaseUrl ? 0 : 2),
     poolMax: toInt(process.env.DB_POOL_MAX, 10),
   },
   jwt: {
@@ -82,6 +100,19 @@ export const config = {
     email: process.env.SEED_ADMIN_EMAIL ?? 'admin@chokchai.local',
     password: process.env.SEED_ADMIN_PASSWORD ?? 'Admin@1234',
     name: process.env.SEED_ADMIN_NAME ?? 'ผู้ดูแลระบบ',
+  },
+  neon: {
+    branch: process.env.NEON_BRANCH ?? 'production',
+    authBaseUrl: process.env.NEON_AUTH_BASE_URL ?? '',
+    authJwksUrl: process.env.NEON_AUTH_JWKS_URL ?? '',
+    functionHelloUrl: process.env.NEON_FUNCTION_HELLO_BASE_URL ?? '',
+    storage: {
+      endpoint: process.env.AWS_ENDPOINT_URL_S3 ?? '',
+      region: process.env.AWS_REGION ?? 'ap-southeast-1',
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID ?? '',
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ?? '',
+      bucket: process.env.NEON_STORAGE_BUCKET ?? 'assets',
+    },
   },
 };
 

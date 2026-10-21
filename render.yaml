@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: chokchai-backend
+    runtime: node
+    plan: free
+    region: singapore
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: '*'
+      - key: AUTO_MIGRATE
+        value: 'true'
+      - key: AUTO_SEED
+        value: 'true'
+      - key: PAYMENT_PROVIDER
+        value: mock

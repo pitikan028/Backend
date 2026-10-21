@@ -24,7 +24,10 @@ async function bootstrap() {
   const app = createApp();
   const server = app.listen(config.port, () => {
     console.log(`Chokchai API พร้อมใช้งานที่ http://localhost:${config.port}/api`);
-    console.log(`ฐานข้อมูล: ${config.db.isPostgres ? 'PostgreSQL' : 'MySQL'} @ ${config.db.host}:${config.db.port}/${config.db.database}`);
+    const dbTarget = config.db.connectionString
+      ? 'Cloud Database (Neon / PostgreSQL)'
+      : `${config.db.isPostgres ? 'PostgreSQL' : 'MySQL'} @ ${config.db.host}:${config.db.port}/${config.db.database}`;
+    console.log(`ฐานข้อมูล: ${dbTarget}`);
   });
 
   const shutdown = async (signal) => {

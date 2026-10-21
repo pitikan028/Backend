@@ -7,7 +7,16 @@
  */
 const LIVE_SERVER_PORTS = ['5500', '5501'];
 
+/**
+ * URL ของ Backend API:
+ * - ปล่อยว่าง '' สำหรับรันในเครื่อง (localhost) หรือผ่าน Docker / Nginx
+ * - เมื่อนำ Backend ขึ้น Render ให้ใส่ URL ของ Render เช่น 'https://chokchai-backend.onrender.com/api'
+ */
+const CLOUD_API_BASE = '';
+
 const API_BASE = (() => {
+  if (CLOUD_API_BASE) return CLOUD_API_BASE.replace(/\/$/, '');
+
   const override = document.documentElement.dataset.apiBase;
   if (override) return override.replace(/\/$/, '');
 
